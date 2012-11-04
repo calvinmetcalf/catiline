@@ -1,7 +1,9 @@
-function communist(){
+function communist(path){
 	var _this = this;
+	_this.path = path || getPath(document.location.href);
 	var cbs={};
-	_this.worker = new Worker('worker.js');
+	var w='worker.js';
+	_this.worker = new Worker(w);
 	_this.worker.onmessage = function(event){
 	var cb = cbs[event.data[0]];
 	var data = event.data[1];
@@ -14,7 +16,15 @@ function communist(){
 		_this.worker.postMessage([func,data,r]);
 	}
 	_this.addLib=function(url){
-		_this.send("_addLib",url,function(d){console.log(d)});
+		_this.send("_addLib",_this.path+url,function(d){console.log(d)});
+	}
+	getPath(url){
+		var index = url.indexOf('index.html');
+		var ourl;
+    	if (index != -1) {
+      		ourl = url.substring(0, index);
+    	}else{ourl=url};
+    	return ourl;
 	}
 };
 
