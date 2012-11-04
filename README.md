@@ -1,0 +1,4 @@
+communist
+=========
+
+All about workers
