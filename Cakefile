@@ -7,7 +7,8 @@ task 'build', 'build it', () ->
 		unless e
 			fs.writeFile './communist.js', coffee.compile d
 			console.log "compliled"
-			
+
+###
 task 'min', 'build it small', () ->
 	invoke 'build'
 	fs.readFile './communist.coffee', 'utf8', (e,d)->
@@ -19,3 +20,4 @@ task 'min', 'build it small', () ->
 			ast.mangle_names();
 			fs.writeFile './communist.min.js', ast.print_to_string()
 			console.log "minified"
+	###

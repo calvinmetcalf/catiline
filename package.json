@@ -3,7 +3,6 @@
 "name": "communist",
   "version": "0.0.1",
   "dependencies": {
-    "coffee-script":"1.x",
-    "uglify-js" : ">= 0.0.1"
+    "coffee-script":"1.x"
   }
 }
