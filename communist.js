@@ -40,6 +40,7 @@
         return true;
       };
       this.close = function() {
+        _func = void 0;
         return true;
       };
       return true;
