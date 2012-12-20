@@ -1,6 +1,6 @@
 Communist = (fun) ->
 	return  if typeof fun isnt "function"
-	if Worker
+	if window.Worker
 		window.URL = window.URL or window.webkiURL
 		func = fun.toString()
 		body = "var f = " + func + ";self.addEventListener('message', function(e) {self.postMessage(f.apply(null, e.data))})"
@@ -30,5 +30,5 @@ Communist = (fun) ->
 			true
 		true
 
-communist = (fun) ->
+window.communist = (fun) ->
 	new Communist(fun)

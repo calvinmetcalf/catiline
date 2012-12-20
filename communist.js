@@ -1,5 +1,5 @@
 (function() {
-  var Communist, communist,
+  var Communist,
     __slice = [].slice;
 
   Communist = function(fun) {
@@ -7,7 +7,7 @@
     if (typeof fun !== "function") {
       return;
     }
-    if (Worker) {
+    if (window.Worker) {
       window.URL = window.URL || window.webkiURL;
       func = fun.toString();
       body = "var f = " + func + ";self.addEventListener('message', function(e) {self.postMessage(f.apply(null, e.data))})";
@@ -46,7 +46,7 @@
     }
   };
 
-  communist = function(fun) {
+  window.communist = function(fun) {
     return new Communist(fun);
   };
 
