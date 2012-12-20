@@ -27,6 +27,7 @@ Communist = (fun) ->
 			true
 
 		@close = ->
+			_func = undefined
 			true
 		true
 
