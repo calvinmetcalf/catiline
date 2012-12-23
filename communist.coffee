@@ -11,7 +11,10 @@ Communist = (fun) ->
 		@send = (data..., cb) ->
 			_worker.postMessage data
 			_worker.onmessage = (e) ->
-				cb e.data
+				cb null, e.data
+				true
+			_worker.onerror = (e) ->
+				cb e
 				true
 
 			true
@@ -23,7 +26,10 @@ Communist = (fun) ->
 	else
 		_func = fun
 		@send = (data..., cb) ->
-			cb _func(data...)
+			try
+				cb null, _func(data...)
+			catch err
+				cb err
 			true
 
 		@close = ->

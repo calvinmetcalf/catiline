@@ -21,7 +21,11 @@
         data = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
         _worker.postMessage(data);
         _worker.onmessage = function(e) {
-          cb(e.data);
+          cb(null, e.data);
+          return true;
+        };
+        _worker.onerror = function(e) {
+          cb(e);
           return true;
         };
         return true;
@@ -36,7 +40,11 @@
       this.send = function() {
         var cb, data, _i;
         data = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
-        cb(_func.apply(null, data));
+        try {
+          cb(null, _func.apply(null, data));
+        } catch (err) {
+          cb(err);
+        }
         return true;
       };
       this.close = function() {
