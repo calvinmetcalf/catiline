@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Communist.js</title>
+    </head>
+    <script src="communist.js" type="text/javascript"></script>
+    <body>
+<textarea rows="15" cols="50" id="func">
+function(num){
+	var a = 0;
+	while(num){
+		a = a + num;
+		num--;
+	};
+	return a;
+}</textarea><br/>Input Value adjust as needed, takes 4 seconds for me: <input type="text" value="5000000000" id="inp" /><br/><button type="button" id="inProc">Run In Proccess</button><br/>Results:<span id="res"></span><br/><button type="button" id="outProc">Run Out of Proccess</button><br/>Results:<span id="res2"></span><br/>Can be blocked: <span id="timeA"></span><br/>Won't be blocked: <span id="timeB"></span>
+<script type="text/javascript">
+eval("var func = "+document.getElementById("func").innerHTML);
+var timeA = document.getElementById("timeA");
+var timeB = document.getElementById("timeB");
+var t = new Date;
+timeA.innerHTML = t.toLocaleTimeString();
+timeB.innerHTML = t.toLocaleTimeString();
+function setA(){
+	t.setSeconds(t.getSeconds()+1);
+	timeA.innerHTML = t.toLocaleTimeString();
+};
+function setB(){
+	var d = new Date;
+	timeB.innerHTML = d.toLocaleTimeString();
+}
+function setTimes(){
+	setA();
+	setB();
+}
+var si = setInterval(setTimes,1000);
+var inProc = document.getElementById("inProc");
+var outProc = document.getElementById("outProc");
+var res = document.getElementById("res");
+var res2 = document.getElementById("res2");
+var async = communist(func);
+inProc.onclick = function(){
+	res.innerHTML = func(parseInt(document.getElementById("inp").value,10));
+	
+};
+outProc.onclick = function(){
+	async.send(parseInt(document.getElementById("inp").value,10),function(err,data){
+		res2.innerHTML = data;
+	});
+}
+</script>
+    </body>
+</html>
