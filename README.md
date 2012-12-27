@@ -4,11 +4,11 @@ communist
 All about workers, pass it a function, then pass it data and a callback, e.g.
 
 ```javascript
-var asyncFunc = communist(function(a,b){return a + b});
+var comrade = communist(function(a,b){return a + b});
 //creates a worker
-asyncFunc.send(1,2,function(err, data){console.log(data)});
+comrade.send(1,2,function(err, data){console.log(data)});
 //prints 3
-asyncFunc.close();
+comrade.close();
 //closes the wroker
 ```
 
