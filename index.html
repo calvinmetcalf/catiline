@@ -1,16 +1,41 @@
 <!DOCTYPE html>
 <html>
-    <head>
+    <head><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Demo of Communist.js">
+    <meta name="author" content="Calvin Metcalf">
+
+    <!-- Le styles -->
+    <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+    <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
         <title>Communist.js</title>
         <link rel="apple-touch-icon-precomposed" sizes="144x144" href="apple-touch-icon-144x144-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="apple-touch-icon-114x114-precomposed.png">
       <link rel="apple-touch-icon-precomposed" sizes="72x72" href="apple-touch-icon-72x72-precomposed.png">
                     <link rel="apple-touch-icon-precomposed" href="apple-touch-icon-57x57-precomposed.png">
-                                   <link rel="shortcut icon" href="favicon.ico">
+                                   <link rel="shortcut icon" href="favicon.ico"><link rel="stylesheet" href="gh-fork-ribbon.css" />
+    <!--[if IE]>
+        <link rel="stylesheet" href="gh-fork-ribbon.ie.css" />
+    <![endif]-->
     </head>
-    <script src="communist.js" type="text/javascript"></script>
-    <body>
-<textarea rows="15" cols="50" id="func">
+    <script src="communist.js" type="text/javascript"></script><body><div class="github-fork-ribbon-wrapper right">
+        <div class="github-fork-ribbon"><!--from http://simonwhitaker.github.com/github-fork-ribbon-css/ -->
+            <a href="https://github.com/calvinmetcalf/communist">Fork me on GitHub</a>
+        </div>
+    </div>
+    <div class="container-fluid"> 
+<div class="row-fluid"><div class="span4 offset2"><div class="row-fluid"><textarea rows="8" id="func">
 function(num){
 	var a = 0;
 	while(num){
@@ -18,7 +43,15 @@ function(num){
 		num--;
 	};
 	return a;
-}</textarea><br/>Input Value adjust as needed, takes 4 seconds for me in chrome takes over 2 minutes in IE 9, I'd adjsut down: <input type="text" value="5000000000" id="inp" /><br/><button type="button" id="inProc">Run In Proccess</button><br/>Results:<span id="res"></span><br/><button type="button" id="outProc">Run Out of Proccess</button><br/>Results:<span id="res2"></span><br/>Can be blocked: <span id="timeA"></span><br/>Won't be blocked: <span id="timeB"></span>
+}</textarea></div>
+<div class="row-fluid"><strong>Input Value:</strong> adjust as needed<ul><li>takes 4 seconds for me in chrome</li><li>takes over 2 minutes in IE 9, I'd adjust down</li><li><input type="text" value="5000000000" id="inp" /></li></ul></div></div><div class="span4">
+<div class="row-fluid"><button type="button" id="inProc" class="btn btn-danger">Run In Proccess</button><br/>Results:<span id="res"></span></div>
+<div class="row-fluid"><button type="button" id="outProc" class="btn btn-success">Run Out of Proccess</button></div>
+<div class="row-fluid">Results:<span id="res2"></span></div>
+<div class="row-fluid">Can be blocked: <span id="timeA"></span></div>
+<div class="row-fluid">Won't be blocked: <span id="timeB"></span></div>
+</div>
+</div></div>
 <script type="text/javascript">
 eval("var func = "+document.getElementById("func").innerHTML);
 var timeA = document.getElementById("timeA");
