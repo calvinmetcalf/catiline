@@ -2,7 +2,7 @@ Communist = (fun) ->
 	return  if typeof fun isnt "function"
 	if window.Worker
 		window.URL = window.URL or window.webkiURL
-		body = "var f =  #{ fun.toString() };self.addEventListener('message', function(e) {try{self.postMessage({body:f.apply(null, e.data.body),cb:e.data.cb})},catch(err){self.postMessege({error:err,cb:e.data.cb})}})"
+		body = "var f =  #{ fun.toString() };self.addEventListener('message', function(e) {try{self.postMessage({body:f.apply(null, e.data.body),cb:e.data.cb})}catch(err){self.postMessege({error:err,cb:e.data.cb})}})"
 		blob = new Blob [body],
 			type: "text/javascript"
 		bUrl = window.URL.createObjectURL(blob)
