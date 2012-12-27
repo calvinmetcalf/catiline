@@ -52,8 +52,11 @@
     } else {
       _func = fun;
       this.send = function() {
-        var cb, data, _i;
+        var cb, data, send, _i;
         data = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
+        send = function(m) {
+          return cb(null, m);
+        };
         try {
           cb(null, _func.apply(null, data));
         } catch (err) {
