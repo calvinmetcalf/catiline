@@ -2,6 +2,11 @@
 <html>
     <head>
         <title>Communist.js</title>
+        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="apple-touch-icon-144x144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="apple-touch-icon-114x114-precomposed.png">
+      <link rel="apple-touch-icon-precomposed" sizes="72x72" href="apple-touch-icon-72x72-precomposed.png">
+                    <link rel="apple-touch-icon-precomposed" href="apple-touch-icon-57x57-precomposed.png">
+                                   <link rel="shortcut icon" href="favicon.ico">
     </head>
     <script src="communist.js" type="text/javascript"></script>
     <body>
@@ -13,7 +18,7 @@ function(num){
 		num--;
 	};
 	return a;
-}</textarea><br/>Input Value adjust as needed, takes 4 seconds for me: <input type="text" value="5000000000" id="inp" /><br/><button type="button" id="inProc">Run In Proccess</button><br/>Results:<span id="res"></span><br/><button type="button" id="outProc">Run Out of Proccess</button><br/>Results:<span id="res2"></span><br/>Can be blocked: <span id="timeA"></span><br/>Won't be blocked: <span id="timeB"></span>
+}</textarea><br/>Input Value adjust as needed, takes 4 seconds for me in chrome takes over 2 minutes in IE 9, I'd adjsut down: <input type="text" value="5000000000" id="inp" /><br/><button type="button" id="inProc">Run In Proccess</button><br/>Results:<span id="res"></span><br/><button type="button" id="outProc">Run Out of Proccess</button><br/>Results:<span id="res2"></span><br/>Can be blocked: <span id="timeA"></span><br/>Won't be blocked: <span id="timeB"></span>
 <script type="text/javascript">
 eval("var func = "+document.getElementById("func").innerHTML);
 var timeA = document.getElementById("timeA");
