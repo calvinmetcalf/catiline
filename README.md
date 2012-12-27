@@ -13,3 +13,5 @@ asyncFunc.close();
 ```
 
 on browsers that don't support web workers function is executed in normal process. 
+
+I set up a [quick demo](http://calvinmetcalf.github.com/communist/)
