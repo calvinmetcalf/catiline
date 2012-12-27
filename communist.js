@@ -3,7 +3,7 @@
     __slice = [].slice;
 
   Communist = function(fun) {
-    var bUrl, blob, body, send, _func, _worker,
+    var bUrl, blob, body, _func, _worker,
       _this = this;
     if (typeof fun !== "function") {
       return;
@@ -50,12 +50,11 @@
       };
       return true;
     } else {
-      send = void 0;
       _func = fun;
       this.send = function() {
         var cb, data, _i;
         data = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
-        send = function(m) {
+        window.send = function(m) {
           return cb(null, m);
         };
         try {
