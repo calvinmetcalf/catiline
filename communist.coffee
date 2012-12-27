@@ -35,6 +35,8 @@ Communist = (fun) ->
 	else
 		_func = fun
 		@send = (data..., cb) ->
+			send = (m)->
+				cb null, m
 			try
 				cb null, _func(data...)
 			catch err
