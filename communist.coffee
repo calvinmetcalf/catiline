@@ -33,6 +33,7 @@ Communist = (fun) ->
 			true
 		true 
 	else
+		send = undefined
 		_func = fun
 		@send = (data..., cb) ->
 			send = (m)->
