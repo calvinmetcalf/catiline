@@ -10,7 +10,7 @@
     }
     if (window.Worker) {
       window.URL = window.URL || window.webkiURL;
-      body = "var f =  " + (fun.toString()) + ";self.addEventListener('message', function(e) {try{self.postMessage({body:f.apply(null, e.data.body),cb:e.data.cb})}catch(err){self.postMessege({error:err,cb:e.data.cb})}})";
+      body = "var send;var _f =  " + (fun.toString()) + ";self.addEventListener('message', function(_e) {send = function(data){self.postMessage({messege:data,cb:_e.data.cb})};try{self.postMessage({body:_f.apply(null, _e.data.body),cb:_e.data.cb})}catch(_err){self.postMessege({error:_err,cb:_e.data.cb})}})";
       blob = new Blob([body], {
         type: "text/javascript"
       });
@@ -30,6 +30,8 @@
           if (e.data.body) {
             _this.CBs[e.data.cb](null, e.data.body);
             delete _this.CBs[e.data.cb];
+          } else if (e.data.messege) {
+            _this.CBs[e.data.cb](null, e.data.messege);
           } else if (e.data.error) {
             CBs[e.data.cb](e.data.error);
             delete _this.CBs[e.data.cb];

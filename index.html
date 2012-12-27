@@ -51,12 +51,14 @@ function(num){
 <div class="row-fluid">Results:<span id="res2"></span></div>
 <div class="row-fluid">Can be blocked: <span id="timeA"></span></div>
 <div class="row-fluid">Won't be blocked: <span id="timeB"></span></div>
+<div class="row-fluid">Running out of proccess: <span id="timeC"></span></div>
 </div>
 </div></div><script src="communist.js" type="text/javascript"></script>
 <script type="text/javascript">
 eval("var func = "+document.getElementById("func").innerHTML);
 var timeA = document.getElementById("timeA");
 var timeB = document.getElementById("timeB");
+var timeC = document.getElementById("timeC");
 var t = new Date;
 timeA.innerHTML = t.toLocaleTimeString();
 timeB.innerHTML = t.toLocaleTimeString();
@@ -87,6 +89,9 @@ outProc.onclick = function(){
 		res2.innerHTML = data;
 	});
 }
+var timer = function(){setInterval(function(){	var d = new Date;send(d.toLocaleTimeString())},1000);}
+var comrade = communist(timer);
+comrade.send("",function(err,data){timeC.innerHTML=data;})
 </script>
     </body>
 </html>
