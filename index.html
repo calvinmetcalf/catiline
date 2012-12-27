@@ -91,7 +91,7 @@ outProc.onclick = function(){
 }
 var timer = function(){setInterval(function(){	var d = new Date;send(d.toLocaleTimeString())},1000);}
 var comrade = communist(timer);
-comrade.send("",function(err,data){timeC.innerHTML=data;})
+comrade.send("",function(err,_data){timeC.innerHTML=_data;})
 </script>
     </body>
 </html>
