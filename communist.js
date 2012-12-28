@@ -47,7 +47,7 @@
       _worker.terminate();
       return true;
     };
-    return true;
+    return this;
   };
 
   Socialist = function(fun) {
@@ -71,7 +71,7 @@
       _func = void 0;
       return true;
     };
-    return true;
+    return this;
   };
 
   window.communist = function(fun) {
