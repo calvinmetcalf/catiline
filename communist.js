@@ -62,7 +62,7 @@
         return cb(null, m);
       };
       try {
-        cb(null, _func.apply.apply(_func, [loc].concat(__slice.call(data))));
+        cb(null, _func.apply(loc, data));
       } catch (err) {
         cb(err);
       }
