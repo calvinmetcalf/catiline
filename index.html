@@ -92,7 +92,7 @@ outProc.onclick = function(){
 		async.close();
 	});
 }
-var timer = function(){setInterval(function(){	var d = new Date;send(d.toLocaleTimeString())},1000);}
+var timer = function(){var f = function(){	var d = new Date;this.send(d.toLocaleTimeString())}; var ff = f.bind(this);setInterval(ff,1000);}
 var comrade = communist(timer);
 comrade.send("",function(err,_data){timeC.innerHTML=_data;})
 </script>

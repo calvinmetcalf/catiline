@@ -44,7 +44,7 @@
         }
         return true;
       };
-      this.worker.onerror = function(e) {
+      this._worker.onerror = function(e) {
         cb(e);
         return true;
       };
@@ -62,6 +62,8 @@
 
   })();
 
+  window.Communist = Communist;
+
   Socialist = (function() {
 
     function Socialist(_func) {
@@ -70,16 +72,21 @@
 
     }
 
+    Socialist.prototype.CBs = {};
+
     Socialist.prototype.send = function() {
-      var cb, data, _i;
+      var cb, data, self, _i;
       data = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
-      window.send = function(m) {
+      self = {};
+      self.send = function(m) {
         return cb(null, m);
       };
       try {
-        cb(null, this._func.apply(this, data));
+        cb(null, this._func.apply(self, data));
+        return true;
       } catch (err) {
         cb(err);
+        return false;
       }
       return true;
     };
@@ -95,6 +102,8 @@
     return Socialist;
 
   })();
+
+  window.Socialist = Socialist;
 
   window.communist = function(fun) {
     if (window.Worker) {
