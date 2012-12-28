@@ -54,8 +54,9 @@
     var _func;
     _func = fun;
     this.send = function() {
-      var cb, data, _i;
+      var cb, data, loc, _i;
       data = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
+      loc = {};
       loc.self = {};
       loc.self.send = function(m) {
         return cb.apply(loc, [null, m]);
