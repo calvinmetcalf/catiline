@@ -44,7 +44,7 @@ class Socialist
 			cb err
 		true
 
-	@close : ->
+	close : ->
 		_func = undefined
 		true
 	true
