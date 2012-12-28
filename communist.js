@@ -59,10 +59,10 @@
       loc = {};
       loc.self = {};
       loc.self.send = function(m) {
-        return cb.apply(loc, [null, m]);
+        return cb(null, m);
       };
       try {
-        cb.apply(loc, [null, _func.apply.apply(_func, [loc].concat(__slice.call(data)))]);
+        cb(null, _func.apply.apply(_func, [loc].concat(__slice.call(data))));
       } catch (err) {
         cb(err);
       }
