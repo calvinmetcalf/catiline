@@ -51,9 +51,8 @@
   };
 
   Socialist = function(fun) {
-    var _func,
-      _this = this;
-    _func = fun;
+    var _this = this;
+    eval("_func = " + fun.toString());
     this.self = {
       send: function(data) {
         return cb(null, data);
@@ -70,6 +69,7 @@
       return true;
     };
     this.close = function() {
+      var _func;
       _func = void 0;
       return true;
     };
