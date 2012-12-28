@@ -69,13 +69,13 @@
     }
 
     Socialist.prototype.send = function() {
-      var cb, data, _i;
+      var cb, data, _i, _ref;
       data = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
       window.send = function(m) {
         return cb(null, m);
       };
       try {
-        cb(null, this._func.apply(this, data));
+        cb(null, (_ref = this._func).call.apply(_ref, [this].concat(__slice.call(data))));
       } catch (err) {
         cb(err);
       }
