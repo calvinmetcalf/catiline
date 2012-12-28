@@ -30,7 +30,7 @@ Communist = (fun) ->
 	@close = ->
 		_worker.terminate()
 		true
-	true 
+	@ 
 
 Socialist = (fun)->
 	_func = fun
@@ -47,7 +47,8 @@ Socialist = (fun)->
 	@close = ->
 		_func = undefined
 		true
-	true
+	@
+	
 
 window.communist = (fun) ->
 	if window.Worker
