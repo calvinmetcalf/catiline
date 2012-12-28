@@ -22,7 +22,7 @@ class Communist
 				CBs[e.data.cb] e.data.error
 				delete @CBs[e.data.cb] 
 			true
-		@worker.onerror = (e) ->
+		@_worker.onerror = (e) ->
 			cb e
 			true
 
@@ -33,24 +33,4 @@ class Communist
 		true
 	true 
 
-class Socialist
-	constructor : (@_func)->
-	send : (data..., cb) =>
-		window.send = (m)->
-			cb null, m
-		try
-			cb null, @_func(data...)
-		catch err
-			cb err
-		true
-
-	close : ->
-		_func = undefined
-		true
-	true
-
-window.communist = (fun) ->
-	if window.Worker
-		new Communist(fun.toString())
-	else
-		new Socialist(fun)
+window.Communist = Communist
