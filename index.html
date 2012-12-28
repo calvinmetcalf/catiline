@@ -89,7 +89,7 @@ outProc.onclick = function(){
 		res2.innerHTML = data;
 	});
 }
-var timer = function(){setInterval(function(){	var d = new Date;send(d.toLocaleTimeString())},1000);}
+var timer = function(){setInterval(function(){	var d = new Date;self.send(d.toLocaleTimeString())},1000);}
 var comrade = communist(timer);
 comrade.send("",function(err,_data){timeC.innerHTML=_data;})
 </script>
