@@ -22,7 +22,7 @@ class Communist
 				CBs[e.data.cb] e.data.error
 				delete @CBs[e.data.cb] 
 			true
-		@worker.onerror = (e) ->
+		@_worker.onerror = (e) ->
 			cb e
 			true
 

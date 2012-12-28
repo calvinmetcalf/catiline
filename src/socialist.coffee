@@ -1,12 +1,16 @@
 class Socialist
 	constructor : (@_func)->
+	CBs : {}
 	send : (data..., cb) =>
-		window.send = (m)->
+		self = {}
+		self.send = (m)->
 			cb null, m
 		try
-			cb null, @_func(data...)
+			cb null, @_func.apply(self,data)
+			return true
 		catch err
 			cb err
+			return false
 		true
 
 	close : ->
