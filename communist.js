@@ -84,7 +84,7 @@
       return true;
     };
 
-    Socialist.close = function() {
+    Socialist.prototype.close = function() {
       var _func;
       _func = void 0;
       return true;
