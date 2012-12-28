@@ -1,7 +1,6 @@
 Communist = (fun) ->
-	return  if typeof fun isnt "function"
 	window.URL = window.URL or window.webkiURL
-	body = "var _f =  #{ fun.toString() };self.addEventListener('message', function(_e) {self.send = function(data){self.postMessage({messege:data,cb:_e.data.cb})};try{self.postMessage({body:_f.apply(null, _e.data.body),cb:_e.data.cb})}catch(_err){self.postMessege({error:_err,cb:_e.data.cb})}})"
+	body = "var send;var _f =  #{ fun };self.addEventListener('message', function(_e) {send = function(data){self.postMessage({messege:data,cb:_e.data.cb})};try{self.postMessage({body:_f.apply(null, _e.data.body),cb:_e.data.cb})}catch(_err){self.postMessege({error:_err,cb:_e.data.cb})}})"
 	blob = new Blob [body],
 		type: "text/javascript"
 	bUrl = window.URL.createObjectURL(blob)
@@ -30,27 +29,26 @@ Communist = (fun) ->
 	@close = ->
 		_worker.terminate()
 		true
-	@ 
+	true 
 
 Socialist = (fun)->
-	_func = fun
-	_send = (data..., cb) ->
-		@send = (m)->
-			cb.apply null, m
+	eval("_func = " + fun)
+	@send = (data..., cb) ->
+		window.send = (m)->
+			cb null, m
 		try
-			cb null, _func.apply(@,data)
+			cb null, _func(data...)
 		catch err
 			cb err
 		true
-	@send = _send
+
 	@close = ->
 		_func = undefined
 		true
-	@
-
+	true
 
 window.communist = (fun) ->
 	if window.Worker
-		new Communist(fun)
+		new Communist(fun.toString())
 	else
-		new Socialist(fun)
+		new Socialist(fun.toString())
