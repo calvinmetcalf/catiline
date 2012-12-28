@@ -52,7 +52,7 @@
 
   Socialist = function(fun) {
     var _this = this;
-    eval("_func = " + fun.toString());
+    this._func = fun;
     this.send = function() {
       var cb, data, _i;
       data = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
@@ -62,15 +62,14 @@
         }
       };
       try {
-        cb(null, _func.apply(null, data));
+        cb(null, _this._func.apply(_this, data));
       } catch (err) {
         cb(err);
       }
       return true;
     };
     this.close = function() {
-      var _func;
-      _func = void 0;
+      this._func = void 0;
       return true;
     };
     return this;
