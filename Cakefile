@@ -3,10 +3,10 @@ coffee = require 'coffee-script'
 uglifyjs = require 'uglify-js' 
 
 task 'build', 'build it', () ->
-	fs.readFile './communist.coffee', 'utf8', (e,d)->
-		unless e
-			fs.writeFile './communist.js', coffee.compile d
-			console.log "compliled"
+	a = ["communist","socialist","misc"].map (nom)->
+		return fs.readFileSync "./src/#{nom}.coffee", 'utf8'
+	fs.writeFile './communist.js', coffee.compile a.join("\n")
+	console.log "compliled"
 
 ###
 task 'min', 'build it small', () ->
