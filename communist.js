@@ -1,28 +1,38 @@
 (function() {
   var Communist, Socialist,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __slice = [].slice;
 
-  Communist = function(fun) {
-    var bUrl, blob, body, _worker,
-      _this = this;
-    window.URL = window.URL || window.webkiURL;
-    body = "var send;var _f =  " + fun + ";self.addEventListener('message', function(_e) {send = function(data){self.postMessage({messege:data,cb:_e.data.cb})};try{self.postMessage({body:_f.apply(null, _e.data.body),cb:_e.data.cb})}catch(_err){self.postMessege({error:_err,cb:_e.data.cb})}})";
-    blob = new Blob([body], {
-      type: "text/javascript"
-    });
-    bUrl = window.URL.createObjectURL(blob);
-    _worker = new Worker(bUrl);
-    this.CBs = {};
-    this.send = function() {
-      var cb, data, id, _i;
+  Communist = (function() {
+
+    function Communist(fun) {
+      this.send = __bind(this.send, this);
+
+      var bUrl, blob, body;
+      window.URL = window.URL || window.webkiURL;
+      body = "var send;var _f =  " + fun + ";self.addEventListener('message', function(_e) {send = function(data){self.postMessage({messege:data,cb:_e.data.cb})};try{self.postMessage({body:_f.apply(null, _e.data.body),cb:_e.data.cb})}catch(_err){self.postMessege({error:_err,cb:_e.data.cb})}})";
+      blob = new Blob([body], {
+        type: "text/javascript"
+      });
+      bUrl = window.URL.createObjectURL(blob);
+      this._worker = new Worker(bUrl);
+      this;
+
+    }
+
+    Communist.prototype.CBs = {};
+
+    Communist.prototype.send = function() {
+      var cb, data, id, _i,
+        _this = this;
       data = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
       id = ("" + Math.random()).slice(2);
-      _this.CBs[id] = cb;
-      _worker.postMessage({
+      this.CBs[id] = cb;
+      this._worker.postMessage({
         body: data,
         cb: id
       });
-      _worker.onmessage = function(e) {
+      this._worker.onmessage = function(e) {
         if (e.data.body) {
           _this.CBs[e.data.cb](null, e.data.body);
           delete _this.CBs[e.data.cb];
@@ -34,47 +44,63 @@
         }
         return true;
       };
-      _worker.onerror = function(e) {
+      this.worker.onerror = function(e) {
         cb(e);
         return true;
       };
       return true;
     };
-    this.close = function() {
-      _worker.terminate();
+
+    Communist.prototype.close = function() {
+      this._worker.terminate();
       return true;
     };
-    return true;
-  };
 
-  Socialist = function(fun) {
-    eval("_func = " + fun);
-    this.send = function() {
+    true;
+
+    return Communist;
+
+  })();
+
+  Socialist = (function() {
+
+    function Socialist(_func) {
+      this._func = _func;
+      this.send = __bind(this.send, this);
+
+    }
+
+    Socialist.prototype.send = function() {
       var cb, data, _i;
       data = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
       window.send = function(m) {
         return cb(null, m);
       };
       try {
-        cb(null, _func.apply(null, data));
+        cb(null, this._func.apply(this, data));
       } catch (err) {
         cb(err);
       }
       return true;
     };
-    this.close = function() {
+
+    Socialist.close = function() {
       var _func;
       _func = void 0;
       return true;
     };
-    return true;
-  };
+
+    true;
+
+    return Socialist;
+
+  })();
 
   window.communist = function(fun) {
     if (window.Worker) {
       return new Communist(fun.toString());
     } else {
-      return new Socialist(fun.toString());
+      return new Socialist(fun);
     }
   };
 
