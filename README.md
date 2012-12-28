@@ -1,5 +1,4 @@
-communist
-=========
+![communist](https://raw.github.com/calvinmetcalf/communist/gh-pages/apple-touch-icon-144x144-precomposed.png)
 
 All about workers, pass it a function, then pass it data and a callback, e.g.
 
