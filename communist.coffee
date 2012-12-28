@@ -35,7 +35,7 @@ Communist = (fun) ->
 Socialist = (fun)->
 	_func = fun
 	@send = (data..., cb) ->
-		self.send = (m)->
+		@self.send = (m)->
 			cb.apply @, [null, m]
 		try
 			cb.apply @, [null, _func(data...)]
