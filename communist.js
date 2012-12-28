@@ -1,13 +1,11 @@
 (function() {
   var Communist, Socialist,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __slice = [].slice;
+    __slice = [].slice,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   Communist = (function() {
 
     function Communist(fun) {
-      this.send = __bind(this.send, this);
-
       var bUrl, blob, body;
       window.URL = window.URL || window.webkiURL;
       body = "var send;var _f =  " + fun + ";self.addEventListener('message', function(_e) {send = function(data){self.postMessage({messege:data,cb:_e.data.cb})};try{self.postMessage({body:_f.apply(null, _e.data.body),cb:_e.data.cb})}catch(_err){self.postMessege({error:_err,cb:_e.data.cb})}})";
@@ -84,7 +82,7 @@
       return true;
     };
 
-    Socialist.close = function() {
+    Socialist.prototype.close = function() {
       var _func;
       _func = void 0;
       return true;
