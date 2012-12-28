@@ -56,6 +56,7 @@
     this.send = function() {
       var cb, data, _i;
       data = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
+      this.self = {};
       this.self.send = function(m) {
         return cb.apply(this, [null, m]);
       };
