@@ -34,21 +34,20 @@ Communist = (fun) ->
 
 Socialist = (fun)->
 	_func = fun
-	@send = (data..., cb) ->
-		@self = {}
-		@self.send = (m)->
-			cb.apply @, [null, m]
+	_send = (data..., cb) ->
+		@send = (m)->
+			cb.apply null, m
 		try
-			cb.apply @, [null, _func(data...)]
+			cb null, _func.apply(@,data)
 		catch err
 			cb err
 		true
-
+	@send = _send
 	@close = ->
 		_func = undefined
 		true
 	@
-	
+
 
 window.communist = (fun) ->
 	if window.Worker
