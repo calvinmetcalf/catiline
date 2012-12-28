@@ -45,7 +45,7 @@ function(num){
 	};
 	return a;
 }</textarea></div>
-<div class="row-fluid"><strong>Input Value:</strong> adjust as needed<ul><li>takes 4 seconds for me in chrome</li><li>takes over 2 minutes in IE 9, I'd adjust down</li><li><input type="text" value="5000000000" id="inp" /></li></ul></div></div><div class="span4">
+<div class="row-fluid"><strong>Input Value:</strong> adjust as needed<ul><li>takes 4 seconds for me in chrome</li><li>takes over 2 minutes in IE 9, I'd adjust down</li><li><input type="text" value="500000000" id="inp" /></li></ul></div></div><div class="span4">
 <div class="row-fluid"><button type="button" id="inProc" class="btn btn-danger">Run In Proccess</button><br/>Results:<span id="res"></span></div>
 <div class="row-fluid"><button type="button" id="outProc" class="btn btn-success">Run Out of Proccess</button></div>
 <div class="row-fluid">Results:<span id="res2"></span></div>
@@ -55,7 +55,6 @@ function(num){
 </div>
 </div></div><script src="communist.js" type="text/javascript"></script>
 <script type="text/javascript">
-eval("var func = "+document.getElementById("func").innerHTML);
 var timeA = document.getElementById("timeA");
 var timeB = document.getElementById("timeB");
 var timeC = document.getElementById("timeC");
@@ -77,16 +76,20 @@ function setTimes(){
 var si = setInterval(setTimes,1000);
 var inProc = document.getElementById("inProc");
 var outProc = document.getElementById("outProc");
-var res = document.getElementById("res");
-var res2 = document.getElementById("res2");
-var async = communist(func);
+
 inProc.onclick = function(){
+	eval("var func = "+document.getElementById("func").innerHTML);
+	var res = document.getElementById("res");
 	res.innerHTML = func(parseInt(document.getElementById("inp").value,10));
 	
 };
 outProc.onclick = function(){
+	eval("var func = "+document.getElementById("func").innerHTML);
+	var res2 = document.getElementById("res2");
+	var async = communist(func);
 	async.send(parseInt(document.getElementById("inp").value,10),function(err,data){
 		res2.innerHTML = data;
+		async.close();
 	});
 }
 var timer = function(){setInterval(function(){	var d = new Date;send(d.toLocaleTimeString())},1000);}
