@@ -14,6 +14,6 @@ comrade.close();
 
 on browsers that don't support web workers function is executed in normal process.
 
-The worker has access to to a function "send" which it can use to send messeges back without returning.
+The worker has access to to a function "send" which it can use to send messeges back without returning, but that doesn't work on in process with multiple workers.
 
 I set up a [quick demo](http://calvinmetcalf.github.com/communist/)
