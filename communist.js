@@ -1,11 +1,13 @@
 (function() {
   var Communist, Socialist,
-    __slice = [].slice,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __slice = [].slice;
 
   Communist = (function() {
 
     function Communist(fun) {
+      this.send = __bind(this.send, this);
+
       var bUrl, blob, body;
       window.URL = window.URL || window.webkiURL;
       body = "var send;var _f =  " + fun + ";self.addEventListener('message', function(_e) {send = function(data){self.postMessage({messege:data,cb:_e.data.cb})};try{self.postMessage({body:_f.apply(null, _e.data.body),cb:_e.data.cb})}catch(_err){self.postMessege({error:_err,cb:_e.data.cb})}})";
@@ -69,21 +71,20 @@
     }
 
     Socialist.prototype.send = function() {
-      var cb, data, self, _i, _ref;
+      var cb, data, _i;
       data = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), cb = arguments[_i++];
-      self = {};
-      self.send = function(m) {
+      window.send = function(m) {
         return cb(null, m);
       };
       try {
-        cb(null, (_ref = this._func).call.apply(_ref, [self].concat(__slice.call(data))));
+        cb(null, this._func.apply(this, data));
       } catch (err) {
         cb(err);
       }
       return true;
     };
 
-    Socialist.prototype.close = function() {
+    Socialist.close = function() {
       var _func;
       _func = void 0;
       return true;
