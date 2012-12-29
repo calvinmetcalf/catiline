@@ -1,5 +1,3 @@
-
-
 class Socialist
 	constructor : (@_func)->
 	CBs : {}
@@ -7,20 +5,15 @@ class Socialist
 		self = {}
 		self.send = (m)->
 			cb null, m
-		self.setTimeout = (vCallback, nDelay) -> #, argumentToPass1, argumentToPass2, etc.
-			__nativeST__ = window.setTimeout
-			oThis = this
-			aArgs = Array::slice.call(arguments_, 2)
-			__nativeST__ (if vCallback instanceof Function then ->
-				vCallback.apply oThis, aArgs
-			else vCallback), nDelay
-		self.setInterval = (vCallback, nDelay) -> #, argumentToPass1, argumentToPass2, etc.
-			__nativeSI__ = window.setInterval
-			oThis = this
-			aArgs = Array::slice.call(arguments_, 2)
-			__nativeSI__ (if vCallback instanceof Function then ->
-				vCallback.apply oThis, aArgs
-			else vCallback), nDelay
+		#these two are origionally from https://developer.mozilla.org/en-US/docs/DOM/window.setTimeout#A_possible_solution but modified
+		self.setInterval = (vCallback, nDelay, _args...) -> 
+			_func = ()=>
+				vCallback.apply @, _args
+			window.setInterval _func, nDelay
+		self.setTimeout = (vCallback, nDelay, _args...) -> 
+			_func = ()=>
+				vCallback.apply @, _args
+			window.setInterval _func, nDelay
 		try
 			cb null, @_func.apply(self,data)
 			return true

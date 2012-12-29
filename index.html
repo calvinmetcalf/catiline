@@ -86,14 +86,14 @@ inProc.onclick = function(){
 outProc.onclick = function(){
 	eval("var func = "+document.getElementById("func").innerHTML);
 	var res2 = document.getElementById("res2");
-	var async = communist(func);
+	var async = new Socialist(func);
 	async.send(parseInt(document.getElementById("inp").value,10),function(err,data){
 		res2.innerHTML = data;
 		async.close();
 	});
 }
-var timer = function(){var f = function(){	var d = new Date;this.send(d.toLocaleTimeString())}; var ff = f.bind(this);setInterval(ff,1000);}
-var comrade = communist(timer);
+var timer = function(){var f = function(){var d = new Date;this.send(d.toLocaleTimeString())};this.setInterval(f,1000);}
+var comrade = new Socialist(timer);
 comrade.send("",function(err,_data){timeC.innerHTML=_data;})
 </script>
     </body>

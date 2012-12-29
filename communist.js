@@ -81,6 +81,24 @@
       self.send = function(m) {
         return cb(null, m);
       };
+      self.setInterval = function() {
+        var nDelay, vCallback, _args, _func,
+          _this = this;
+        vCallback = arguments[0], nDelay = arguments[1], _args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
+        _func = function() {
+          return vCallback.apply(_this, _args);
+        };
+        return window.setInterval(_func, nDelay);
+      };
+      self.setTimeout = function() {
+        var nDelay, vCallback, _args, _func,
+          _this = this;
+        vCallback = arguments[0], nDelay = arguments[1], _args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
+        _func = function() {
+          return vCallback.apply(_this, _args);
+        };
+        return window.setInterval(_func, nDelay);
+      };
       try {
         cb(null, this._func.apply(self, data));
         return true;
