@@ -25,6 +25,8 @@ class Communist
 		@_worker.onerror = (e) ->
 			cb e
 			true
+	start : (cb)=>
+		@send(cb)
 
 		true
 
