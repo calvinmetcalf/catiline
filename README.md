@@ -25,8 +25,11 @@ comrade.send(function(err, data){console.log(data)});
 //this will print the time every second
 comerade.close();
 ```
-make sure you use "this" with setInterval and send if there is any chance it's going to be used in older browsers, though note that when closed it doesn't automatically stop the interval function.
-
+make sure you use "this" with setInterval and send if there is any chance it's going to be used in older browsers, though note that when closed it doesn't automatically stop the interval function, also it should be noted tha your function can't take advantage of closures as it'll be executed in a seperate context, so:
+```javascript
+var a = 1;
+var BAD = communist(function(c){return c + 1};)//this leads to crying
+```
 this is actually two scripts Communist, the main one which is for working in an alternative thread, and Socialist which is a(n attempt at) a drop in replacement that runs in thread.  When you call communist, it returns a new Communist or a new Socialist depending on what your browser can handle. 
 
 This is a work in progress, help is always apreciated, I wrote it in CoffeeScript mainly for the splats.
