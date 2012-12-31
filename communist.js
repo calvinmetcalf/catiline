@@ -16,7 +16,6 @@
         fun = fun.toString();
         body = "var send;var _f =  " + fun + ";self.addEventListener('message', function(_e) {send = function(data){self.postMessage({message:data,cb:_e.data.cb})};self.postMessage({body:_f.apply(null, _e.data.body),cb:_e.data.cb})})";
       } else {
-        this.nofun = true;
         body = "var _db = {}\n				_db._add=function(name, func){\n				_db[name]=eval(\"(\"+func+\")\");\n					return true;	\n				};	\n				_db._rm=function(name){\n					delete _db[name];		\n					return true;\n				};\n				_db._test=function(a){\n					return a || \"all quiet\";\n				};\n				var _f =  function () {\n				    var args, method,__slice = [].slice;\n				    method = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];\n				    return _db[method].apply(null, args);\n				  };\n				 self.addEventListener('message', function(_e) {\n				 	self.send = function(data){\n				 		self.postMessage({\n						messege:data,cb:_e.data.cb\n					});\n				};\n					self.postMessage({\n					cb:_e.data.cb,\n					body:_f.apply(null, _e.data.body)\n					});\n\n				});";
       }
       blob = new Blob([body], {
@@ -70,26 +69,23 @@
       return true;
     };
 
-    if (Communist.nofun) {
-      Communist.prototype.add = function(method, func, cb) {
-        if (cb == null) {
-          cb = function() {
-            return true;
-          };
-        }
-        this.send("_add", method, func.toString(), cb);
-        return true;
-      };
-      Communist.prototype.remove = function(method, cb) {
-        if (cb == null) {
-          cb = function() {
-            return true;
-          };
-        }
-        this.send("_rm", method, cb);
-        return true;
-      };
-    }
+    Communist.prototype.add = function(method, func, cb) {
+      if (cb == null) {
+        cb = function() {
+          return true;
+        };
+      }
+      return this.send("_add", method, func.toString(), cb);
+    };
+
+    Communist.prototype.remove = function(method, cb) {
+      if (cb == null) {
+        cb = function() {
+          return true;
+        };
+      }
+      return this.send("_rm", method, cb);
+    };
 
     true;
 
@@ -122,7 +118,6 @@
         this._func = function() {
           var args, name;
           name = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-          console.log(this);
           return this._db[name].apply(null, args);
         };
       }
@@ -178,25 +173,24 @@
       return true;
     };
 
-    console.log(Socialist);
-
-    Socialist.prototype.add = function(method, func, cb) {
-      if (cb == null) {
-        cb = function() {
-          return true;
-        };
-      }
-      return this.send("_add", method, func, cb);
-    };
-
-    Socialist.prototype.remove = function(method, cb) {
-      if (cb == null) {
-        cb = function() {
-          return true;
-        };
-      }
-      return this.send("_rm", method, cb);
-    };
+    if (Socialist._db) {
+      Socialist.prototype.add = function(method, func, cb) {
+        if (cb == null) {
+          cb = function() {
+            return true;
+          };
+        }
+        return this.send("_add", method, func, cb);
+      };
+      Socialist.prototype.remove = function(method, cb) {
+        if (cb == null) {
+          cb = function() {
+            return true;
+          };
+        }
+        return this.send("_rm", method, cb);
+      };
+    }
 
     true;
 

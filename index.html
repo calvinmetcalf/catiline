@@ -86,7 +86,7 @@ inProc.onclick = function(){
 outProc.onclick = function(){
 	eval("var func = "+document.getElementById("func").innerHTML);
 	var res2 = document.getElementById("res2");
-	var async = new Socialist();
+	var async = communist();
 	async.add("calc",func,function(err1,data1){
 		if(err1){console.log(err1)}
 		else{
@@ -103,7 +103,7 @@ outProc.onclick = function(){
 	
 }
 var timer = function(){var f = function(){var d = new Date;this.send(d.toLocaleTimeString())};this.setInterval(f,1000);}
-var comrade = new Socialist(timer);
+var comrade = communist(timer);
 comrade.send("",function(err,_data){timeC.innerHTML=_data;})
 </script>
     </body>
