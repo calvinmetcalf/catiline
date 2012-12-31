@@ -173,24 +173,23 @@
       return true;
     };
 
-    if (Socialist._db) {
-      Socialist.prototype.add = function(method, func, cb) {
-        if (cb == null) {
-          cb = function() {
-            return true;
-          };
-        }
-        return this.send("_add", method, func, cb);
-      };
-      Socialist.prototype.remove = function(method, cb) {
-        if (cb == null) {
-          cb = function() {
-            return true;
-          };
-        }
-        return this.send("_rm", method, cb);
-      };
-    }
+    Socialist.prototype.add = function(method, func, cb) {
+      if (cb == null) {
+        cb = function() {
+          return true;
+        };
+      }
+      return this.send("_add", method, func, cb);
+    };
+
+    Socialist.prototype.remove = function(method, cb) {
+      if (cb == null) {
+        cb = function() {
+          return true;
+        };
+      }
+      return this.send("_rm", method, cb);
+    };
 
     true;
 
