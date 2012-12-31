@@ -40,10 +40,9 @@ class Socialist
 	close : ->
 		_func = undefined
 		true
-	if @_db
-		add : (method, func, cb=()->true)->
-			@send("_add",method,func,cb)
-		remove : (method,cb=()->true)->
-			@send("_rm",method,cb)
+	add : (method, func, cb=()->true)->
+		@send("_add",method,func,cb)
+	remove : (method,cb=()->true)->
+		@send("_rm",method,cb)
 	true
 window.Socialist = Socialist
