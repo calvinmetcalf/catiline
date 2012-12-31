@@ -21,6 +21,8 @@ class Socialist
 			cb err
 			return false
 		true
+	start : (cb)=>
+		@send(cb)
 
 	close : ->
 		_func = undefined
