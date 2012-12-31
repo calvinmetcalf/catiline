@@ -5,4 +5,7 @@ window.communist = (fun) ->
 		else
 			new Communist()
 	else
-		new Socialist(fun)
+		if fun
+			new Socialist(fun)
+		else
+			new Socialist()
