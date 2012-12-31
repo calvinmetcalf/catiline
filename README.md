@@ -25,6 +25,18 @@ comrade.send(function(err, data){console.log(data)});
 //this will print the time every second
 comerade.close();
 ```
+you can also do (experimental warning)
+```javascript
+var comrade = communist();
+comrade.add("calc",function(a,b){return a+b;});
+comrade.add("mult",function(a,b){return a*b;});
+comrade.send("calc",3,2,function(err, data){console.log(data)});
+//this will print 5
+comrade.send("mult",3,2,function(err, data){console.log(data)});
+//this will print 6
+```
+if you use that with the send function I mentioned earlier shit might assplode, more testing to come.
+
 make sure you use "this" with setInterval and send if there is any chance it's going to be used in older browsers, though note that when closed it doesn't automatically stop the interval function, also it should be noted tha your function can't take advantage of closures as it'll be executed in a seperate context, so:
 ```javascript
 var a = 1;
