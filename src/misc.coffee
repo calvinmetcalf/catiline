@@ -1,5 +1,8 @@
 window.communist = (fun) ->
 	if window.Worker
-		new Communist(fun.toString())
+		if fun
+			new Communist(fun)
+		else
+			new Communist()
 	else
 		new Socialist(fun)
