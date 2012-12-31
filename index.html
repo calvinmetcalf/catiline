@@ -86,14 +86,24 @@ inProc.onclick = function(){
 outProc.onclick = function(){
 	eval("var func = "+document.getElementById("func").innerHTML);
 	var res2 = document.getElementById("res2");
-	var async = new communist(func);
-	async.send(parseInt(document.getElementById("inp").value,10),function(err,data){
-		res2.innerHTML = data;
-		async.close();
+	var async = new Socialist();
+	async.add("calc",func,function(err1,data1){
+		if(err1){console.log(err1)}
+		else{
+		async.send("calc",parseInt(document.getElementById("inp").value,10),function(err2,data2){
+			if(err2){
+				console.log(err2)
+			}else{
+		res2.innerHTML = data2;
+		async.remove("calc",function(err3,data3){async.close()});
+			}
 	});
+		}
+	});
+	
 }
 var timer = function(){var f = function(){var d = new Date;this.send(d.toLocaleTimeString())};this.setInterval(f,1000);}
-var comrade = communist(timer);
+var comrade = new Socialist(timer);
 comrade.send("",function(err,_data){timeC.innerHTML=_data;})
 </script>
     </body>

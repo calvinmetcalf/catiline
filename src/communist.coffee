@@ -5,6 +5,7 @@ class Communist
 			fun = fun.toString()
 			body = "var send;var _f =  #{ fun };self.addEventListener('message', function(_e) {send = function(data){self.postMessage({message:data,cb:_e.data.cb})};self.postMessage({body:_f.apply(null, _e.data.body),cb:_e.data.cb})})"
 		else
+			@nofun=true
 			body  = """var _db = {}
 				_db._add=function(name, func){
 				_db[name]=eval("("+func+")");
@@ -60,7 +61,7 @@ class Communist
 	close : () ->
 		@_worker.terminate()
 		true
-	unless fun
+	if @nofun
 		add : (method, func, cb=()->true)->
 			@send("_add",method,(func.toString()),cb)
 			true
