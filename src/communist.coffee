@@ -57,14 +57,16 @@ class Communist
 			cb e
 			true
 		true
+	start : (cb)=>
+		@send(cb)
+	close : () ->
+		@_worker.terminate()
+		true
 	add : (method, func, cb=()->true)->
 		@send("_add",method,(func.toString()),cb)
 		true
 	remove : (method,cb=()->true)->
 		@send("_rm",method,cb)
-		true
-	close : () ->
-		@_worker.terminate()
 		true
 	true 
 window.Communist = Communist
