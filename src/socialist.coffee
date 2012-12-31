@@ -1,5 +1,17 @@
 class Socialist
-	constructor : (@_func)->
+	constructor : (fun)->
+		if fun
+			@_func = fun
+		else
+			@_db = {}
+			@_db._add = (name, func)->
+				@_db[name]=func
+				true
+			@_db._rm = (name)->
+				delete @_db[name]
+				true
+			@_func = (name,args...)->
+				@_db[name].apply null, args
 	CBs : {}
 	send : (data..., cb) =>
 		self = {}
@@ -28,4 +40,11 @@ class Socialist
 		_func = undefined
 		true
 	true
+	if @_db
+		add : (method, func, cb=()->true)->
+			@send("_add",method,(func.toString()),cb)
+			true
+		remove : (method,cb=()->true)->
+			@send("_rm",method,cb)
+			true
 window.Socialist = Socialist
