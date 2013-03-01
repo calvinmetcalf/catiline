@@ -11,7 +11,7 @@
 			}\
 			self.onmessage=function(){\
 			var _rst = fun(',JSON.stringify(data),',_clb);\
-			if(_rst){\
+			if(typeof _rst !== "undefined"){\
 				_clb(_rst);\
 			}\
 			}']);
@@ -34,7 +34,7 @@
 			self.onmessage=function(event){\
 				var _cc = _clb.bind(self, event.data[0]);\
 				var _rst = fun(event.data[1],_cc);\
-				if(_rst){\
+				if(typeof _rst !== "undefined"){\
 					_cc(_rst)\
 				}\
 				}']);
@@ -66,8 +66,14 @@
 	var mWorker=function(fun,callback){
 		var w ={};
 		var worker = makeWorker(['var fun = ',fun,';\
+			function _clb(data){\
+				self.postMessage(data);\
+			}\
 			self.onmessage=function(e){\
-				self.postMessage(fun(e.data));\
+			var _rst = fun(e.data,_clb);\
+				if(typeof _rst !== "undefined"){\
+					_clb(_rst);\
+				}\
 			}']);
 		worker.onmessage = function(e){
 			callback(e.data);	
