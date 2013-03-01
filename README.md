@@ -1,58 +1,38 @@
 Communist
 ==========
-![communist](https://raw.github.com/calvinmetcalf/communist/gh-pages/apple-touch-icon-144x144-precomposed.png)
+![communist](logo.png)
 
-All about workers, pass it a function, then pass it data and a callback, e.g.
+A library all about workers that grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).  You want Node.js and IE support and for it not to blow up? go use Parallel.js, at the moment that's not what I'm going for here. Requires [RSVP](https://github.com/tildeio/rsvp.js).
 
-```javascript
-var comrade = communist(function(a,b){return a + b});
-//creates a worker
-comrade.send(1,2,function(err, data){console.log(data)});
-//prints 3
-comrade.close();
-//closes the wroker
-```
-that works by executing the function each time it gets a messege and returning the results, you can also have it pass messeges back
-```javascript
-var comrade = communist(function(){
-	var f = function(){
-		var d = new Date;
-		this.send(d.toLocaleTimeString())
-	};
-	this.setInterval(f,1000);
-});
-comrade.send(function(err, data){console.log(data)});
-//this will print the time every second
-comerade.close();
-```
-you can also do (experimental warning)
-```javascript
-var comrade = communist();
-comrade.add("calc",function(a,b){return a+b;});
-comrade.add("mult",function(a,b){return a*b;});
-comrade.send("calc",3,2,function(err, data){console.log(data)});
-//this will print 5
-comrade.send("mult",3,2,function(err, data){console.log(data)});
-//this will print 6
-```
-if you use that with the send function I mentioned earlier shit might assplode, more testing to come.
+API
+===
+Create a onetime use worker:
 
-make sure you use "this" with setInterval and send if there is any chance it's going to be used in older browsers, though note that when closed it doesn't automatically stop the interval function, also it should be noted tha your function can't take advantage of closures as it'll be executed in a seperate context, so:
-```javascript
-var a = 1;
-var BAD = communist(function(c){return c + 1};)//this leads to crying
+```JavaScript
+var comrade = communist(function,data);//returns promise
 ```
-this is actually two scripts Communist, the main one which is for working in an alternative thread, and Socialist which is a(n attempt at) a drop in replacement that runs in thread.  When you call communist, it returns a new Communist or a new Socialist depending on what your browser can handle. 
 
-This is a work in progress, help is always apreciated, I wrote it in CoffeeScript mainly for the splats.
+calls your function with the data as the first argument and a callback as the second in a worker, the function can either return a value, or call the callback, once it does that, the promise is fufiled and the worker is closed. , ie:
 
-link at the top is for compiled javascript, to build you need Node and then run 
-```bash
-npm install
+```JavaScript
+function(x){
+	return x*x;
+}
+//or
+function(x,cb){
+	cb(x*x);
+}
+//all together
+communist(function(x){return x*x;},9).then(function(a){console.log(a)});
+//prints 81.
 ```
-to get the dependencies and then
-```bash
-cake build
+
+Create a reusable worker:
+
+```JavaScript
+var comrade = communist(function);//returns object
+var manifesto = comrade.data(data);//returns promise
+comrade.close();//closes the worker
 ```
-builds
-I set up a [quick demo](http://calvinmetcalf.github.com/communist/) of the various aspects. 
+
+you can call data on multiple times and each time will return a new promise which will be fuffiled based on your data, otherwise the same as the onetime worker.
