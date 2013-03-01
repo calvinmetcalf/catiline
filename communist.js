@@ -9,11 +9,9 @@
 				self.postMessage(data);\
 				self.close();\
 			}\
-			self.onmessage=function(){\
 			var _rst = fun(',JSON.stringify(data),',_clb);\
 			if(typeof _rst !== "undefined"){\
 				_clb(_rst);\
-			}\
 			}']);
 		worker.onmessage=function(e){
 			promise.resolve(e.data);
@@ -21,7 +19,6 @@
 		worker.onerror=function(e){
 			promise.reject(e);
 		};
-		worker.postMessage("");
 		return promise;
 	};
 	var sticksAround = function(fun){
@@ -78,6 +75,9 @@
 		worker.onmessage = function(e){
 			callback(e.data);	
 		};
+		worker.onerror=function(){
+			callback();
+		};
 		w.data=function(d){
 			worker.postMessage(d);	
 		};
@@ -131,7 +131,7 @@
 		var reducer;
 		var w = new RSVP.Promise();
 		var workers = [];
-		var terminated = 0;
+		var terminated = threads;
 		var status = {
 			map:false,
 			reduce:false,
@@ -152,7 +152,9 @@
 			while(i<threads){
 				(function(){
 					var mw = mWorker(fun, function(d){
-						reducer.data(d);
+						if(typeof d !== undefined){
+							reducer.data(d);
+						}
 						if(len>0){
 							len--;
 							mw.data(data.pop());
@@ -194,7 +196,12 @@
 				len--;
 				workers[i].data(data.pop());
 				i++;
+				terminated--;
 			}
+			w.data=function(){
+				w.reject("can't add data, already called.");
+				return w;
+			};
 			return w;
 		}
 		return w;
@@ -229,7 +236,9 @@
 			while(i<threads){
 				(function(){
 					var mw = mWorker(fun, function(d){
-						reducer.data(d);
+						if(typeof d !== undefined){
+							reducer.data(d);
+						}
 						if(len>0){
 							len--;
 							mw.data(data.pop());
@@ -240,6 +249,7 @@
 								if(closing){
 								closeUp();
 								}else if(waiting){
+									waiting = false;
 									reducer.fetch();
 								}
 							}
@@ -258,14 +268,17 @@
 			}
 			reducer = rWorker(fun,function(d){
 				if(promise){
-				promise.resolve(d);
-				promise = false;
-				};
+					promise.resolve(d);
+					promise = false;
+				}
 			});
 			status.reduce=true;
 			return checkStatus();
 		};
 		w.data = function(d){
+			if(closing){
+				return;
+			}
 			len = len + d.length;
 			data = data.concat(d);
 			status.data=true;
@@ -274,7 +287,7 @@
 		function go(){
 			var i = 0;
 			var wlen = workers.length;
-			while(i<wlen && len>0 && !idle.length){
+			while(i<wlen && len>0 && idle>0){
 				len--;
 				workers[i].data(data.pop());
 				i++;
@@ -284,9 +297,9 @@
 		}
 		w.fetch=function(now){
 			if(!promise){
-			promise = new RSVP.Promise();
-		}
-			if(data.length && !now){
+				promise = new RSVP.Promise();
+			}
+			if(idle<threads && !now){
 				waiting=true;
 			}else{
 				reducer.fetch();
@@ -295,9 +308,9 @@
 		};
 		w.close=function(){
 			if(!promise){
-			promise = new RSVP.Promise();
-		}
-			if(data.length){
+				promise = new RSVP.Promise();
+			}
+			if(idle<threads){
 				closing=true;
 			}else{
 				closeUp();

@@ -35,4 +35,86 @@ var manifesto = comrade.data(data);//returns promise
 comrade.close();//closes the worker
 ```
 
-you can call data on multiple times and each time will return a new promise which will be fuffiled based on your data, otherwise the same as the onetime worker.
+you can call data on multiple times and each time will return a new promise which will be fufiled based on your data, otherwise the same as the onetime worker.
+
+If you don't feel like messing around with promises or you need the same callback called multiple times you can pass a callback function as the second argument, this gets called with the results each time.
+
+```JavaScript
+var comrade = //returns object
+comrade.data(data);//will call the callback with the result
+//this is chainable
+communist(function,callback).data(data1).data(data2);
+//will call the callback twice, once for each result.
+```
+
+next up comes the fancy stuff, map reduce
+
+```Javascript
+var comrade = communist(threads);//returns object threads is the number of map workers, reducer will be an additional thread
+comrade.data([array of data]);//can be called multiple times, the arrays will be concated
+comrade.map(function);//function to be called once on each member of the array
+//can be async but only call the callback once
+comrade.reduce(function);//reduce function of the function(a,b){return c};
+```
+
+this returns a chainable object until it has all it needs, then it returns a promise, e.g.
+
+```JavaScript
+var comrade = communist(4);
+//returns object
+comrade.data([1,2,3]);
+//object
+comrade.map(function(x){return x*x;});
+//object
+comrade.reduce(function(a,b){return a+b;});
+//returns promise
+//the object is chainable, and data can be called more then once so....
+communist(4)
+	.data([1,2,3])
+	.map(function(x){return x*x;})
+	.data([4,5,6])
+	.reduce(function(a,b){return a+b;})
+	.then(function(a){console.log(a)});
+//prints 91
+//remember that once all three data,map and reduced are called it runs, so the following will give you an error:
+communist(4)
+	.data([1,2,3])
+	.map(function(x){return x*x;})
+	.reduce(function(a,b){return a+b;})
+	.data([4,5,6])
+	.then(function(a){console.log("yay "+a)},function(a){console.log("boo "+a)});
+```
+
+Behind the scenes it's spinning a worker up for each thread plus one for the reducer, chrews through your data, then gives you result and cleans up.
+
+you can also give a second argument after threads, if this is true than you have an incremental map reduce, we can keep on adding data, then we can call fetch() to get the promise, fetch waits until the data queue is empty and then invokes the primse, it takes an argument "now" that you can set to true if you don't want to wait, i.e. if data is continusly being added. 
+it also has a close method which works like fetch but always waits, prevents you from adding more data and then cleans up the workers afterwards. 
+
+```JavaScript
+var comrade = communist(4, true);
+comrade.data([1,2,3]);
+comrade.map(function(x){return x*x;});
+comrade.reduce(function(a,b){return a+b;});
+comrade.data([4,5,6]);
+comrade.fetch().then(function(a){console.log(a)});
+//prints 91
+comrade.data([6,7,8]).fetch().then(function(a){console.log(a)});
+//prints 240
+//fetch takes an argument "now", if it's undefined then 
+comrade.data([6,7,8]).fetch(true).then(function(a){console.log(a)});
+//also returns 240
+comrade.close().then(function(a){console.log(a)});
+//returns 389
+```
+
+We also have communist.reducer, this is the internal function we use for the mapreduce stuff, give it two function, a reducer, and a callback, then give it .data() and it reduces it, call .fetch() to get it and call the callback and .close() which is like fetch but closes it after. 
+
+we also have `communist.makeUrl(reletiveURL);` returns an absolute url.
+
+Lastly we have communist.ajax(); this is a demo function which uses the above tools (the first worker type actually) to create a function which opens up a worker, does an ajax request, can do some prosesing on it, and returns it.
+
+```JavaScript
+var promise = communist.ajax(url,after,notjson);//returns promise obv
+//after is an optional function you can add if you want to process the data in the other thread before returning it
+//if notjson is true doesn't try to parse it as json which it does by default. 
+```
