@@ -1,4 +1,5 @@
 (function(){
+	var Communist = function(){};
     var makeWorker = function(strings){
     return new Worker(URL.createObjectURL(new Blob([strings.join("")],{type: "text/javascript"})));	
 	};
@@ -22,7 +23,7 @@
 		return promise;
 	};
 	var sticksAround = function(fun){
-		var w = {};
+		var w = new Communist();
 		var promises = [];
 		var worker = makeWorker(['var fun=', fun,';\
 			function _clb(num,data){\
@@ -61,7 +62,7 @@
 		return w;
 	};
 	var mWorker=function(fun,callback){
-		var w ={};
+		var w = new Communist();
 		var worker = makeWorker(['var fun = ',fun,';\
 			function _clb(data){\
 				self.postMessage(data);\
@@ -87,7 +88,7 @@
 		return w;
 	};
 	var rWorker = function(fun,callback){
-		var w = {};
+		var w = new Communist();
 		var worker = makeWorker(['var fun = ',fun,',reduced,reduceEmpty=true;\
 		self.onmessage=function(event){\
 			switch(event.data[0]){\
@@ -207,7 +208,7 @@
 		return w;
 	};
 	var incrementalMapReduce = function(threads){
-		var w = {};
+		var w = new Communist();
 		var len = 0;
 		var promise;
 		var workers = [];
@@ -351,8 +352,9 @@
 				};\
 			request.send();\
 		}';
-		return window.parallel(func,p.makeUrl(url));
+		return p(func,p.makeUrl(url));
 	};
 	p.reducer = rWorker;
+	p.worker = makeWorker;
 	window.communist=p;
 })();
