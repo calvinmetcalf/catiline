@@ -109,7 +109,7 @@ comrade.close().then(function(a){console.log(a)});
 
 We also have communist.reducer, this is the internal function we use for the mapreduce stuff, give it two function, a reducer, and a callback, then give it .data() and it reduces it, call .fetch() to get it and call the callback and .close() which is like fetch but closes it after. 
 
-we also have `communist.makeUrl(reletiveURL);` returns an absolute url.
+we also have `communist.makeUrl(reletiveURL);` returns an absolute url, and communist.worker([aray of strings]); returns worker made from those strings.
 
 Lastly we have communist.ajax(); this is a demo function which uses the above tools (the first worker type actually) to create a function which opens up a worker, does an ajax request, can do some prosesing on it, and returns it.
 
