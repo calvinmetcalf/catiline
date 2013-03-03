@@ -126,7 +126,7 @@ function toA(a,size){\
 		}';
 		return communist(func,communist.makeUrl(url));
 	};
-$("#transferobj").on("click",function(){ajax("dictionary.txt").then(function(dd){console.log("got it");dict = dd;});})	
+$("#transferobj").on("click",function(){ajax("dictionary.txt").then(function(dd){console.log("got it");dict = dd.map(function(v){String.fromCharCode.apply(null, new Uint16Array(v))});});})	
 $("#regular").on("click",function(){
 	communist.ajax("dictionary.txt",false,true).then(function(dd){console.log("got it");dict2 = dd;});
 });
