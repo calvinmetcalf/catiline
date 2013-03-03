@@ -1,63 +1,50 @@
-<!DOCTYPE html>
-<html>
-    <head><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Demo of Communist.js">
-    <meta name="author" content="Calvin Metcalf">
+<!DOCTYPE html><style>
+#test-container {
+			position: relative;
+			height: 40px;
+		}
+		#test {
+			width: 40px;
+			height: 40px;
+			background: red;
+			position: absolute;
+		}</style>
+<div id="timeA"></div><br/><div id="timeB"></div>
+<div id="test-container">
+		<div id="test"></div>
+	</div>
+	<button type="button" id="regular">Download and transfer with structured clone</button><button type="button" id="transferobj">Download and transfer with transferable objects</button>
+<script src="//raw.github.com/timrwood/moment/2.0.0/moment.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"> </script>
+<script>
+function animateSquare() {
+	var test = document.getElementById('test'),
+		start = Date.now();
 
-    <!-- Le styles -->
-    <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
-    <style>
-      body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-      }
-    </style>
-    <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+	window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+                                   window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.setTimeout;
 
-    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+	function step() {
+		var now = Date.now(),
+			progress = now - start;
 
-    <!-- Fav and touch icons -->
-        <title>Communist.js</title>
-        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="apple-touch-icon-144x144-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="apple-touch-icon-114x114-precomposed.png">
-      <link rel="apple-touch-icon-precomposed" sizes="72x72" href="apple-touch-icon-72x72-precomposed.png">
-                    <link rel="apple-touch-icon-precomposed" href="apple-touch-icon-57x57-precomposed.png">
-                                   <link rel="shortcut icon" href="favicon.ico"><link rel="stylesheet" href="gh-fork-ribbon.css" />
-    <!--[if IE]>
-        <link rel="stylesheet" href="gh-fork-ribbon.ie.css" />
-    <![endif]-->
+		if (progress > 5000) {
+			progress = 0;
+			start = now;
+		}
 
-    </head>
-    <body><div class="github-fork-ribbon-wrapper right">
-        <div class="github-fork-ribbon"><!--from http://simonwhitaker.github.com/github-fork-ribbon-css/ -->
-            <a href="https://github.com/calvinmetcalf/communist">Fork me on GitHub</a>
-        </div>
-    </div>
-    <div class="container-fluid"> 
-<div class="row-fluid"><div class="span4 offset2"><div class="row-fluid"><textarea rows="8" id="func">
-function(num){
-	var a = 0;
-	while(num){
-		a = a + num;
-		num--;
-	};
-	return a;
-}</textarea></div>
-<div class="row-fluid"><strong>Input Value:</strong> adjust as needed<ul><li>takes 4 seconds for me in chrome</li><li>takes over 2 minutes in IE 9, I'd adjust down</li><li><input type="text" value="500000000" id="inp" /></li></ul></div></div><div class="span4">
-<div class="row-fluid"><button type="button" id="inProc" class="btn btn-danger">Run In Proccess</button><br/>Results:<span id="res"></span></div>
-<div class="row-fluid"><button type="button" id="outProc" class="btn btn-success">Run Out of Proccess</button></div>
-<div class="row-fluid">Results:<span id="res2"></span></div>
-<div class="row-fluid">Can be blocked: <span id="timeA"></span></div>
-<div class="row-fluid">Won't be blocked: <span id="timeB"></span></div>
-<div class="row-fluid">Running out of proccess: <span id="timeC"></span></div>
-</div>
-</div></div><script src="communist.js" type="text/javascript"></script>
-<script type="text/javascript">
+		test.style.left = (progress / 10) + "px";
+
+		requestAnimationFrame(step);
+	}
+
+	requestAnimationFrame(step);
+}
+
+
 var timeA = document.getElementById("timeA");
 var timeB = document.getElementById("timeB");
-var timeC = document.getElementById("timeC");
+
 var t = new Date;
 timeA.innerHTML = t.toLocaleTimeString();
 timeB.innerHTML = t.toLocaleTimeString();
@@ -73,38 +60,74 @@ function setTimes(){
 	setA();
 	setB();
 }
-var si = setInterval(setTimes,1000);
-var inProc = document.getElementById("inProc");
-var outProc = document.getElementById("outProc");
-
-inProc.onclick = function(){
-	eval("var func = "+document.getElementById("func").innerHTML);
-	var res = document.getElementById("res");
-	res.innerHTML = func(parseInt(document.getElementById("inp").value,10));
-	
-};
-outProc.onclick = function(){
-	eval("var func = "+document.getElementById("func").innerHTML);
-	var res2 = document.getElementById("res2");
-	var async = communist();
-	async.add("calc",func,function(err1,data1){
-		if(err1){console.log(err1)}
-		else{
-		async.send("calc",parseInt(document.getElementById("inp").value,10),function(err2,data2){
-			if(err2){
-				console.log(err2)
-			}else{
-		res2.innerHTML = data2;
-		async.remove("calc",function(err3,data3){async.close()});
-			}
-	});
-		}
-	});
-	
-}
-var timer = function(){var f = function(){var d = new Date;this.send(d.toLocaleTimeString())};this.setInterval(f,1000);}
-var comrade = communist(timer);
-comrade.send("",function(err,_data){timeC.innerHTML=_data;})
+setInterval(setTimes,1000);
+animateSquare();
 </script>
-    </body>
-</html>
+<script src="https://raw.github.com/tildeio/rsvp.js/master/browser/rsvp.js"></script>
+<script src="communist.js"></script>
+<script>
+function fromText(text){
+	var len = 10000;
+	var ab = new Uint16Array(len);
+	var i = 0;
+	while(i<len){
+		ab[i]=text.charCodeAt(i);
+		i++;
+	}
+	return ab.buffer;
+}
+function toA(a,size){
+	var sliceList=[];
+	var len = a.byteLength;
+	var start = 0;
+	var end = len%size;
+	while(end<len){
+		sliceList.push([start,end]);
+		start = end;
+		end = end + size;
+	}
+	return sliceList.map(function(v){return a.slice(v[0],v[1])});
+}	
+
+var dict,dict2;
+var ajax = function(url,after,notjson){
+		var func = 'function (url, cb) {\
+		function fromText(text){\
+	var len = text.length;\
+	var ab = new Uint16Array(len);\
+	var i = 0;\
+	while(i<len){\
+		ab[i]=text.charCodeAt(i);\
+		i++;\
+	}\
+	return ab.buffer;\
+};\
+function toA(a,size){\
+	var sliceList=[];\
+	var len = a.byteLength;\
+	var start = 0;\
+	var end = len%size;\
+	while(end<len){\
+		sliceList.push([start,end]);\
+		start = end;\
+		end = end + size;\
+	}\
+	return sliceList.map(function(v){return a.slice(v[0],v[1])});\
+}\
+			var request = new XMLHttpRequest();\
+			request.open("GET", url);\
+				request.onreadystatechange = function() {\
+					if (request.readyState === 4 && request.status === 200) {\
+					var a = toA(fromText(request.responseText),10000);\
+						cb(a,a);\
+						}\
+				};\
+			request.send();\
+		}';
+		return communist(func,communist.makeUrl(url));
+	};
+$("#transferobj").on("click",function(){ajax("dictionary.txt").then(function(dd){console.log("got it");dict = dd;});})	
+$("#regular").on("click",function(){
+	communist.ajax("dictionary.txt",false,true).then(function(dd){console.log("got it");dict2 = dd;});
+});
+</script>

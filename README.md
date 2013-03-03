@@ -1,58 +1,120 @@
 Communist
 ==========
-![communist](https://raw.github.com/calvinmetcalf/communist/gh-pages/apple-touch-icon-144x144-precomposed.png)
+![communist](logo.png)
 
-All about workers, pass it a function, then pass it data and a callback, e.g.
+A library all about workers that grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).  You want Node.js and IE support and for it not to blow up? go use Parallel.js, at the moment that's not what I'm going for here. Requires [RSVP](https://github.com/tildeio/rsvp.js).
 
-```javascript
-var comrade = communist(function(a,b){return a + b});
-//creates a worker
-comrade.send(1,2,function(err, data){console.log(data)});
-//prints 3
-comrade.close();
-//closes the wroker
-```
-that works by executing the function each time it gets a messege and returning the results, you can also have it pass messeges back
-```javascript
-var comrade = communist(function(){
-	var f = function(){
-		var d = new Date;
-		this.send(d.toLocaleTimeString())
-	};
-	this.setInterval(f,1000);
-});
-comrade.send(function(err, data){console.log(data)});
-//this will print the time every second
-comerade.close();
-```
-you can also do (experimental warning)
-```javascript
-var comrade = communist();
-comrade.add("calc",function(a,b){return a+b;});
-comrade.add("mult",function(a,b){return a*b;});
-comrade.send("calc",3,2,function(err, data){console.log(data)});
-//this will print 5
-comrade.send("mult",3,2,function(err, data){console.log(data)});
-//this will print 6
-```
-if you use that with the send function I mentioned earlier shit might assplode, more testing to come.
+API
+===
+Create a onetime use worker:
 
-make sure you use "this" with setInterval and send if there is any chance it's going to be used in older browsers, though note that when closed it doesn't automatically stop the interval function, also it should be noted tha your function can't take advantage of closures as it'll be executed in a seperate context, so:
-```javascript
-var a = 1;
-var BAD = communist(function(c){return c + 1};)//this leads to crying
+```JavaScript
+var comrade = communist(function,data);//returns promise
 ```
-this is actually two scripts Communist, the main one which is for working in an alternative thread, and Socialist which is a(n attempt at) a drop in replacement that runs in thread.  When you call communist, it returns a new Communist or a new Socialist depending on what your browser can handle. 
 
-This is a work in progress, help is always apreciated, I wrote it in CoffeeScript mainly for the splats.
+calls your function with the data as the first argument and a callback as the second in a worker, the function can either return a value, or call the callback, once it does that, the promise is fufiled and the worker is closed. , ie:
 
-link at the top is for compiled javascript, to build you need Node and then run 
-```bash
-npm install
+```JavaScript
+function(x){
+	return x*x;
+}
+//or
+function(x,cb){
+	cb(x*x);
+}
+//all together
+communist(function(x){return x*x;},9).then(function(a){console.log(a)});
+//prints 81.
 ```
-to get the dependencies and then
-```bash
-cake build
+
+Create a reusable worker:
+
+```JavaScript
+var comrade = communist(function);//returns object
+var manifesto = comrade.data(data);//returns promise
+comrade.close();//closes the worker
 ```
-builds
-I set up a [quick demo](http://calvinmetcalf.github.com/communist/) of the various aspects. 
+
+you can call data on multiple times and each time will return a new promise which will be fufiled based on your data, otherwise the same as the onetime worker.
+
+If you don't feel like messing around with promises or you need the same callback called multiple times you can pass a callback function as the second argument, this gets called with the results each time.
+
+```JavaScript
+var comrade = //returns object
+comrade.data(data);//will call the callback with the result
+//this is chainable
+communist(function,callback).data(data1).data(data2);
+//will call the callback twice, once for each result.
+```
+
+next up comes the fancy stuff, map reduce
+
+```Javascript
+var comrade = communist(threads);//returns object threads is the number of map workers, reducer will be an additional thread
+comrade.data([array of data]);//can be called multiple times, the arrays will be concated
+comrade.map(function);//function to be called once on each member of the array
+//can be async but only call the callback once
+comrade.reduce(function);//reduce function of the function(a,b){return c};
+```
+
+this returns a chainable object until it has all it needs, then it returns a promise, e.g.
+
+```JavaScript
+var comrade = communist(4);
+//returns object
+comrade.data([1,2,3]);
+//object
+comrade.map(function(x){return x*x;});
+//object
+comrade.reduce(function(a,b){return a+b;});
+//returns promise
+//the object is chainable, and data can be called more then once so....
+communist(4)
+	.data([1,2,3])
+	.map(function(x){return x*x;})
+	.data([4,5,6])
+	.reduce(function(a,b){return a+b;})
+	.then(function(a){console.log(a)});
+//prints 91
+//remember that once all three data,map and reduced are called it runs, so the following will give you an error:
+communist(4)
+	.data([1,2,3])
+	.map(function(x){return x*x;})
+	.reduce(function(a,b){return a+b;})
+	.data([4,5,6])
+	.then(function(a){console.log("yay "+a)},function(a){console.log("boo "+a)});
+```
+
+Behind the scenes it's spinning a worker up for each thread plus one for the reducer, chrews through your data, then gives you result and cleans up.
+
+you can also give a second argument after threads, if this is true than you have an incremental map reduce, we can keep on adding data, then we can call fetch() to get the promise, fetch waits until the data queue is empty and then invokes the primse, it takes an argument "now" that you can set to true if you don't want to wait, i.e. if data is continusly being added. 
+it also has a close method which works like fetch but always waits, prevents you from adding more data and then cleans up the workers afterwards. 
+
+```JavaScript
+var comrade = communist(4, true);
+comrade.data([1,2,3]);
+comrade.map(function(x){return x*x;});
+comrade.reduce(function(a,b){return a+b;});
+comrade.data([4,5,6]);
+comrade.fetch().then(function(a){console.log(a)});
+//prints 91
+comrade.data([6,7,8]).fetch().then(function(a){console.log(a)});
+//prints 240
+//fetch takes an argument "now", if it's undefined then 
+comrade.data([6,7,8]).fetch(true).then(function(a){console.log(a)});
+//also returns 240
+comrade.close().then(function(a){console.log(a)});
+//returns 389
+```
+
+We also have communist.reducer, this is the internal function we use for the mapreduce stuff, give it two function, a reducer, and a callback, then give it .data() and it reduces it, call .fetch() to get it and call the callback and .close() which is like fetch but closes it after. 
+
+we also have `communist.makeUrl(reletiveURL);` returns an absolute url, and communist.worker([aray of strings]); returns worker made from those strings.
+
+Lastly we have communist.ajax(); this is a demo function which uses the above tools (the first worker type actually) to create a function which opens up a worker, does an ajax request, can do some prosesing on it, and returns it.
+
+```JavaScript
+var promise = communist.ajax(url,after,notjson);//returns promise obv
+//after is an optional function you can add if you want to process the data in the other thread before returning it
+//if notjson is true doesn't try to parse it as json which it does by default. 
+```
