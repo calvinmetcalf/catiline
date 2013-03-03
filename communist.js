@@ -6,8 +6,8 @@
 	var fAndF = function(fun,data){
 		var promise = new RSVP.Promise();
 		var worker = makeWorker(['var fun = ',fun,';\
-		function _clb(data){\
-				self.postMessage(data);\
+		function _clb(data,transfer){\
+				self.postMessage(data,transfer);\
 				self.close();\
 			}\
 			var _rst = fun(',JSON.stringify(data),',_clb);\
@@ -26,8 +26,8 @@
 		var w = new Communist();
 		var promises = [];
 		var worker = makeWorker(['var fun=', fun,';\
-			function _clb(num,data){\
-				self.postMessage([num,data]);\
+			function _clb(num,data,transfer){\
+				self.postMessage([num,data],transfer);\
 			}\
 			self.onmessage=function(event){\
 				var _cc = _clb.bind(self, event.data[0]);\
@@ -44,14 +44,14 @@
 			});
 		};
 		worker.onerror=rejectPromises;
-		w.data=function(data){
+		w.data=function(data, transfer){
 			var i = promises.length;
 			promises[i] = new RSVP.Promise();
 			worker.onmessage=function(e){
 				promises[e.data[0]].resolve(e.data[1]);
 				promises[e.data[0]]=0;
 			};
-			worker.postMessage([i,data]);
+			worker.postMessage([i,data],transfer);
 			return promises[i];
 		};
 		w.close = function(){
@@ -64,8 +64,8 @@
 	var mWorker=function(fun,callback){
 		var w = new Communist();
 		var worker = makeWorker(['var fun = ',fun,';\
-			function _clb(data){\
-				self.postMessage(data);\
+			function _clb(data,transfer){\
+				self.postMessage(data,transfer);\
 			}\
 			self.onmessage=function(e){\
 			var _rst = fun(e.data,_clb);\
@@ -79,8 +79,8 @@
 		worker.onerror=function(){
 			callback();
 		};
-		w.data=function(d){
-			worker.postMessage(d);	
+		w.data=function(d,t){
+			worker.postMessage(d,t);	
 		};
 		w.close=function(){
 			return worker.terminate();
@@ -112,8 +112,8 @@
 		worker.onmessage=function(e){
 			callback(e.data);	
 		};
-		w.data=function(data){
-			worker.postMessage(["data",data]);
+		w.data=function(data,transfer){
+			worker.postMessage(["data",data],transfer);
 		};
 		w.fetch=function(){
 			worker.postMessage(["get"]);

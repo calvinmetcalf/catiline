@@ -1,0 +1,133 @@
+<!DOCTYPE html><style>
+#test-container {
+			position: relative;
+			height: 40px;
+		}
+		#test {
+			width: 40px;
+			height: 40px;
+			background: red;
+			position: absolute;
+		}</style>
+<div id="timeA"></div><br/><div id="timeB"></div>
+<div id="test-container">
+		<div id="test"></div>
+	</div>
+	<button type="button" id="regular">Download and transfer with structured clone</button><button type="button" id="transferobj">Download and transfer with transferable objects</button>
+<script src="//raw.github.com/timrwood/moment/2.0.0/moment.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"> </script>
+<script>
+function animateSquare() {
+	var test = document.getElementById('test'),
+		start = Date.now();
+
+	window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+                                   window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.setTimeout;
+
+	function step() {
+		var now = Date.now(),
+			progress = now - start;
+
+		if (progress > 5000) {
+			progress = 0;
+			start = now;
+		}
+
+		test.style.left = (progress / 10) + "px";
+
+		requestAnimationFrame(step);
+	}
+
+	requestAnimationFrame(step);
+}
+
+
+var timeA = document.getElementById("timeA");
+var timeB = document.getElementById("timeB");
+
+var t = new Date;
+timeA.innerHTML = t.toLocaleTimeString();
+timeB.innerHTML = t.toLocaleTimeString();
+function setA(){
+	t.setSeconds(t.getSeconds()+1);
+	timeA.innerHTML = t.toLocaleTimeString();
+};
+function setB(){
+	var d = new Date;
+	timeB.innerHTML = d.toLocaleTimeString();
+}
+function setTimes(){
+	setA();
+	setB();
+}
+setInterval(setTimes,1000);
+animateSquare();
+</script>
+<script src="https://raw.github.com/tildeio/rsvp.js/master/browser/rsvp.js"></script>
+<script src="communist.js"></script>
+<script>
+function fromText(text){
+	var len = 10000;
+	var ab = new Uint16Array(len);
+	var i = 0;
+	while(i<len){
+		ab[i]=text.charCodeAt(i);
+		i++;
+	}
+	return ab.buffer;
+}
+function toA(a,size){
+	var sliceList=[];
+	var len = a.byteLength;
+	var start = 0;
+	var end = len%size;
+	while(end<len){
+		sliceList.push([start,end]);
+		start = end;
+		end = end + size;
+	}
+	return sliceList.map(function(v){return a.slice(v[0],v[1])});
+}	
+
+var dict,dict2;
+var ajax = function(url,after,notjson){
+		var func = 'function (url, cb) {\
+		function fromText(text){\
+	var len = text.length;\
+	var ab = new Uint16Array(len);\
+	var i = 0;\
+	while(i<len){\
+		ab[i]=text.charCodeAt(i);\
+		i++;\
+	}\
+	return ab.buffer;\
+};\
+function toA(a,size){\
+	var sliceList=[];\
+	var len = a.byteLength;\
+	var start = 0;\
+	var end = len%size;\
+	while(end<len){\
+		sliceList.push([start,end]);\
+		start = end;\
+		end = end + size;\
+	}\
+	return sliceList.map(function(v){return a.slice(v[0],v[1])});\
+}\
+			var request = new XMLHttpRequest();\
+			request.open("GET", url);\
+				request.onreadystatechange = function() {\
+					if (request.readyState === 4 && request.status === 200) {\
+					var a = toA(fromText(request.responseText),10000);\
+						cb(a,a);\
+						}\
+				};\
+			request.send();\
+		}';
+		return communist(func,communist.makeUrl(url));
+	};
+$("#transferobj").on("click",function(){ajax("dictionary.txt").then(function(dd){console.log("got it");dict = dd;});})	
+$("#regular").on("click",function(){
+	communist.ajax("dictionary.txt",false,true).then(function(dd){console.log("got it");dict2 = dd;});
+});
+</script>
