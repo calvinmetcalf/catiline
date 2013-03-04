@@ -9,18 +9,7 @@
 			background: red;
 			position: absolute;
 		}
-			#test2 {
-			width: 40px;
-			height: 40px;
-			background: red;
-			position: absolute;
-		}
-			#test3 {
-			width: 40px;
-			height: 40px;
-			background: red;
-			position: absolute;
-		}
+			
 		</style>
 	 <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
 	 <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
@@ -48,14 +37,8 @@
 	 
 	 </div></div>
 <div class="row-fluid">
-<div id="test-container" class="span4">
+<div id="test-container">
 		<div id="test1"></div>
-	</div>
-	<div id="test-container" class="span4">
-		<div id="test2"></div>
-	</div>
-	<div id="test-container" class="span4">
-		<div id="test3"></div>
 	</div>
 </div>
 	<div class="row-fluid" id="startWell"><div class="span4 well"><button id="startit" class="btn btn-primary" >download dictionrary</button><span class="label label-important" id="startWarn">28MiB</span></div></div>
@@ -77,8 +60,7 @@
 <script>
 function animateSquare() {
 	var test1 = document.getElementById('test1'),
-	test2 = document.getElementById('test2'),
-	test3 = document.getElementById('test3'),
+
 		start = Date.now();
 
 	window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
@@ -94,8 +76,7 @@ function animateSquare() {
 		}
 
 		test1.style.left = (progress / 10) + "px";
-test2.style.left = (progress / 10) + "px";
-test3.style.left = (progress / 10) + "px";
+
 		requestAnimationFrame(step);
 	}
 
@@ -257,7 +238,7 @@ starting.then(function(a){
 						var t2 = moment();
 						reg.css("display","none");
 						var tot = parseInt(moment.duration(t2.diff(t1)).asMilliseconds(),10);
-						$("#b1").prepend( "<span class='label label-inverse'>took " + tot/1000 + " seconds to parse plus " + dur + " milliseconds to transfer for " + ((tot+dur)/1000) +" total</span>");
+						$("#b1").prepend( "<span class='well well-small>took " + tot/1000 + " seconds to parse plus " + dur + " milliseconds to transfer for " + ((tot+dur)/1000) +" total</span>");
 
 					});
 				});
@@ -310,7 +291,7 @@ starting.then(function(a){
 					var t2 = moment();
 					trn.css("display","none");
 					var tot = parseInt(moment.duration(t2.diff(t1)).asMilliseconds(),10);
-					$("#b2").prepend( "<span class='label label-inverse'>took " + tot/1000 + " seconds to parse plus " + dur + " milliseconds to transfer for " + ((tot+dur)/1000) +" seconds total</span>");
+					$("#b2").prepend( "<span class='well well-small'>took " + tot/1000 + " seconds to parse plus " + dur + " milliseconds to transfer for " + ((tot+dur)/1000) +" seconds total</span>");
 				});
 			});
 			},function(a){console.log(a)});
@@ -325,7 +306,7 @@ starting.then(function(a){
 				var t2 = moment();
 				inW.css("display","none");
 				var tot = parseInt(moment.duration(t2.diff(t1)).asSeconds(),10);
-				$("#b3").prepend( "<span class='label label-inverse'>took " + tot + " seconds to parse</span>");
+				$("#b3").prepend( "<span class='well well-small'>took " + tot + " seconds to parse</span>");
 
 			});
 		});
