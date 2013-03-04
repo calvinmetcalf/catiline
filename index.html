@@ -166,7 +166,7 @@ starting.then(function(a){
 						});
 						return out;
 					}).data(a);
-					c.fetch().then(function(b){
+					c2.fetch().then(function(b){
 						$("#out2").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+Object.keys(b).sort(function(a1,b1){return b[b1]-b[a1];}).map(function(v){return "<tr><td>'"+v+"'</td><td>"+b[v]+"</td></tr>";}).join("")+'</tbody></table>');
 
 					});
