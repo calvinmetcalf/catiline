@@ -34,7 +34,7 @@
 		<div id="test2"></div>
 	</div>
 </div>
-	<div class="row-fluid"><div class="span4 well"><button id="startit" class="btn btn-primary" >download dictionrary</button><span class="label label-warning">26mb!</span></div></div>
+	<div class="row-fluid" id="startWell"><div class="span4 well"><button id="startit" class="btn btn-primary" >download dictionrary</button><span class="label label-warning" id="startWarn">26mb!</span></div></div>
 <div class="row-fluid" style="display:none;" id="buttons">
 	<div class="span4">
 		<button type="button" id="regular" class="btn btn-primary">Transfer with structured clone</button>
@@ -122,12 +122,13 @@ var c = communist(wFunc);
 var startButton = $("#startit");
 startButton.on("click",function(){
 startButton.addClass("disabled").html("loading...");
+$("#startWarn").css("display","none");
 var starting = c.data(["s",communist.makeUrl("dictionary.txt")]);
 starting.then(function(a){
 	var reg,trn;
 	if(a>0){
 		console.log(a);
-		startButton.css("display","none");
+		$("#startWell").css("display","none");
 		$("#buttons").css("display","block");
 		reg = $("#regular");
 		reg.on("click",function(){
