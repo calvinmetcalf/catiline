@@ -72,7 +72,6 @@ animateSquare();
 <script src="communist.js"></script>
 <script>
 var wFunc=function(data,callback){
-	var text = self.text;
 	var ajax = function (url, cb) {
 			var request = new XMLHttpRequest();
 			request.open("GET", url);
@@ -85,14 +84,14 @@ var wFunc=function(data,callback){
 		};
 	if(data[0]==="s"){
 		ajax(data[1],function(resp){	
-			text = resp;
-			callback(text.length);
+			_db.text = resp;
+			callback(_db.text.length);
 		});
 	}else if(data==="r"){
-		if(text){
-		callback(text);
+		if(_db.text){
+		callback(_db.text);
 		}else{
-			callback("oh shit " + text);
+			callback("oh shit " + _db.text);
 		}
 	}
 };

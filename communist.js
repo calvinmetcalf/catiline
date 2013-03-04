@@ -25,7 +25,7 @@
 	var sticksAround = function(fun){
 		var w = new Communist();
 		var promises = [];
-		var worker = makeWorker(['var fun=', fun,';\
+		var worker = makeWorker(['var _db={};var fun=', fun,';\
 			function _clb(num,data,transfer){\
 				self.postMessage([num,data],transfer);\
 			}\
@@ -229,20 +229,28 @@
 				return w;
 			}
 		};
-		w.map=function(fun){
+		w.map=function(fun, t){
+			window._temp=[];
 			if(status.map){
 				return w;
 			}
 			var i = 0;
 			while(i<threads){
 				(function(){
+					var dd;
 					var mw = mWorker(fun, function(d){
 						if(typeof d !== undefined){
 							reducer.data(d);
+							window._temp.push(d)
 						}
 						if(len>0){
 							len--;
-							mw.data(data.pop());
+							dd = data.pop();
+							if(t){
+								mw.data(dd,[dd]);
+							}else{
+							mw.data(dd);
+							}
 						}else{ 
 							idle++;
 							if(idle===threads){
