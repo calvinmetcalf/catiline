@@ -99,7 +99,7 @@ var wFunc=function(data,callback){
 		ab[i]=text.charCodeAt(i);
 		i++;
 	}
-	return ab;
+	return ab.buffer;
 }
 function toA(a,size){
 	var sliceList=[];
@@ -111,7 +111,7 @@ function toA(a,size){
 		start = end;
 		end = end + size;
 	}
-	return sliceList.map(function(v){return a.slice(v[0],v[1]).buffer});
+	return sliceList.map(function(v){return a.slice(v[0],v[1])});
 }
 var rb;
 	if(data[0]==="s"){
