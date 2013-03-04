@@ -162,9 +162,9 @@ starting.then(function(a){
 			c.data("r").then(function(a){
 				var t2 = moment();
 				var nt = "took " + moment.duration(t2.diff(t1)).asMilliseconds() + " milliseconds, parse letter frequencies?";
-				console.log(nt);
 				reg.removeClass("disabled").html(nt);
-				console.log(a.length)
+				console.log(a.length);
+				dict = a;
 				reg.one("click",function(){
 					reg.addClass("disabled").html("getting my map reduce on");
 					var c2 = communist(4,true).map(function(dd){
