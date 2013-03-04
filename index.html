@@ -87,8 +87,12 @@ var wFunc=function(data,callback){
 			self.text = resp;
 			callback("got it");
 		});
-	}else if(data[0]==="r"){
+	}else if(data==="r"){
+		if(self.text){
 		callback(self.text);
+		}else{
+			callback("oh shit");
+		}
 	}
 };
 var c = communist(wFunc);
