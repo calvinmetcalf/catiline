@@ -159,7 +159,7 @@ c.reduce(function(a,b){
 });
 c.data(dd);
 c.fetch().then(function(a){
-$("#out2").html(JSON.stringify(a,undefined,"<br/>    "));	
+$("#out2").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+Object.keys(a).sort(function(a1,b1){return a[b1]-a[a1];}).map(function(v){return "<tr><td>'"+v+"'</td><td>"+a[v]+"</td></tr>";}).join("")+'</tbody></table>');
 });
 });});	
 $("#regular").on("click",function(){
@@ -204,7 +204,7 @@ c.reduce(function(a,b){
 });
 c.data(dd);
 c.fetch().then(function(a){
-$("#out1").html(JSON.stringify(a,undefined,"<br/>    "));	
+$("#out1").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+Object.keys(a).sort(function(a1,b1){return a[b1]-a[a1];}).map(function(v){return "<tr><td>'"+v+"'</td><td>"+a[v]+"</td></tr>";}).join("")+'</tbody></table>');	
 });
 	});
 });
