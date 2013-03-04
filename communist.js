@@ -63,7 +63,7 @@
 	};
 	var mWorker=function(fun,callback){
 		var w = new Communist();
-		var worker = makeWorker(['var fun = ',fun,';\
+		var worker = makeWorker(['var _db={};var fun = ',fun,';\
 			function _clb(data,transfer){\
 				self.postMessage(data,transfer);\
 			}\
