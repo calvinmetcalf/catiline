@@ -108,7 +108,7 @@ var rb;
 		});
 	}else if(data==="r"){
 		if(_db.text){
-		callback(_db.text);
+		callback(_db.text.split("\n").filter(function(v){return v.trim()!==" "}));
 		}else{
 			callback("oh shit " + _db.text);
 		}
@@ -131,14 +131,45 @@ starting.then(function(a){
 		$("#startWell").css("display","none");
 		$("#buttons").css("display","block");
 		reg = $("#regular");
-		reg.on("click",function(){
+		reg.one("click",function(){
 			reg.addClass("disabled").html("structured cloning...");
 			var t1 = moment();
 			c.data("r").then(function(a){
 				var t2 = moment();
-				var nt = "transfered via structured clone a string of length " + a.length + " took " + moment.duration(t2.diff(t1)).asMilliseconds() + " milliseconds, again?";
+				var nt = "took " + moment.duration(t2.diff(t1)).asMilliseconds() + " milliseconds, parse letter frequencies?";
 				console.log(nt);
 				reg.removeClass("disabled").html(nt);
+				reg.one("click",function(){
+					var c2 = communist(4,true).map(function(dd){
+							var out={};
+							dd.split("").filter(function(v){return v.trim()!=="";}).forEach(function(v){
+								if(out[v]){
+									out[v]=out[v]+1;
+								}else{
+									out[v]=1;
+								}
+							});
+							return out;
+						});
+					c.reduce(function(a,b){
+						var out = {};
+						Object.keys(a).forEach(function(v){
+							out[v]=a[v];
+						});
+						Object.keys(b).forEach(function(v){
+							if(out[v]){
+								out[v]=out[v]+b[v];
+							}else{
+								out[v]=b[v];
+							}
+						});
+						return out;
+					}).data(a);
+					c.fetch().then(function(b){
+						$("#out2").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+Object.keys(b).sort(function(a1,b1){return b[b1]-b[a1];}).map(function(v){return "<tr><td>'"+v+"'</td><td>"+b[v]+"</td></tr>";}).join("")+'</tbody></table>');
+
+					});
+				});
 			},function(a){console.log(a)});
 			
 		});
@@ -148,7 +179,7 @@ starting.then(function(a){
 			var t1 = moment();
 			c.data("t").then(function(a){
 				var t2 = moment();
-				var nt = "transfered ownershipt an array buffer of byteLength " + a.byteLength + " took " + moment.duration(t2.diff(t1)).asMilliseconds() + " milliseconds, again?";
+				var nt = "took " + moment.duration(t2.diff(t1)).asMilliseconds() + " milliseconds, again?";
 				console.log(nt);
 				trn.removeClass("disabled").html(nt);
 			},function(a){console.log(a)});
