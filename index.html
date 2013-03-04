@@ -79,6 +79,7 @@ animateSquare();
 <script src="https://raw.github.com/timrwood/moment/2.0.0/moment.js"></script>
 <script src="communist.js"></script>
 <script>
+var dict;
 var wFunc=function(data,callback){
 	var ajax = function (url, cb) {
 			var request = new XMLHttpRequest();
@@ -182,6 +183,7 @@ starting.then(function(a){
 			var t1 = moment();
 			c.data("t").then(function(dd){
 				var t2 = moment();
+				dict = dd;
 				var nt = "took " + moment.duration(t2.diff(t1)).asMilliseconds() + " milliseconds, prase letter frequencies?";
 				console.log(nt);
 				trn.removeClass("disabled").html(nt);
