@@ -157,7 +157,7 @@ c.reduce(function(a,b){
 });
 c.data(dd);
 c.fetch().then(function(a){
-$("#out").html(JSON.stringify(a));	
+$("#out").html(JSON.stringify(a,undefined,"\t"));	
 });
 });});	
 $("#regular").on("click",function(){
@@ -202,7 +202,7 @@ c.reduce(function(a,b){
 });
 c.data(dd);
 c.fetch().then(function(a){
-$("#out").html(JSON.stringify(a));	
+$("#out").html(JSON.stringify(a,undefined,"\t"));	
 });
 	});
 });
