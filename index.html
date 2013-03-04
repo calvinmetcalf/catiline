@@ -238,7 +238,7 @@ starting.then(function(a){
 						var t2 = moment();
 						reg.css("display","none");
 						var tot = parseInt(moment.duration(t2.diff(t1)).asMilliseconds(),10);
-						$("#b1").prepend( "<span class='well well-small>took " + tot/1000 + " seconds to parse plus " + dur + " milliseconds to transfer for " + ((tot+dur)/1000) +" total</span>");
+						$("#b1").prepend( "<span class='label label-inverse'>took " + tot/1000 + " seconds to parse plus " + dur + " milliseconds to<br/>transfer for " + ((tot+dur)/1000) +" total</span>");
 
 					});
 				});
@@ -291,7 +291,7 @@ starting.then(function(a){
 					var t2 = moment();
 					trn.css("display","none");
 					var tot = parseInt(moment.duration(t2.diff(t1)).asMilliseconds(),10);
-					$("#b2").prepend( "<span class='well well-small'>took " + tot/1000 + " seconds to parse plus " + dur + " milliseconds to transfer for " + ((tot+dur)/1000) +" seconds total</span>");
+					$("#b2").prepend( "<span class='label label-inverse'>took " + tot/1000 + " seconds to parse plus " + dur + " milliseconds<br/>to transfer for " + ((tot+dur)/1000) +" seconds total</span>");
 				});
 			});
 			},function(a){console.log(a)});
@@ -306,7 +306,7 @@ starting.then(function(a){
 				var t2 = moment();
 				inW.css("display","none");
 				var tot = parseInt(moment.duration(t2.diff(t1)).asSeconds(),10);
-				$("#b3").prepend( "<span class='well well-small'>took " + tot + " seconds to parse</span>");
+				$("#b3").prepend( "<span class='label label-inverse'>took " + tot + " seconds to parse</span>");
 
 			});
 		});
