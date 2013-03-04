@@ -198,7 +198,7 @@ starting.then(function(a){
 						var t2 = moment();
 						reg.css("display","none");
 						var tot = parseInt(moment.duration(t2.diff(t1)).asMilliseconds(),10);
-						$("#b1").prepend( "<p>took " + tot/1000 + " seconds to parse plus " + dur + " to transfer for " + ((tot+dur)/1000) +" total</p>");
+						$("#b1").prepend( "<p>took " + tot/1000 + " seconds to parse plus " + dur + " milliseconds to transfer for " + ((tot+dur)/1000) +" total</p>");
 						$("#out1").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+Object.keys(b).sort(function(a1,b1){return b[b1]-b[a1];}).map(function(v){return "<tr><td>'"+v+"'</td><td>"+b[v]+"</td></tr>";}).join("")+'</tbody></table>');
 
 					});
@@ -214,12 +214,12 @@ starting.then(function(a){
 				var t2 = moment();
 				dict = dd;
 				var dur = parseInt(moment.duration(t2.diff(t1)).asMilliseconds(),10);
-				var nt = "took " + dur + " milliseconds, prase letter frequencies?";
+				var nt = "took " + dur + " milliseconds, parse letter frequencies?";
 				console.log(nt);
 				trn.removeClass("disabled").html(nt);
 				trn.one("click",function(){
 					var t1 = moment();
-					trn.addClass("disabled");
+					trn.addClass("disabled").html("getting my map reduce on");
 				var c3 = communist(4,true);
 					c3.map(function(d,cb){
 						var dd = String.fromCharCode.apply(null, new Uint16Array(d));
