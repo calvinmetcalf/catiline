@@ -35,13 +35,12 @@
 	 	</div><div class="span4"><p>The down side of transferable objects is one I hinted at earlier, you can only use it with array buffers(and message ports but I'm not sure that's implemented/what they are). Array buffers are the basis of typed arrays, buffers are abstract containers for bytes and typed arrays are representations with various byte lengths it is a non trivial task to convert a typed array back to text. With the array buffer version we turned the text into unsigned 16 bit integers, I'd give you a demo of trying to convert it back in one go but it fills up the heap and crashes your browser.</p>
 	 	<p>So instead we cut the text up into about 5000 pieces, to make it even we cut both the text and the array buffer version into arrays with the same number of pieces, then we fire up some more workers and start handing out those pieces to them for a mapreduce of letter frequencies. We send a piece to one of the map workers, it computes an object with with the numbers for each letter which it sends back, we send that to the reducer function and send the map function a new piece. Once we are out of data and we shut down the map workers and ask the reducer for its data.</p>
 
-	 	<p>You can try the results below and they are...inconclusive for me. On my quad core computer if I have 4 map workers or less (plus 1 reduce worker) then the version that used structured cloning wins, but 6 map workers or more (plus 1 reduce worker) the version that uses transferable objects wins. The version below uses 5 map workers (plus 1 reduce worker). The fact that the times are overall lower leads me to suspect there is slack somewhere, feel free to clone and fiddle with this. 
-</p>
+	 	<p>You can try the results below and they are...inconclusive for me. On my quad core computer if I have 4 map workers or less (plus 1 reduce worker) then the version that used structured cloning wins, but 6 map workers or more (plus 1 reduce worker) the version that uses transferable objects wins. The version below uses 5 map workers (plus 1 reduce worker). The fact that the times are overall lower leads me to suspect there is slack somewhere, feel free to clone and fiddle with this. </p>
 	 	<p>In case you're curious all the way on the right is a version that just does it single threaded in the worker, takes an inordinate amount of time for me.  This has has been built with my communist library, I’m debating changing the name but feedback would be appreciated. </p>
 	 
 	 </div></div>
 <div class="row-fluid">
-<div id="test-container">You can try the results below and they are...inconclusive for me. On my quad core computer if I have 4 map workers or less (plus 1 reduce worker) then the version that used structured cloning wins, but 6 map workers or more (plus 1 reduce worker) the version that uses transferable objects wins. The version below uses 5 map workers (plus 1 reduce worker). The fact that the times are overall lower leads me to suspect there is slack somewhere, feel free to clone and fiddle with this. 
+<div id="test-container">
 
 		<div id="test1"></div>
 	</div>
