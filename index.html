@@ -34,7 +34,7 @@
 	</div>
 	 <div class="row-fluid">
 	 	<div class="span10 offset 2"><div class="page-header">
-	 		<h1 class="text-center">Loading data</h1></div><div class="row-fluid"><div class="span2"></div><div class="span4"><p>
+	 		<h1 class="text-center">Loading data with workers</h1></div><div class="row-fluid"><div class="span2"></div><div class="span4"><p>
 	 	I was inpired by <a href="http://mourner.github.com/worker-data-load/">Mourner's data load test</a>, (where I took the code for the boxes) which is all well and good if we want to do all the calculations in one worker, but what if we want to divide it up amongst several workers for prossessing?</p>
 	 	<p>Easy you say, you'll open some more workers inside your worker, but alas chrome hasn't gotten around to to implimenting nested worker, you're probobly going to have to transfer it back to the main thread first.</p>
 	 	<p>Before we go any farther, we're going to be working with a massive 28MiB(12MiB gziped) text file, I'd hit the button to download dictionary now. The file in question is Webster's Unabridged English Dictionary origionally from project gutenberg, but I grabbed it from <a href="https://github.com/adambom/dictionary">this repo</a> </p>
