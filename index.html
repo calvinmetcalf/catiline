@@ -104,7 +104,8 @@ startButton.addClass("disabled").html("loading...");
 var starting = c.data(["s",communist.makeUrl("dictionary.txt")]);
 starting.then(function(a){
 	var reg;
-	if(a==="got it"){
+	if(a>0){
+		console.log(a);
 		startButton.css("display","none");
 		$("#buttons").css("display","block");
 		reg = $("#regular");
