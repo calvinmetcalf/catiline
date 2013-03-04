@@ -318,7 +318,7 @@ starting.then(function(a){
 				var t2 = moment();
 				var tot = moment.duration(t2.diff(t1)).asMilliseconds();
 				tasb.css("display","none");
-				$("#tas").prepend("took " + tot + "milliseconds");
+				$("#tas").prepend("<div class="well well-small">took " + tot + " milliseconds</div>");
 			});
 		});
 	}
