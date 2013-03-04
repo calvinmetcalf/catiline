@@ -1,4 +1,4 @@
-<!DOCTYPE html><style>
+<!DOCTYPE html><html><head><style>
 #test-container {
 			position: relative;
 			height: 40px;
@@ -24,10 +24,18 @@
 		</style>
 	 <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
 	 <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+	 <link rel="stylesheet" href="gh-fork-ribbon.css" />
+	 <title>Workers!</title>
+	 </head><body>
+	 	<div class="github-fork-ribbon-wrapper right">
+		<div class="github-fork-ribbon">
+			<a href="https://github.com/calvinmetcalf/communist">Fork me on GitHub</a>
+		</div>
+	</div>
 	 <div class="row-fluid">
 	 	<div class="span4">
 	 		<h1>Loading data</h1><p>
-	 	I was inpired by <a href="http://mourner.github.com/worker-data-load/">Mourner's data load test</a>, which is all well and good if we want to do all the calculations in one worker, but what if we want to divide it up amongst several workers for prossessing?</p>
+	 	I was inpired by <a href="http://mourner.github.com/worker-data-load/">Mourner's data load test</a>, (where I took the code for the boxes) which is all well and good if we want to do all the calculations in one worker, but what if we want to divide it up amongst several workers for prossessing?</p>
 	 	<p>Easy you say, you'll open some more workers inside your worker, but alas chrome hasn't gotten around to to implimenting nested worker, you're probobly going to have to transfer it back to the main thread first.</p>
 	 	<p>Before we go any farther, we're going to be working with a massive 28MiB(12MiB gziped) text file, I'd hit the button to download dictionary now. The file in question is Webster's Unabridged English Dictionary origionally from project gutenberg, but I grabbed it from <a href="https://github.com/adambom/dictionary">this repo</a> </p>
 	 	<p>The problem is that transfering between threads is a blocking operation, once the dictionary is done loading you'll see a button marked "Transfer with structured clone" hit it while looking at the boxes, you'll notice them jump. Here is where transferable objects come in, for certain JavaScript data types (array buffers) we can transfer ownership, this is slightly different 
@@ -338,4 +346,4 @@ starting.then(function(a){
 });
 
 
-</script>
+</script></body></html>
