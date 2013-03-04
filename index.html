@@ -113,6 +113,18 @@ function toA(a,size){
 	}
 	return sliceList.map(function(v){return a.slice(v[0],v[1])});
 }
+function inA(a,size){
+	var sliceList=[];
+	var len = a.length;
+	var start = 0;
+	var end = len%size;
+	while(end<len){
+		sliceList.push([start,end]);
+		start = end;
+		end = end + size;
+	}
+	return sliceList.map(function(v){return a.slice(v[0],v[1])});
+}
 var rb;
 	if(data[0]==="s"){
 		ajax(data[1],function(resp){	
@@ -121,7 +133,7 @@ var rb;
 		});
 	}else if(data==="r"){
 		if(_db.text){
-		callback(_db.text.split("\n").filter(function(v){return v.trim()!==" "}));
+		callback(inA(_db.text,5000));
 		}else{
 			callback("oh shit " + _db.text);
 		}
