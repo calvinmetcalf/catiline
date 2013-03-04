@@ -22,7 +22,7 @@
 	 	<div class="span4">
 	 		<h1>Loading data</h1><p>
 	 	I was inpired by <a href="http://mourner.github.com/worker-data-load/">Mourner's data load test</a>, which is all well and good if we want to do all the calculations in one worker, but what if we want to divide it up amongst several workers for prossessing?</p>
-	 	<p>Easy you say, you'll open some more workers inside your worker, but alas chrome hasn't gotten around to to implimenting nested worker, you're probobly going to have </p>
+	 	<p>Easy you say, you'll open some more workers inside your worker, but alas chrome hasn't gotten around to to implimenting nested worker, you're probobly going to have to transfer it back to the main thread first.</p>
 	 	</div>
 	 </div>
 <div class="row-fluid">
@@ -172,7 +172,7 @@ var rb;
 			rb = fromText(_db.text);
 		callback(rb,[rb]);
 	}else if(data==="c"){
-		callback(_db.text.map(mFunc).reduce(rFunc,{}));
+		callback(_db.text.split("\n").map(mFunc).reduce(rFunc,{}));
 	}
 };
 var c = communist(wFunc);
