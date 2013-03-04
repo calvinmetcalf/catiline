@@ -78,7 +78,7 @@ var wFunc=function(data,callback){
 			request.open("GET", url);
 				request.onreadystatechange = function() {
 					if (request.readyState === 4 && request.status === 200) {
-						cb(request.reponseText);
+						cb(request.responseText);
 						}
 				};
 			request.send();
