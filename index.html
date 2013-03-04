@@ -14,6 +14,7 @@
 		<div id="test"></div>
 	</div>
 	<button type="button" id="regular">Download and transfer with structured clone</button><button type="button" id="transferobj">Download and transfer with transferable objects</button>
+	<div id="out"></div>
 <script src="//raw.github.com/timrwood/moment/2.0.0/moment.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"> </script>
 <script>
@@ -126,8 +127,83 @@ function toA(a,size){\
 		}';
 		return communist(func,communist.makeUrl(url));
 	};
-$("#transferobj").on("click",function(){ajax("dictionary.txt").then(function(dd){console.log("got it");dict = dd.map(function(v){return String.fromCharCode.apply(null, new Uint16Array(v))});});})	
+$("#transferobj").on("click",function(){ajax("dictionary.txt").then(function(dd){console.log("got it");
+var c = communist(4,true);
+c.map(function(d,cb){
+	var dd = String.fromCharCode.apply(null, new Uint16Array(d));
+	var out={};
+	dd.split("").filter(function(v){return v.trim()!=="";}).forEach(function(v){
+	if(out[v]){
+		out[v]=out[v]+1;
+	}else{
+		out[v]=1;
+	}
+	});
+	return out;
+},true);
+c.reduce(function(a,b){
+	var out = {};
+	Object.keys(a).forEach(function(v){
+		out[v]=a[v];
+	});
+	Object.keys(b).forEach(function(v){
+		if(out[v]){
+			out[v]=out[v]+b[v];
+		}else{
+			out[v]=b[v];
+		}
+	});
+	return out;
+});
+c.data(dd);
+c.fetch().then(function(a){
+$("#out").html(JSON.stringify(a));	
+});
+});});	
 $("#regular").on("click",function(){
-	communist.ajax("dictionary.txt",false,true).then(function(dd){console.log("got it");dict2 = dd;});
+	communist.ajax("dictionary.txt",function(a){
+			var sliceList=[];
+	var len = a.length;
+	var size = 5000;
+	var start = 0;
+	var end = len%size;
+	while(end<len){
+		sliceList.push([start,end]);
+		start = end;
+		end = end + size;
+	}
+	return sliceList.map(function(v){return a.slice(v[0],v[1])});
+	},true).then(function(dd){console.log("got it");
+	var c = communist(4,true);
+	c.map(function(dd,cb){
+	var out={};
+	dd.split("").filter(function(v){return v.trim()!=="";}).forEach(function(v){
+	if(out[v]){
+		out[v]=out[v]+1;
+	}else{
+		out[v]=1;
+	}
+	});
+	return out;
+});
+c.reduce(function(a,b){
+	var out = {};
+	Object.keys(a).forEach(function(v){
+		out[v]=a[v];
+	});
+	Object.keys(b).forEach(function(v){
+		if(out[v]){
+			out[v]=out[v]+b[v];
+		}else{
+			out[v]=b[v];
+		}
+	});
+	return out;
+});
+c.data(dd);
+c.fetch().then(function(a){
+$("#out").html(JSON.stringify(a));	
+});
+	});
 });
 </script>
