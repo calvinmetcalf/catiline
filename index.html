@@ -26,7 +26,7 @@
 	 	<p>Before we go any farther, we're going to be working with a massive 28MiB(12MiB gziped) text file, I'd hit the button to download dictionary now. The file in question is Webster's Unabridged English Dictionary origionally from project gutenberg, but I grabbed it from<a href="https://github.com/adambom/dictionary">this repo</a> </p>
 	 	<p>The problem is that transfering between threads is a blocking operation, once the dictionary is done loading you'll see a button marked "Transfer with structured clone" hit it while looking at the boxes, you'll notice them jump. Here is where transferable objects come in, for certain JavaScript data types (array buffers) we can transfer ownership, this is slightly different 
 	 	from sending messages as the object is no longer available in the origional context, to see this in action click it the button marked Transfer with transferable objects</p>
-	 	<p>We've actually done some pre-processing on the object so were actually transfering ownership of about 5000 seperate typed arrays which slows things down, if your curious you can <span id="tas"><button id="transArray" class"btn btn-small btn-primary">Transfer as one array</button></span></p>
+	 	<p>We've actually done some pre-processing on the object so were actually transfering ownership of about 5000 seperate typed arrays which slows things down, if your curious you can <span id="tas"><button id="transArray" class="btn btn-small btn-primary disabled">Transfer as one array</button></span></p>
 	 	</div>
 	 </div>
 <div class="row-fluid">
@@ -310,6 +310,7 @@ starting.then(function(a){
 			});
 		});
 		tasb = $("#transArray");
+		tasb.removeClass("disabled");
 		tasb.one("click",function(){
 			tasb.addClass("disabled").html("loading");
 			var t1 = moment();
@@ -319,7 +320,7 @@ starting.then(function(a){
 				tasb.css("display","none");
 				$("#tas").prepend("took " + tot + "milliseconds");
 			});
-		});'
+		});
 	}
 });
 });
