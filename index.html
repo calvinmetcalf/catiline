@@ -140,6 +140,7 @@ starting.then(function(a){
 				console.log(nt);
 				reg.removeClass("disabled").html(nt);
 				reg.one("click",function(){
+					reg.addClass("disabled").html("getting my map reduce on");
 					var c2 = communist(4,true).map(function(dd){
 							var out={};
 							dd.split("").filter(function(v){return v.trim()!=="";}).forEach(function(v){
@@ -151,7 +152,7 @@ starting.then(function(a){
 							});
 							return out;
 						});
-					c.reduce(function(a,b){
+					c2.reduce(function(a,b){
 						var out = {};
 						Object.keys(a).forEach(function(v){
 							out[v]=a[v];
