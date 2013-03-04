@@ -198,7 +198,7 @@ starting.then(function(a){
 						var t2 = moment();
 						reg.css("display","none");
 						var tot = parseInt(moment.duration(t2.diff(t1)).asMilliseconds(),10);
-						$("#b1").prepend( "<p>took " + tot + " milliseconds to parse plus " + dur + " to transfer for " + tot+dur +" total</p>");
+						$("#b1").prepend( "<p>took " + tot + " milliseconds to parse plus " + dur + " to transfer for " + (tot+dur) +" total</p>");
 						$("#out1").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+Object.keys(b).sort(function(a1,b1){return b[b1]-b[a1];}).map(function(v){return "<tr><td>'"+v+"'</td><td>"+b[v]+"</td></tr>";}).join("")+'</tbody></table>');
 
 					});
@@ -252,7 +252,7 @@ starting.then(function(a){
 						var t2 = moment();
 					trn.css("display","none");
 					var tot = parseInt(moment.duration(t2.diff(t1)).asMilliseconds(),10);
-					$("#b2").prepend( "<p>took " + tot + " milliseconds to parse plus " + dur + " to transfer for " + tot+dur +" total</p>");
+					$("#b2").prepend( "<p>took " + tot + " milliseconds to parse plus " + dur + " to transfer for " + (tot+dur) +" total</p>");
 					$("#out2").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+Object.keys(a).sort(function(a1,b1){return a[b1]-a[a1];}).map(function(v){return "<tr><td>'"+v+"'</td><td>"+a[v]+"</td></tr>";}).join("")+'</tbody></table>');
 				});
 			});
