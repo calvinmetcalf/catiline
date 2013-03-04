@@ -15,6 +15,12 @@
 			background: red;
 			position: absolute;
 		}
+			#test3 {
+			width: 40px;
+			height: 40px;
+			background: red;
+			position: absolute;
+		}
 		</style>
 	 <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
 	 <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
@@ -23,10 +29,12 @@
 	 		<h1>Loading data</h1><p>
 	 	I was inpired by <a href="http://mourner.github.com/worker-data-load/">Mourner's data load test</a>, which is all well and good if we want to do all the calculations in one worker, but what if we want to divide it up amongst several workers for prossessing?</p>
 	 	<p>Easy you say, you'll open some more workers inside your worker, but alas chrome hasn't gotten around to to implimenting nested worker, you're probobly going to have to transfer it back to the main thread first.</p>
-	 	<p>Before we go any farther, we're going to be working with a massive 28MiB(12MiB gziped) text file, I'd hit the button to download dictionary now. The file in question is Webster's Unabridged English Dictionary origionally from project gutenberg, but I grabbed it from<a href="https://github.com/adambom/dictionary">this repo</a> </p>
+	 	<p>Before we go any farther, we're going to be working with a massive 28MiB(12MiB gziped) text file, I'd hit the button to download dictionary now. The file in question is Webster's Unabridged English Dictionary origionally from project gutenberg, but I grabbed it from <a href="https://github.com/adambom/dictionary">this repo</a> </p>
 	 	<p>The problem is that transfering between threads is a blocking operation, once the dictionary is done loading you'll see a button marked "Transfer with structured clone" hit it while looking at the boxes, you'll notice them jump. Here is where transferable objects come in, for certain JavaScript data types (array buffers) we can transfer ownership, this is slightly different 
-	 	from sending messages as the object is no longer available in the origional context, to see this in action click it the button marked Transfer with transferable objects</p>
-	 	<p>We've actually done some pre-processing on the object so were actually transfering ownership of about 5000 seperate typed arrays which slows things down, if your curious you can <span id="tas"><button id="transArray" class="btn btn-small btn-primary disabled">Transfer as one array</button></span></p>
+	 	from sending messages as the object is no longer available in the origional context, to see this in action click it the button marked "Transfer with transferable objects" and again look at the boxes, no jump for me at least.</p>
+	 	<p>We've actually done some pre-processing on the object so were actually transfering ownership of about 5000 seperate typed arrays which slows things down, if your curious you can <span id="tas"><button id="transArray" class="btn btn-small btn-primary disabled">Transfer as one array</button></span>, for me the preposessing increased the time it took to transfer by about 42%.</p>
+	 	<p>The down side of transferable objects is one I hinted at earler, you can only use it with array buffers(and message ports but I'm not sure that's implemented/what they are). Array buffers are the basis of typed arrays, buffers are abstract containers for bytes and typed arrays are representations with various byte lengths it is a non trivial task to convert a typed array back to text. With the array buffer version we turned the text into unsigned 16bit integers, I'd give you a demo of trying to convert it back in one go but it fills up the heap and crashes your browser.</p>
+	 	<p>So instead we cut the text up into about 5000 pieces, to make it even we cut both the text and the array buffer version into arrays with the same number of pieces, no</p>
 	 	</div>
 	 </div>
 <div class="row-fluid">
@@ -35,6 +43,9 @@
 	</div>
 	<div id="test-container" class="span4">
 		<div id="test2"></div>
+	</div>
+	<div id="test-container" class="span4">
+		<div id="test3"></div>
 	</div>
 </div>
 	<div class="row-fluid" id="startWell"><div class="span4 well"><button id="startit" class="btn btn-primary" >download dictionrary</button><span class="label label-important" id="startWarn">28MiB</span></div></div>
@@ -56,7 +67,8 @@
 <script>
 function animateSquare() {
 	var test1 = document.getElementById('test1'),
-	test2 = document.getElementById('test2')
+	test2 = document.getElementById('test2'),
+	test3 = document.getElementById('test3'),
 		start = Date.now();
 
 	window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
@@ -73,6 +85,7 @@ function animateSquare() {
 
 		test1.style.left = (progress / 10) + "px";
 test2.style.left = (progress / 10) + "px";
+test3.style.left = (progress / 10) + "px";
 		requestAnimationFrame(step);
 	}
 
@@ -189,7 +202,6 @@ var starting = c.data(["s",communist.makeUrl("dictionary.txt")]);
 starting.then(function(a){
 	var reg,trn,inW,tasb;
 	if(a>0){
-		console.log(a);
 		$("#startWell").css("display","none");
 		$("#buttons").css("display","block");
 		reg = $("#regular");
@@ -201,12 +213,11 @@ starting.then(function(a){
 				var dur = parseInt(moment.duration(t2.diff(t1)).asMilliseconds(),10);
 				var nt = "took " + dur + " milliseconds, parse letter frequencies?";
 				reg.removeClass("disabled").html(nt);
-				console.log(a.length);
 				dict = a;
 				reg.one("click",function(){
 					reg.addClass("disabled").html("getting my map reduce on");
 					var t1 = moment();
-					var c2 = communist(4,true).map(function(dd){
+					var c2 = communist(5,true).map(function(dd){
 							var out={};
 							dd.split("").filter(function(v){return v.trim()!=="";}).forEach(function(v){
 								if(out[v]){
@@ -236,7 +247,7 @@ starting.then(function(a){
 						var t2 = moment();
 						reg.css("display","none");
 						var tot = parseInt(moment.duration(t2.diff(t1)).asMilliseconds(),10);
-						$("#b1").prepend( "<p>took " + tot/1000 + " seconds to parse plus " + dur + " milliseconds to transfer for " + ((tot+dur)/1000) +" total</p>");
+						$("#b1").prepend( "<span class='label label-inverse'>took " + tot/1000 + " seconds to parse plus " + dur + " milliseconds to transfer for " + ((tot+dur)/1000) +" total</span>");
 
 					});
 				});
@@ -252,12 +263,11 @@ starting.then(function(a){
 				dict = dd;
 				var dur = parseInt(moment.duration(t2.diff(t1)).asMilliseconds(),10);
 				var nt = "took " + dur + " milliseconds, parse letter frequencies?";
-				console.log(nt);
 				trn.removeClass("disabled").html(nt);
 				trn.one("click",function(){
 					var t1 = moment();
 					trn.addClass("disabled").html("getting my map reduce on");
-				var c3 = communist(4,true);
+				var c3 = communist(3,true);
 					c3.map(function(d,cb){
 						var dd = String.fromCharCode.apply(null, new Uint16Array(d));
 						var out={};
@@ -290,7 +300,7 @@ starting.then(function(a){
 					var t2 = moment();
 					trn.css("display","none");
 					var tot = parseInt(moment.duration(t2.diff(t1)).asMilliseconds(),10);
-					$("#b2").prepend( "<p>took " + tot/1000 + " seconds to parse plus " + dur + " milliseconds to transfer for " + ((tot+dur)/1000) +" seconds total</p>");
+					$("#b2").prepend( "<span class='label label-inverse'>took " + tot/1000 + " seconds to parse plus " + dur + " milliseconds to transfer for " + ((tot+dur)/1000) +" seconds total</span>");
 				});
 			});
 			},function(a){console.log(a)});
@@ -305,7 +315,7 @@ starting.then(function(a){
 				var t2 = moment();
 				inW.css("display","none");
 				var tot = parseInt(moment.duration(t2.diff(t1)).asSeconds(),10);
-				$("#b3").prepend( "<p>took " + tot + " seconds to parse</p>");
+				$("#b3").prepend( "<span class='label label-inverse'>took " + tot + " seconds to parse</span>");
 
 			});
 		});
