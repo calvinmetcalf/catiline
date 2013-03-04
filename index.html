@@ -217,7 +217,7 @@ starting.then(function(a){
 				reg.one("click",function(){
 					reg.addClass("disabled").html("getting my map reduce on");
 					var t1 = moment();
-					var c2 = communist(5,true).map(function(dd){
+					var c2 = communist(6,true).map(function(dd){
 							var out={};
 							dd.split("").filter(function(v){return v.trim()!=="";}).forEach(function(v){
 								if(out[v]){
@@ -267,7 +267,7 @@ starting.then(function(a){
 				trn.one("click",function(){
 					var t1 = moment();
 					trn.addClass("disabled").html("getting my map reduce on");
-				var c3 = communist(3,true);
+				var c3 = communist(6,true);
 					c3.map(function(d,cb){
 						var dd = String.fromCharCode.apply(null, new Uint16Array(d));
 						var out={};
