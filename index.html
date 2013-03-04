@@ -108,7 +108,9 @@ starting.then(function(a){
 			var t1 = moment();
 			c.data("r").then(function(a){
 				var t2 = moment();
-				reg.removeClass("disabled").html("transfered a string of length " + a.length + " took " + moment.duration(t2.diff(t1)).asSeconds() + " seconds, again?");
+				var nt = "transfered a string of length " + a.length + " took " + moment.duration(t2.diff(t1)).asSeconds() + " seconds, again?";
+				console.log(nt);
+				reg.removeClass("disabled").html(nt);
 			});
 			
 		});
