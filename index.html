@@ -167,6 +167,7 @@ starting.then(function(a){
 				dict = a;
 				reg.one("click",function(){
 					reg.addClass("disabled").html("getting my map reduce on");
+					var t1 = moment();
 					var c2 = communist(4,true).map(function(dd){
 							var out={};
 							dd.split("").filter(function(v){return v.trim()!=="";}).forEach(function(v){
@@ -193,7 +194,8 @@ starting.then(function(a){
 						return out;
 					}).data(a);
 					c2.fetch().then(function(b){
-						reg.removeClass("disabled");
+						var t2 = moment();
+						reg.removeClass("disabled").html( "took " + moment.duration(t2.diff(t1)).asMilliseconds() + " milliseconds");
 						$("#out1").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+Object.keys(b).sort(function(a1,b1){return b[b1]-b[a1];}).map(function(v){return "<tr><td>'"+v+"'</td><td>"+b[v]+"</td></tr>";}).join("")+'</tbody></table>');
 
 					});
@@ -212,6 +214,7 @@ starting.then(function(a){
 				console.log(nt);
 				trn.removeClass("disabled").html(nt);
 				trn.one("click",function(){
+					var t1 = moment();
 					trn.addClass("disabled");
 				var c3 = communist(4,true);
 					c3.map(function(d,cb){
@@ -242,7 +245,8 @@ starting.then(function(a){
 				});
 				c3.data(dd);
 				c3.fetch().then(function(a){
-					trn.removeClass("disabled").html("got this");
+						var t2 = moment();
+					trn.removeClass("disabled").html( "took " + moment.duration(t2.diff(t1)).asMilliseconds() + " milliseconds");
 					$("#out2").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+Object.keys(a).sort(function(a1,b1){return a[b1]-a[a1];}).map(function(v){return "<tr><td>'"+v+"'</td><td>"+a[v]+"</td></tr>";}).join("")+'</tbody></table>');
 				});
 			});
