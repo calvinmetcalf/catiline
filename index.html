@@ -34,14 +34,14 @@
 		<div id="test2"></div>
 	</div>
 </div>
-	<div class="row-fluid"><button id="startit" class="btn" >download stuff</button></div>
-<div class="row-fluid" id="buttons">
+	<div class="row-fluid"><button id="startit" class="btn btn-primary" >download stuff</button></div>
+<div class="row-fluid" style="display:none;" id="buttons">
 	<div class="span4">
-		<button type="button" id="regular" class="btn">Transfer with structured clone</button>
+		<button type="button" id="regular" class="btn btn-primary">Transfer with structured clone</button>
 		<div id="out1"></div>
 	</div>
 	<div class="span4">
-		<button type="button" id="transferobj" class="btn">Transfer with transferable objects</button>
+		<button type="button" id="transferobj" class="btn btn-primary">Transfer with transferable objects</button>
 		<div id="out2"></div>
 	</div>
 </div>
@@ -118,7 +118,7 @@ var rb;
 	}
 };
 var c = communist(wFunc);
-$("#buttons").css("display","none");
+
 var startButton = $("#startit");
 startButton.on("click",function(){
 startButton.addClass("disabled").html("loading...");
@@ -147,7 +147,7 @@ starting.then(function(a){
 			var t1 = moment();
 			c.data("t").then(function(a){
 				var t2 = moment();
-				var nt = "transfered ownershipt an array buffer of length " + a.byteLength + " took " + moment.duration(t2.diff(t1)).asMilliseconds() + " milliseconds, again?";
+				var nt = "transfered ownershipt an array buffer of byteLength " + a.byteLength + " took " + moment.duration(t2.diff(t1)).asMilliseconds() + " milliseconds, again?";
 				console.log(nt);
 				trn.removeClass("disabled").html(nt);
 			},function(a){console.log(a)});
