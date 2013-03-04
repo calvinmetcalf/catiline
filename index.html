@@ -168,6 +168,7 @@ starting.then(function(a){
 						return out;
 					}).data(a);
 					c2.fetch().then(function(b){
+						reg.removeClass("disabled");
 						$("#out1").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+Object.keys(b).sort(function(a1,b1){return b[b1]-b[a1];}).map(function(v){return "<tr><td>'"+v+"'</td><td>"+b[v]+"</td></tr>";}).join("")+'</tbody></table>');
 
 					});
@@ -181,10 +182,11 @@ starting.then(function(a){
 			var t1 = moment();
 			c.data("t").then(function(dd){
 				var t2 = moment();
-				var nt = "took " + moment.duration(t2.diff(t1)).asMilliseconds() + " milliseconds, again?";
+				var nt = "took " + moment.duration(t2.diff(t1)).asMilliseconds() + " milliseconds, prase letter frequencies?";
 				console.log(nt);
 				trn.removeClass("disabled").html(nt);
 				trn.one("click",function(){
+					trn.addClass("disabled");
 				var c3 = communist(4,true);
 c3.map(function(d,cb){
 	var dd = String.fromCharCode.apply(null, new Uint16Array(d));
@@ -214,6 +216,7 @@ c3.reduce(function(a,b){
 });
 c3.data(dd);
 c3.fetch().then(function(a){
+	trn.removeClass("disabled");
 $("#out2").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+Object.keys(a).sort(function(a1,b1){return a[b1]-a[a1];}).map(function(v){return "<tr><td>'"+v+"'</td><td>"+a[v]+"</td></tr>";}).join("")+'</tbody></table>');
 });});
 			},function(a){console.log(a)});
