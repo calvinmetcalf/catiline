@@ -37,8 +37,8 @@
 	 	</div><div class="span4"><p>So instead we cut the text up into about 5000 pieces, to make it even we cut both the text and the array buffer version into arrays with the same number of pieces, then we fire up some more workers and start handing out those pieces to them for a mapreduce of letter frequencies. We send a piece to one of the map workers, it computes an object with with the numbers for each letter which it sends back, we send that to the reducer function and send the map function a new piece. Once we are out of data and we shut down the map workers and ask the reducer for its data.</p>
 
 	 	<p>You can try the results below and they are as follows, the structured clone takes longer to transfer back but performs faster when it comes to mapreduce, the increase in mapreduce is less than the decrease of the transfer time causing the structured clone to finish as much as a fifth of a second faster, there are enough vagaries in the test that your mileage may vary, a lot. I noticed that up to 4 map workers (on a quad core computer) the improvements for adding an additional worker were very high, with the difference between 1 and 2 workers being a doubling of speed tapering off after 4 with minimal gain for any worker added past 8 (i.e. cores x two).</p>
-	 	<p>I've noticed that workers are extreamly poorly documented on <a href="https://developer.mozilla.org/en-US/docs/DOM/Using_web_workers?redirectlocale=en-US&redirectslug=Using_web_workers">MDN</a> (update: not the case anymore ... your welcome) and <a href="http://www.html5rocks.com/en/tutorials/workers/basics/#toc-enviornment-subworkers">HTML5 rocks</a> has a few ommisions, namely, worker.postMessage is unprefixed for transferable objects (i.e. not worker.webkitPostMessage), it also works fine in FireFox, blob builder is no longer with us, you can just use Blob, the Chromium still does not allow subworkers, and IE10 which in theory should work fine has security restriction if you try to open a worker from a blob url, lastly it is a okay to send circular references to a worker, they are stringified using structured clone, not JSON.stringify.</p>
-	 	<p>In case you're curious all the way on the right is a version that just does it single threaded in the worker, takes an inordinate amount of time for me, though does come up with a different answer then the other version version.</p>
+	 	<p>I've noticed that workers are extreamly poorly documented on <a href="https://developer.mozilla.org/en-US/docs/DOM/Using_web_workers?redirectlocale=en-US&redirectslug=Using_web_workers">MDN</a> (<span class="label label-info">update</span> not the case anymore ... your welcome) and <a href="http://www.html5rocks.com/en/tutorials/workers/basics/#toc-enviornment-subworkers">HTML5 rocks</a> has a few ommisions, namely, worker.postMessage is unprefixed for transferable objects (i.e. not worker.webkitPostMessage), it also works fine in FireFox, blob builder is no longer with us, you can just use Blob, the Chromium still does not allow subworkers, and IE10 which in theory should work fine has security restriction if you try to open a worker from a blob url, lastly it is a okay to send circular references to a worker, they are stringified using structured clone, not JSON.stringify.</p>
+	 	<p>In case you're curious all the way on the right is a version that just does it single threaded in the worker, <span class="label label-info">update</span> with a better written function doens't take a huge amount of time, still slow though.</p>
 	 	<p>This has has been built with my <a href="https://github.com/calvinmetcalf/communist">communist library</a>, I’m debating changing the name but feedback would be appreciated. </p>
 	 
 	 </div></div>
@@ -112,38 +112,6 @@ var wFunc=function(data,callback){
 				};
 			request.send();
 		};
-	var mFunc=function(dd){
-		var out={};
-		dd.split("").filter(function(v){return v.trim()!=="";}).forEach(function(v){
-			if(out[v]){
-				out[v]=out[v]+1;
-			}else{
-				out[v]=1;
-			}
-		});
-		return out;
-	};
-	var rFunc = function(b){
-		var a;
-		if(!_db.reduced){
-			_db.reduced=b;
-			return;
-		}else{
-			a=_db.reduced;
-		}
-		var out = {};
-		Object.keys(a).forEach(function(v){
-			out[v]=a[v];
-		});
-		Object.keys(b).forEach(function(v){
-			if(out[v]){
-				out[v]=out[v]+b[v];
-			}else{
-				out[v]=b[v];
-			}
-		});
-		_db.reduced=out;;
-	};
 	function fromText(text){
 	var len = text.length;
 	var ab = new Uint16Array(len);
@@ -178,7 +146,7 @@ function inA(a,size){
 	}
 	return sliceList.map(function(v){return a.slice(v[0],v[1])});
 }
-var rb;
+var rb,len,i,char;
 	if(data[0]==="s"){
 		ajax(data[1],function(resp){	
 			_db.text = resp;
@@ -197,11 +165,21 @@ var rb;
 			rb = fromText(_db.text);
 		callback(rb,[rb]);
 	}else if(data==="c"){
-		rb = inA(_db.text,5000);
-		rb.forEach(function(v){
-			rFunc(mFunc(v));
-		});
-		callback(_db.reduced);
+		rb = {};
+		i = 0;
+		len = _db.text.length;
+		while(i<len){
+			char = _db[i];
+			if(char===" "||char==="\n"||char==="\r"){
+				
+			}else if(rb[char]){
+				rb[char] =rb[char]+1;
+			}else{
+				rb[char]=1;
+			}
+			i++;
+		}
+		callback(rb);
 	}
 };
 var c = communist(wFunc);
