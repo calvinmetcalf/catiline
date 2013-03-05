@@ -36,7 +36,7 @@
 	 	<p>The down side of transferable objects is one I hinted at earlier, you can only use it with array buffers(and message ports but I'm not sure that's implemented/what they are). Array buffers are the basis of typed arrays, buffers are abstract containers for bytes and typed arrays are representations with various byte lengths it is a non trivial task to convert a typed array back to text. With the array buffer version we turned the text into unsigned 16 bit integers, I'd give you a demo of trying to convert it back in one go but it fills up the heap and crashes your browser.</p>
 	 	</div><div class="span4"><p>So instead we cut the text up into about 5000 pieces, to make it even we cut both the text and the array buffer version into arrays with the same number of pieces, then we fire up some more workers and start handing out those pieces to them for a mapreduce of letter frequencies. We send a piece to one of the map workers, it computes an object with with the numbers for each letter which it sends back, we send that to the reducer function and send the map function a new piece. Once we are out of data and we shut down the map workers and ask the reducer for its data.</p>
 
-	 	<p>You can try the results below and they are as follows, the structured clone takes longer to transfer back but performs faster when it comes to mapreduce, the increase in mapreduce is less than the decrease of the transfer time causing the structured clone to finish as much as a fifth of a second faster, there are enough vagaries in the test that your mileage may vary, a lot. I noticed that up to 4 map workers (on a quad core computer) the improvements for adding an additional worker were very high, with the difference between 1 and 2 workers being a doubling of speed tapering off after 4 with minimal gain for any worker added past 8 (i.e. cores x two).</p>
+	 	<p>Results, updated 2. After a massive optimization effort which involved going through and replacing all of the map and forEach loops with while loops, holding off converting back from CharCode to until we are all the way reduced, clears up the results dramatically, transferable objects is dramatically faster to the point that it takes approximately the same amount of time to transfer the structured clone as it does to parse the transferable object. </p>
 	 	<p>I've noticed that workers are extreamly poorly documented on <a href="https://developer.mozilla.org/en-US/docs/DOM/Using_web_workers?redirectlocale=en-US&redirectslug=Using_web_workers">MDN</a> (<span class="label label-info">update</span> not the case anymore ... your welcome) and <a href="http://www.html5rocks.com/en/tutorials/workers/basics/#toc-enviornment-subworkers">HTML5 rocks</a> has a few ommisions, namely, worker.postMessage is unprefixed for transferable objects (i.e. not worker.webkitPostMessage), it also works fine in FireFox, blob builder is no longer with us, you can just use Blob, the Chromium still does not allow subworkers, and IE10 which in theory should work fine has security restriction if you try to open a worker from a blob url, lastly it is a okay to send circular references to a worker, they are stringified using structured clone, not JSON.stringify.</p>
 	 	<p>In case you're curious all the way on the right is a version that just does it single threaded in the worker, <span class="label label-info">update</span> with a better written function doens't take a huge amount of time, still slower though.</p>
 	 	<p>This has has been built with my <a href="https://github.com/calvinmetcalf/communist">communist library</a>, I’m debating changing the name but feedback would be appreciated. </p>
@@ -211,12 +211,8 @@ starting.then(function(a){
 							var out={},i=0,len = dd.length,char;
 							while(i<len){
 								char = dd[i];
-								if(char===" "||char==="\n"||char==="\r"){
-								
-								}else if(out[char]){
-									out[char] =out[char]+1;
-								}else{
-									out[char]=1;
+								if(char.strip()!==""){
+									out[char] =(out[char]||0)+1;
 								}
 								i++;
 							}
