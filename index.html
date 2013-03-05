@@ -123,7 +123,14 @@ var wFunc=function(data,callback){
 		});
 		return out;
 	};
-	var rFunc = function(a,b){
+	var rFunc = function(b){
+		var a;
+		if(!_db.reduced){
+			_db.reduced=b;
+			return;
+		}else{
+			a=_db.reduced;
+		}
 		var out = {};
 		Object.keys(a).forEach(function(v){
 			out[v]=a[v];
@@ -135,7 +142,7 @@ var wFunc=function(data,callback){
 				out[v]=b[v];
 			}
 		});
-		return out;
+		_db.reduced=out;;
 	};
 	function fromText(text){
 	var len = text.length;
@@ -190,11 +197,15 @@ var rb;
 			rb = fromText(_db.text);
 		callback(rb,[rb]);
 	}else if(data==="c"){
-		callback(_db.text.split("\n").map(mFunc).reduce(rFunc,{}));
+		rb = inA(_db.text,5000);
+		rb.forEach(function(v){
+			rFunc(mFunc(v));
+		});
+		callback(_db.reduced);
 	}
 };
 var c = communist(wFunc);
-
+var fulla;
 var startButton = $("#startit");
 startButton.on("click",function(){
 startButton.addClass("disabled").html("<i class='icon-spinner icon-spin'></i> loading...");
@@ -326,6 +337,7 @@ starting.then(function(a){
 			tasb.addClass("disabled").html("<i class='icon-spinner icon-spin'></i> loading");
 			var t1 = moment();
 			c.data("g").then(function(a){
+				fulla = a;
 				var t2 = moment();
 				var tot = moment.duration(t2.diff(t1)).asMilliseconds();
 				tasb.css("display","none");
