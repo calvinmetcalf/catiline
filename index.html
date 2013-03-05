@@ -38,7 +38,7 @@
 
 	 	<p>You can try the results below and they are as follows, the structured clone takes longer to transfer back but performs faster when it comes to mapreduce, the increase in mapreduce is less than the decrease of the transfer time causing the structured clone to finish as much as a fifth of a second faster, there are enough vagaries in the test that your mileage may vary, a lot. I noticed that up to 4 map workers (on a quad core computer) the improvements for adding an additional worker were very high, with the difference between 1 and 2 workers being a doubling of speed tapering off after 4 with minimal gain for any worker added past 8 (i.e. cores x two).</p>
 	 	<p>I've noticed that workers are extreamly poorly documented on <a href="https://developer.mozilla.org/en-US/docs/DOM/Using_web_workers?redirectlocale=en-US&redirectslug=Using_web_workers">MDN</a> (<span class="label label-info">update</span> not the case anymore ... your welcome) and <a href="http://www.html5rocks.com/en/tutorials/workers/basics/#toc-enviornment-subworkers">HTML5 rocks</a> has a few ommisions, namely, worker.postMessage is unprefixed for transferable objects (i.e. not worker.webkitPostMessage), it also works fine in FireFox, blob builder is no longer with us, you can just use Blob, the Chromium still does not allow subworkers, and IE10 which in theory should work fine has security restriction if you try to open a worker from a blob url, lastly it is a okay to send circular references to a worker, they are stringified using structured clone, not JSON.stringify.</p>
-	 	<p>In case you're curious all the way on the right is a version that just does it single threaded in the worker, <span class="label label-info">update</span> with a better written function doens't take a huge amount of time, still slow though.</p>
+	 	<p>In case you're curious all the way on the right is a version that just does it single threaded in the worker, <span class="label label-info">update</span> with a better written function doens't take a huge amount of time, still slower though.</p>
 	 	<p>This has has been built with my <a href="https://github.com/calvinmetcalf/communist">communist library</a>, I’m debating changing the name but feedback would be appreciated. </p>
 	 
 	 </div></div>
@@ -127,7 +127,7 @@ function toA(a,size){
 	var len = a.byteLength;
 	var start = 0;
 	var end = len%size;
-	while(end<len){
+	while(end<=len){
 		sliceList.push([start,end]);
 		start = end;
 		end = end + size;
@@ -139,7 +139,7 @@ function inA(a,size){
 	var len = a.length;
 	var start = 0;
 	var end = len%size;
-	while(end<len){
+	while(end<=len){
 		sliceList.push([start,end]);
 		start = end;
 		end = end + size;
@@ -208,32 +208,46 @@ starting.then(function(a){
 					reg.addClass("disabled").html("<i class='icon-spinner icon-spin'></i> getting my map reduce on");
 					var t1 = moment();
 					var c2 = communist(parseInt($("#mNumber").val(),10),true).map(function(dd){
-							var out={};
-							dd.split("").filter(function(v){return v.trim()!=="";}).forEach(function(v){
-								if(out[v]){
-									out[v]=out[v]+1;
+							var out={},i=0,len = dd.length,char;
+							while(i<len){
+								char = dd[i];
+								if(char===" "||char==="\n"||char==="\r"){
+								
+								}else if(out[char]){
+									out[char] =out[char]+1;
 								}else{
-									out[v]=1;
+									out[char]=1;
 								}
-							});
+								i++;
+							}
 							return out;
 						});
 					c2.reduce(function(a,b){
 						var out = {};
-						Object.keys(a).forEach(function(v){
+						for(var v in a){
 							out[v]=a[v];
-						});
-						Object.keys(b).forEach(function(v){
-							if(out[v]){
-								out[v]=out[v]+b[v];
+						};
+						for(var k in b){
+							if(out[k]){
+								out[k]=out[k]+b[k];
 							}else{
-								out[v]=b[v];
+								out[k]=b[k];
 							}
-						});
+						};
 						return out;
 					}).data(a);
-					c2.close().then(function(b){
-						$("#out1").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+Object.keys(b).sort(function(a1,b1){return b[b1]-b[a1];}).map(function(v){return "<tr><td>'"+v+"'</td><td>"+b[v]+"</td></tr>";}).join("")+'</tbody></table>');
+					c2.close().then(function(a){
+						var keys = Object.keys(a).sort(function(a1,b1){return a[b1]-a[a1];});
+						var len = keys.length;
+						var out= new Array(len);
+						var i = 0;
+						var idm;
+						while(i<len){
+							idm = keys[i];
+							out[i] = "<tr><td>'"+idm+"'</td><td>"+a[idm]+"</td></tr>";
+							i++;
+						}
+						$("#out1").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+out.join("")+'</tbody></table>');
 						var t2 = moment();
 						reg.css("display","none");
 						var tot = parseInt(moment.duration(t2.diff(t1)).asMilliseconds(),10);
@@ -259,34 +273,47 @@ starting.then(function(a){
 					trn.addClass("disabled").html("<i class='icon-spinner icon-spin'></i> getting my map reduce on");
 				var c3 = communist(parseInt($("#mNumber").val(),10),true);
 					c3.map(function(d,cb){
-						var dd = String.fromCharCode.apply(null, new Uint16Array(d));
+						var dd = new Uint16Array(d);
 						var out={};
-						dd.split("").filter(function(v){return v.trim()!=="";}).forEach(function(v){
-							if(out[v]){
-								out[v]=out[v]+1;
-							}else{
-								out[v]=1;
+						var i = 0;
+						var len = dd.length;
+						var char;
+						while(i<len){
+								char = dd[i];
+								if(char!==32){
+									out[char]=(out[char]||0)+1;
+								}
+								i++;
 							}
-						});
 					return out;
 				},true);
 				c3.reduce(function(a,b){
 					var out = {};
-					Object.keys(a).forEach(function(v){
-						out[v]=a[v];
-					});
-					Object.keys(b).forEach(function(v){
-						if(out[v]){
-							out[v]=out[v]+b[v];
-						}else{
-							out[v]=b[v];
-						}
-					});
-					return out;
+						for(var v in a){
+							out[v]=a[v];
+						};
+						for(var k in b){
+							if(out[k]){
+								out[k]=out[k]+b[k];
+							}else{
+								out[k]=b[k];
+							}
+						};
+						return out;
 				});
 				c3.data(dd);
 				c3.close().then(function(a){
-					$("#out2").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+Object.keys(a).sort(function(a1,b1){return a[b1]-a[a1];}).map(function(v){return "<tr><td>'"+v+"'</td><td>"+a[v]+"</td></tr>";}).join("")+'</tbody></table>');
+					var keys = Object.keys(a).sort(function(a1,b1){return a[b1]-a[a1];});
+					var len = keys.length;
+					var out= new Array(len);
+					var i = 0;
+					var idm;
+					while(i<len){
+						idm = keys[i];
+						out[i] = "<tr><td>'"+String.fromCharCode(idm)+"'</td><td>"+a[idm]+"</td></tr>";
+						i++;
+					}
+					$("#out2").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+out.join("")+'</tbody></table>');
 					var t2 = moment();
 					trn.css("display","none");
 					var tot = parseInt(moment.duration(t2.diff(t1)).asMilliseconds(),10);
