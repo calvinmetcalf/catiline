@@ -170,7 +170,9 @@ var rb,len,i,char;
 		len = _db.text.length;
 		while(i<len){
 			char = _db.text[i];
-			rb[char] =(rb[char]||0)+1;
+			if(char!==" "&&char!=="\r"&&char!=="\n"){
+				rb[char] =(rb[char]||0)+1;
+			}
 			i++;
 		}
 		callback(rb);
@@ -205,7 +207,9 @@ starting.then(function(a){
 							var out={},i=0,len = dd.length,char;
 							while(i<len){
 								char = dd[i];
-								out[char] =(out[char]||0)+1;
+								if(char!==" "&&char!=="\r"&&char!=="\n"){
+									out[char] =(out[char]||0)+1;
+								}
 								i++;
 							}
 							return out;
@@ -268,7 +272,9 @@ starting.then(function(a){
 						var char;
 						while(i<len){
 								char = dd[i];
-								out[char]=(out[char]||0)+1;
+								if(char!==32&&char!==13&&char!==10){
+									out[char]=(out[char]||0)+1;
+								}
 								i++;
 							}
 					return out;
