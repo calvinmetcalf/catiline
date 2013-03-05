@@ -170,7 +170,7 @@ var rb,len,i,char;
 		len = _db.text.length;
 		while(i<len){
 			char = _db.text[i];
-			if(char.trim()!==""){
+			if(char!==" "&&char!=="\n"&&char!=="\r"){
 				rb[char] =(rb[char]||0)+1;
 			}
 			i++;
