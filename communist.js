@@ -3,7 +3,7 @@
     var makeWorker = function(strings){
     return new Worker(URL.createObjectURL(new Blob([strings.join("")],{type: "text/javascript"})));	
 	};
-	var fAndF = function(fun,data){
+	var oneOff = function(fun,data){
 		var promise = new RSVP.Promise();
 		var worker = makeWorker(['var fun = ',fun,';\
 		function _clb(data,transfer){\
@@ -22,46 +22,7 @@
 		};
 		return promise;
 	};
-	var sticksAround = function(fun){
-		var w = new Communist();
-		var promises = [];
-		var worker = makeWorker(['var _db={};var fun=', fun,';\
-			function _clb(num,data,transfer){\
-				self.postMessage([num,data],transfer);\
-			}\
-			self.onmessage=function(event){\
-				var _cc = _clb.bind(self, event.data[0]);\
-				var _rst = fun(event.data[1],_cc);\
-				if(typeof _rst !== "undefined"){\
-					_cc(_rst)\
-				}\
-				}']);
-		var rejectPromises = function(msg){
-			promises.forEach(function(p){
-				if(p){
-					p.reject(msg);
-				}	
-			});
-		};
-		worker.onerror=rejectPromises;
-		w.data=function(data, transfer){
-			var i = promises.length;
-			promises[i] = new RSVP.Promise();
-			worker.onmessage=function(e){
-				promises[e.data[0]].resolve(e.data[1]);
-				promises[e.data[0]]=0;
-			};
-			worker.postMessage([i,data],transfer);
-			return promises[i];
-		};
-		w.close = function(){
-			w.worker.terminate();
-			rejectPromises("closed");
-			return;
-		};
-		return w;
-	};
-	var mWorker=function(fun,callback){
+	var mapWorker=function(fun,callback,onerr){
 		var w = new Communist();
 		var worker = makeWorker(['var _db={};var fun = ',fun,';\
 			function _clb(data,transfer){\
@@ -76,9 +37,7 @@
 		worker.onmessage = function(e){
 			callback(e.data);	
 		};
-		worker.onerror=function(){
-			callback();
-		};
+		worker.onerror=onerr||function(){callback();};
 		w.data=function(d,t){
 			worker.postMessage(d,t);	
 		};
@@ -87,42 +46,78 @@
 		};
 		return w;
 	};
+	var sticksAround = function(fun){
+		var w = new Communist();
+		var promises = [];
+		var rejectPromises = function(msg){
+			promises.forEach(function(p){
+				if(p){
+					p.reject(msg);
+				}	
+			});
+		};
+		var func = 'function(data,cb){var _fun = '+fun+';\
+			var _nCB = function(num,d,tran){\
+			cb([num,d],tran);\
+			};\
+			var _bCB = _nCB.bind(self,data[0]);\
+			var _nR = _fun(data[1],_bCB);\
+			if(typeof _nR !== "undefined"){\
+				_bCB(_nR);\
+			}\
+		}';
+		var callback = function(data){
+				promises[data[0]].resolve(data[1]);
+				promises[data[0]]=0;
+		};
+		var worker = mapWorker(func, callback,rejectPromises);
+		w.close = function(){
+			worker.close();
+			rejectPromises("closed");
+			return;
+		};
+		w.data=function(data, transfer){
+			var i = promises.length;
+			promises[i] = new RSVP.Promise();
+			worker.data([i,data],transfer);
+			return promises[i];
+		};
+		return w;
+	};
 	var rWorker = function(fun,callback){
 		var w = new Communist();
-		var worker = makeWorker(['var fun = ',fun,',reduced,reduceEmpty=true;\
-		self.onmessage=function(event){\
-			switch(event.data[0]){\
+		var func = 'function(dat,cb){ var fun = '+fun+';\
+			switch(dat[0]){\
 				case "data":\
-					if(reduceEmpty){\
-						reduced = event.data[1];\
-						reduceEmpty = false;\
+					if(_db==={}){\
+						_db = dat[1];\
 					}else{\
-						reduced = fun(reduced,event.data[1]);\
+						_db = fun(_db,dat[1]);\
 					}\
 					break;\
 				case "get":\
-					self.postMessage(reduced);\
-					break;\
+					return cb(_db);\
 				case "close":\
-					self.postMessage(reduced);\
+					cb(_db);\
 					self.close();\
 					break;\
 			}\
-		};']);
-		worker.onmessage=function(e){
-			callback(e.data);	
+		};'
+		var cb =function(data){
+			callback(data);	
 		};
+		var worker = mapWorker(func,cb);
 		w.data=function(data,transfer){
-			worker.postMessage(["data",data],transfer);
+			worker.data(["data",data],transfer);
 		};
 		w.fetch=function(){
-			worker.postMessage(["get"]);
+			worker.data(["get"]);
 		};
 		w.close=function(silent){
 			if(silent){
 				callback=function(){};
 			}
-			worker.postMessage(["close"]);
+			worker.data(["close"]);
 		};
 		return w;
 	};
@@ -145,20 +140,26 @@
 				return w;
 			}
 		};
-		w.map=function(fun){
+		w.map=function(fun,t){
 			if(status.map){
 				return w;
 			}
 			var i = 0;
 			while(i<threads){
+				var dd;
 				(function(){
-					var mw = mWorker(fun, function(d){
+					var mw = mapWorker(fun, function(d){
 						if(typeof d !== undefined){
 							reducer.data(d);
 						}
 						if(len>0){
 							len--;
-							mw.data(data.pop());
+							dd = data.pop();
+							if(t){
+								mw.data(dd,[dd]);
+							}else{
+							mw.data(dd);
+							}
 						}else{
 							terminated++;
 							mw.close();
@@ -238,10 +239,10 @@
 			while(i<threads){
 				(function(){
 					var dd;
-					var mw = mWorker(fun, function(d){
+					var mw = mapWorker(fun, function(d){
 						if(typeof d !== undefined){
 							reducer.data(d);
-							window._temp.push(d)
+							window._temp.push(d);
 						}
 						if(len>0){
 							len--;
@@ -336,9 +337,9 @@
 	};
 	var p=function(a,b){
 		if(typeof a === "function" && typeof b === "function"){
-			return mWorker(a,b);
+			return mapWorker(a,b);
 		}else if(typeof a === "function" || typeof a === "string"){
-			return b ? fAndF(a,b):sticksAround(a);
+			return b ? oneOff(a,b):sticksAround(a);
 		}else if(typeof a === "number"){
 			return b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
 		}
