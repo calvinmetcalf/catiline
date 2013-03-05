@@ -304,8 +304,8 @@ starting.then(function(a){
 				$("#out3").html('<table class="table table-striped table-bordered table-hover"><thead><th>character</th><th>count</th></thead><tbody>'+Object.keys(a).sort(function(a1,b1){return a[b1]-a[a1];}).map(function(v){return "<tr><td>'"+v+"'</td><td>"+a[v]+"</td></tr>";}).join("")+'</tbody></table>');
 				var t2 = moment();
 				inW.css("display","none");
-				var tot = parseInt(moment.duration(t2.diff(t1)).asSeconds(),10);
-				$("#b3").prepend( "<span class='label label-inverse'>took " + tot + " seconds to parse</span>");
+				var tot = parseInt(moment.duration(t2.diff(t1)).asMilliseconds(),10);
+				$("#b3").prepend( "<span class='label label-inverse'>took " + tot/1000 + " seconds to parse</span>");
 
 			});
 		});
