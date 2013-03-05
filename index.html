@@ -170,12 +170,8 @@ var rb,len,i,char;
 		len = _db.text.length;
 		while(i<len){
 			char = _db.text[i];
-			if(char===" "||char==="\n"||char==="\r"){
-				
-			}else if(rb[char]){
-				rb[char] =rb[char]+1;
-			}else{
-				rb[char]=1;
+			if(char.trim()!==""){
+				rb[char] =(rb[char]||0)+1;
 			}
 			i++;
 		}
@@ -211,7 +207,7 @@ starting.then(function(a){
 							var out={},i=0,len = dd.length,char;
 							while(i<len){
 								char = dd[i];
-								if(char.strip()!==""){
+								if(char.trim()!==""){
 									out[char] =(out[char]||0)+1;
 								}
 								i++;
