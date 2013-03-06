@@ -236,7 +236,6 @@
 			}
 		};
 		w.map=function(fun, t){
-			window._temp=[];
 			if(status.map){
 				return w;
 			}
@@ -247,7 +246,6 @@
 					var mw = mapWorker(fun, function(d){
 						if(typeof d !== undefined){
 							reducer.data(d);
-							window._temp.push(d);
 						}
 						if(len>0){
 							len--;
