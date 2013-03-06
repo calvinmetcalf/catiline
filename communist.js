@@ -90,16 +90,16 @@
 		var func = 'function(dat,cb){ var fun = '+fun+';\
 			switch(dat[0]){\
 				case "data":\
-					if(_db==={}){\
-						_db = dat[1];\
+					if(!_db._r){\
+						_db._r = dat[1];\
 					}else{\
-						_db = fun(_db,dat[1]);\
+						_db._r = fun(_db._r,dat[1]);\
 					}\
 					break;\
 				case "get":\
-					return cb(_db);\
+					return cb(_db._r);\
 				case "close":\
-					cb(_db);\
+					cb(_db._r);\
 					self.close();\
 					break;\
 			}\
