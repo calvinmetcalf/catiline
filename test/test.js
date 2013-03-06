@@ -18,7 +18,7 @@ describe('communist()', function () {
 	});
 	it('should allow chaining of data functions, with callback passed to communist()', function (done) {
 		var count = 0;
-		var comrade = communist(square, function (a) { count++; a.should.equal(81); }).then(function () { if (count === 2) { done(); } }, function () { if (count === 2) { done(); } });
+		var comrade = communist(square, function (a) { count++; a.should.equal(81); if (count === 2) { done(); } });
 		comrade.data(9).data(9);
 	});
 	describe('Worker reuse', function () {
