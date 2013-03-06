@@ -1,8 +1,15 @@
 (function(){
 	var Communist = function(){};
 	var makeWorker = function(strings){
+		var worker;
 		var URL = window.URL || window.webkitURL || self.URL;
-		return new Worker(URL.createObjectURL(new Blob([strings.join("")],{type: "text/javascript"})));	
+		if(window.communist.IEpath){
+			worker = new Worker(window.communist.IEpath);
+			worker.postMessage(strings.join(""));
+			return worker;
+		}else {
+			return new Worker(URL.createObjectURL(new Blob([strings.join("")],{type: "text/javascript"})));	
+		}
 	};
 	var oneOff = function(fun,data){
 		var promise = new RSVP.Promise();

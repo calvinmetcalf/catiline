@@ -118,3 +118,5 @@ var promise = communist.ajax(url,after,notjson);//returns promise obv
 //after is an optional function you can add if you want to process the data in the other thread before returning it
 //if notjson is true doesn't try to parse it as json which it does by default. 
 ```
+
+If you want to use it in IE 10 then due to security issues you'll need to put the file IE.js somewhere on the same origin as your web page and call `communist.IEpath = "../path/to/IE.js"`.  Based off [this work around in parallel.js](https://github.com/adambom/parallel.js/pull/16)
