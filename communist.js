@@ -351,13 +351,16 @@
 		return link.href;
 	};
 	p.ajax = function(url,after,notjson){
-		var resp = after?"("+after.toString()+")(request.responseText)":"request.responseText";
+		var txt=!notjson?'JSON.parse(request.responseText)':"request.responseText";
+		var resp = after?"("+after.toString()+")("+txt+",cb)":txt;
 		var func = 'function (url, cb) {\
 			var request = new XMLHttpRequest();\
 			request.open("GET", url);\
 				request.onreadystatechange = function() {\
+					var _resp;\
 					if (request.readyState === 4 && request.status === 200) {'+
-						(!notjson?'cb(JSON.parse('+resp+'));':'cb('+resp+');')+'\
+						'_resp = '+resp+';\
+						if(typeof _resp!=="undefined"){cb(_resp);}\
 						}\
 				};\
 			request.send();\
