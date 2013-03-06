@@ -41,6 +41,7 @@
 		worker.onerror=onerr||function(){callback();};
 		w.data=function(d,t){
 			worker.postMessage(d,t);	
+			return w;
 		};
 		w.close=function(){
 			return worker.terminate();
@@ -110,15 +111,18 @@
 		var worker = mapWorker(func,cb);
 		w.data=function(data,transfer){
 			worker.data(["data",data],transfer);
+			return w;
 		};
 		w.fetch=function(){
 			worker.data(["get"]);
+			return w;
 		};
 		w.close=function(silent){
 			if(silent){
 				callback=function(){};
 			}
 			worker.data(["close"]);
+			return;
 		};
 		return w;
 	};
