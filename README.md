@@ -9,7 +9,7 @@ API
 Create a onetime use worker:
 
 ```JavaScript
-var comrade = communist(function,data);//returns promise
+var worker = communist(function,data);//returns promise
 ```
 
 calls your function with the data as the first argument and a callback as the second in a worker, the function can either return a value, or call the callback, once it does that, the promise is fufiled and the worker is closed. , ie:
@@ -30,9 +30,9 @@ communist(function(x){return x*x;},9).then(function(a){console.log(a)});
 Create a reusable worker:
 
 ```JavaScript
-var comrade = communist(function);//returns object
-var manifesto = comrade.data(data);//returns promise
-comrade.close();//closes the worker
+var worker = communist(function);//returns object
+var manifesto = worker.data(data);//returns promise
+worker.close();//closes the worker
 ```
 
 you can call data on multiple times and each time will return a new promise which will be fufiled based on your data, otherwise the same as the onetime worker.
@@ -40,8 +40,8 @@ you can call data on multiple times and each time will return a new promise whic
 If you don't feel like messing around with promises or you need the same callback called multiple times you can pass a callback function as the second argument, this gets called with the results each time.
 
 ```JavaScript
-var comrade = //returns object
-comrade.data(data);//will call the callback with the result
+var worker = communist(fun) = //returns object
+worker.data(data);//will call the callback with the result
 //this is chainable
 communist(function,callback).data(data1).data(data2);
 //will call the callback twice, once for each result.
@@ -50,23 +50,23 @@ communist(function,callback).data(data1).data(data2);
 next up comes the fancy stuff, map reduce
 
 ```Javascript
-var comrade = communist(threads);//returns object threads is the number of map workers, reducer will be an additional thread
-comrade.data([array of data]);//can be called multiple times, the arrays will be concated
-comrade.map(function);//function to be called once on each member of the array
+var worker = communist(threads);//returns object threads is the number of map workers, reducer will be an additional thread
+worker.data([array of data]);//can be called multiple times, the arrays will be concated
+worker.map(function);//function to be called once on each member of the array
 //can be async but only call the callback once
-comrade.reduce(function);//reduce function of the function(a,b){return c};
+worker.reduce(function);//reduce function of the function(a,b){return c};
 ```
 
 this returns a chainable object until it has all it needs, then it returns a promise, e.g.
 
 ```JavaScript
-var comrade = communist(4);
+var worker = communist(4);
 //returns object
-comrade.data([1,2,3]);
+worker.data([1,2,3]);
 //object
-comrade.map(function(x){return x*x;});
+worker.map(function(x){return x*x;});
 //object
-comrade.reduce(function(a,b){return a+b;});
+worker.reduce(function(a,b){return a+b;});
 //returns promise
 //the object is chainable, and data can be called more then once so....
 communist(4)
@@ -91,19 +91,19 @@ you can also give a second argument after threads, if this is true than you have
 it also has a close method which works like fetch but always waits, prevents you from adding more data and then cleans up the workers afterwards. 
 
 ```JavaScript
-var comrade = communist(4, true);
-comrade.data([1,2,3]);
-comrade.map(function(x){return x*x;});
-comrade.reduce(function(a,b){return a+b;});
-comrade.data([4,5,6]);
-comrade.fetch().then(function(a){console.log(a)});
+var worker = communist(4, true);
+worker.data([1,2,3]);
+worker.map(function(x){return x*x;});
+worker.reduce(function(a,b){return a+b;});
+worker.data([4,5,6]);
+worker.fetch().then(function(a){console.log(a)});
 //prints 91
-comrade.data([6,7,8]).fetch().then(function(a){console.log(a)});
+worker.data([6,7,8]).fetch().then(function(a){console.log(a)});
 //prints 240
 //fetch takes an argument "now", if it's undefined then 
-comrade.data([6,7,8]).fetch(true).then(function(a){console.log(a)});
+worker.data([6,7,8]).fetch(true).then(function(a){console.log(a)});
 //also returns 240
-comrade.close().then(function(a){console.log(a)});
+worker.close().then(function(a){console.log(a)});
 //returns 389
 ```
 
