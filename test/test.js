@@ -35,13 +35,15 @@ describe('communist()', function () {
 	describe('Worker reuse', function () {
 		it('should work with callback applied to promise', function (done) {
 			var comrade = communist(square)
-			comrade.data(9).then(function (a) { a.should.equal(81); }).then(done, done);
+			comrade.data(9).then(function (a) { a.should.equal(81); 
 			comrade.data(62).then(function (a) { a.should.equal(3844); }).then(done, done);
+			});
 		});
 		it('should work with callback applied to promise async', function (done) {
 			var comrade = communist(aSquare)
-			comrade.data(9).then(function (a) { a.should.equal(81); }).then(done, done);
+			comrade.data(9).then(function (a) { a.should.equal(81); 
 			comrade.data(62).then(function (a) { a.should.equal(3844); }).then(done, done);
+			});
 		});
 		it('should work with callback passed to communist()', function (done) {
 			var count = 0;
@@ -112,13 +114,13 @@ describe('communist()', function () {
 			communist.ajax("test.json",function(a){a.c=3;return a;}).then(function(a){ a.should.deep.equal({"a":1,"b":2,"c":3}); }).then(done, done);
 		});
 		it('should work with after set to async', function (done) {
-			communist.ajax("test.json",function(a){a.c=3;cb(a);}).then(function(a){ a.should.deep.equal({"a":1,"b":2,"c":3}); }).then(done, done);
+			communist.ajax("test.json",function(a,cb){a.c=3;cb(a);}).then(function(a){ a.should.deep.equal({"a":1,"b":2,"c":3}); }).then(done, done);
 		});
 		it('should work with text', function (done) {
 			communist.ajax("test.json",function(a){return a.split("");},true).then(function(a){ a.should.deep.equal(["{", '"', "a", '"', ":", "1", ",", '"', "b", '"', ":", "2", "}"]); }).then(done, done);
 		});
 		it('should work with an array buffer', function (done) {
-			communist.ajax("test.json",function(a){ b = new Uint32Array(a.split("").map(function(v){return v.charCodeAt()})).buffer; cb(b,[b])},true).then(function(a){ a.should.deep.equal(new Uint32Array([123, 34, 97, 34, 58, 49, 44, 34, 98, 34, 58, 50, 125]).buffer); }).then(done, done);
+			communist.ajax("test.json",function(a,cb){var b = new Uint32Array(a.split("").map(function(v){return v.charCodeAt()})).buffer; cb(b,[b])},true).then(function(a){ a.should.deep.equal(new Uint32Array([123, 34, 97, 34, 58, 49, 44, 34, 98, 34, 58, 50, 125]).buffer); }).then(done, done);
 		});
 	});
 	describe('Everything again, but with the IE shim', function () {
@@ -142,13 +144,15 @@ describe('communist()', function () {
 		describe('Worker reuse', function () {
 			it('should work with callback applied to promise', function (done) {
 				var comrade = communist(square)
-				comrade.data(9).then(function (a) { a.should.equal(81); }).then(done, done);
+				comrade.data(9).then(function (a) { a.should.equal(81); 
 				comrade.data(62).then(function (a) { a.should.equal(3844); }).then(done, done);
+				});
 			});
 			it('should work with callback applied to promise async', function (done) {
 				var comrade = communist(aSquare)
-				comrade.data(9).then(function (a) { a.should.equal(81); }).then(done, done);
+				comrade.data(9).then(function (a) { a.should.equal(81); 
 				comrade.data(62).then(function (a) { a.should.equal(3844); }).then(done, done);
+				});
 			});
 			it('should work with callback passed to communist()', function (done) {
 				var count = 0;
@@ -219,13 +223,13 @@ describe('communist()', function () {
 				communist.ajax("test.json",function(a){a.c=3;return a;}).then(function(a){ a.should.deep.equal({"a":1,"b":2,"c":3}); }).then(done, done);
 			});
 			it('should work with after set to async', function (done) {
-				communist.ajax("test.json",function(a){a.c=3;cb(a);}).then(function(a){ a.should.deep.equal({"a":1,"b":2,"c":3}); }).then(done, done);
+				communist.ajax("test.json",function(a,cb){a.c=3;cb(a);}).then(function(a){ a.should.deep.equal({"a":1,"b":2,"c":3}); }).then(done, done);
 			});
 			it('should work with text', function (done) {
 				communist.ajax("test.json",function(a){return a.split("");},true).then(function(a){ a.should.deep.equal(["{", '"', "a", '"', ":", "1", ",", '"', "b", '"', ":", "2", "}"]); }).then(done, done);
 			});
 			it('should work with an array buffer', function (done) {
-				communist.ajax("test.json",function(a){ b = new Uint32Array(a.split("").map(function(v){return v.charCodeAt()})).buffer; cb(b,[b])},true).then(function(a){ a.should.deep.equal(new Uint32Array([123, 34, 97, 34, 58, 49, 44, 34, 98, 34, 58, 50, 125]).buffer); }).then(done, done);
+				communist.ajax("test.json",function(a,cb){var b = new Uint32Array(a.split("").map(function(v){return v.charCodeAt()})).buffer; cb(b,[b])},true).then(function(a){ a.should.deep.equal(new Uint32Array([123, 34, 97, 34, 58, 49, 44, 34, 98, 34, 58, 50, 125]).buffer); }).then(done, done);
 			});
 		});
 	});
