@@ -361,15 +361,15 @@
 	};
 	p.ajax = function(url,after,notjson){
 		var txt=!notjson?'JSON.parse(request.responseText)':"request.responseText";
-		var resp = after?"("+after.toString()+")("+txt+",cb)":txt;
-		var func = 'function (url, cb) {\
+		var resp = after?"("+after.toString()+")("+txt+",_cb)":txt;
+		var func = 'function (url, _cb) {\
 			var request = new XMLHttpRequest();\
 			request.open("GET", url);\
 				request.onreadystatechange = function() {\
 					var _resp;\
 					if (request.readyState === 4 && request.status === 200) {'+
 						'_resp = '+resp+';\
-						if(typeof _resp!=="undefined"){cb(_resp);}\
+						if(typeof _resp!=="undefined"){_cb(_resp);}\
 						}\
 				};\
 			request.send();\
