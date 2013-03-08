@@ -13,14 +13,14 @@
 	};
 	var oneOff = function(fun,data){
 		var promise = new RSVP.Promise();
-		var worker = makeWorker(['var fun = ',fun,';\
-		function _clb(data,transfer){\
+		var worker = makeWorker(['_self={};_self.fun = ',fun,';\
+		_self.cb=function(data,transfer){\
 				self.postMessage(data,transfer);\
 				self.close();\
-			}\
-			var _rst = fun(',JSON.stringify(data),',_clb);\
-			if(typeof _rst !== "undefined"){\
-				_clb(_rst);\
+			};\
+			_self.result = _self.fun(',JSON.stringify(data),',_self.cb);\
+			if(typeof _self.result !== "undefined"){\
+				_self.cb(_self.result);\
 			}']);
 		worker.onmessage=function(e){
 			promise.resolve(e.data);
@@ -32,14 +32,14 @@
 	};
 	var mapWorker=function(fun,callback,onerr){
 		var w = new Communist();
-		var worker = makeWorker(['var _db={};var fun = ',fun,';\
-			function _clb(data,transfer){\
+		var worker = makeWorker(['var _db={};var _self={};_self.fun = ',fun,';\
+			_self.cb=function(data,transfer){\
 				self.postMessage(data,transfer);\
-			}\
+			};\
 			self.onmessage=function(e){\
-			var _rst = fun(e.data,_clb);\
-				if(typeof _rst !== "undefined"){\
-					_clb(_rst);\
+			_self.result = _self.fun(e.data,_self.cb);\
+				if(typeof _self.result !== "undefined"){\
+					_self.cb(_self.result);\
 				}\
 			}']);
 		worker.onmessage = function(e){
@@ -65,14 +65,14 @@
 				}	
 			});
 		};
-		var func = 'function(data,cb){var _fun = '+fun+';\
-			var _nCB = function(num,d,tran){\
+		var func = 'function(data,cb){var _self={};_self.fun = '+fun+';\
+			_self.numberCB = function(num,d,tran){\
 			cb([num,d],tran);\
 			};\
-			var _bCB = _nCB.bind(self,data[0]);\
-			var _nR = _fun(data[1],_bCB);\
-			if(typeof _nR !== "undefined"){\
-				_bCB(_nR);\
+			_self.boundCB = _self.numberCB.bind(self,data[0]);\
+			_self.result = _self.fun(data[1],_self.boundCB);\
+			if(typeof _self.result !== "undefined"){\
+				_self.boundCB(_self.result);\
 			}\
 		}';
 		var callback = function(data){
