@@ -5,9 +5,6 @@ mocha.setup({
 });
 chai.should();
 
-//function square(x) {
-//	return x * x;
-//
 function aSquare(x,cb) {
 	cb( x * x );
 }
