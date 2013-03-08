@@ -26,7 +26,8 @@
 			promise.resolve(e.data);
 		};
 		worker.onerror=function(e){
-			promise.reject(e);
+			e.preventDefault();
+			promise.reject(e.message);
 		};
 		return promise;
 	};
@@ -45,7 +46,11 @@
 		worker.onmessage = function(e){
 			callback(e.data);	
 		};
-		worker.onerror=onerr||function(){callback();};
+		if(onerr){
+			worker.onerror=onerr;
+		}else{
+			worker.onerror=function(){callback();};
+		}
 		w.data=function(d,t){
 			worker.postMessage(d,t);	
 			return w;
@@ -61,7 +66,7 @@
 		var rejectPromises = function(msg){
 			if(typeof msg!=="string"){
 				msg.preventDefault();
-				msg=msg.message.slice(9);
+				msg=msg.message;
 			}
 			promises.forEach(function(p){
 				if(p){
@@ -349,9 +354,9 @@
 		}
 		return w;
 	};
-	var p=function(a,b){
+	var p=function(a,b,c){
 		if(typeof a !== "number" && typeof b === "function"){
-			return mapWorker(a,b);
+			return mapWorker(a,b,c);
 		}else if(typeof a !== "number"){
 			return b ? oneOff(a,b):sticksAround(a);
 		}else if(typeof a === "number"){
