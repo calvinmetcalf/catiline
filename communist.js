@@ -13,14 +13,14 @@
 	};
 	var oneOff = function(fun,data){
 		var promise = new RSVP.Promise();
-		var worker = makeWorker(['_self={};_self.fun = ',fun,';\
-		_self.cb=function(data,transfer){\
-				self.postMessage(data,transfer);\
-				self.close();\
-			};\
-			_self.result = _self.fun(',JSON.stringify(data),',_self.cb);\
-			if(typeof _self.result !== "undefined"){\
-				_self.cb(_self.result);\
+		var worker = makeWorker(['_self={}\n;_self.fun = ',fun,';\n\
+		_self.cb=function(data,transfer){\n\
+				self.postMessage(data,transfer);\n\
+				self.close();\n\
+			};\n\
+			_self.result = _self.fun(',JSON.stringify(data),',_self.cb);\n\
+			if(typeof _self.result !== "undefined"){\n\
+				_self.cb(_self.result);\n\
 			}']);
 		worker.onmessage=function(e){
 			promise.resolve(e.data);
@@ -32,15 +32,15 @@
 	};
 	var mapWorker=function(fun,callback,onerr){
 		var w = new Communist();
-		var worker = makeWorker(['var _db={};var _self={};_self.fun = ',fun,';\
-			_self.cb=function(data,transfer){\
-				self.postMessage(data,transfer);\
-			};\
-			self.onmessage=function(e){\
-			_self.result = _self.fun(e.data,_self.cb);\
-				if(typeof _self.result !== "undefined"){\
-					_self.cb(_self.result);\
-				}\
+		var worker = makeWorker(['var _db={};var _self={};_self.fun = ',fun,';\n\
+			_self.cb=function(data,transfer){\n\
+				self.postMessage(data,transfer);\n\
+			};\n\
+			self.onmessage=function(e){\n\
+			_self.result = _self.fun(e.data,_self.cb);\n\
+				if(typeof _self.result !== "undefined"){\n\
+					_self.cb(_self.result);\n\
+				}\n\
 			}']);
 		worker.onmessage = function(e){
 			callback(e.data);	
@@ -59,21 +59,25 @@
 		var w = new Communist();
 		var promises = [];
 		var rejectPromises = function(msg){
+			if(typeof msg!=="string"){
+				msg.preventDefault();
+				msg=msg.message.slice(9);
+			}
 			promises.forEach(function(p){
 				if(p){
 					p.reject(msg);
 				}	
 			});
 		};
-		var func = 'function(data,cb){var _self={};_self.fun = '+fun+';\
-			_self.numberCB = function(num,d,tran){\
-			cb([num,d],tran);\
-			};\
-			_self.boundCB = _self.numberCB.bind(self,data[0]);\
-			_self.result = _self.fun(data[1],_self.boundCB);\
-			if(typeof _self.result !== "undefined"){\
-				_self.boundCB(_self.result);\
-			}\
+		var func = 'function(data,cb){var _self={};_self.fun = '+fun+';\n\
+			_self.numberCB = function(num,d,tran){\n\
+			cb([num,d],tran);\n\
+			};\n\
+			_self.boundCB = _self.numberCB.bind(self,data[0]);\n\
+			_self.result = _self.fun(data[1],_self.boundCB);\n\
+			if(typeof _self.result !== "undefined"){\n\
+				_self.boundCB(_self.result);\n\
+			}\n\
 		}';
 		var callback = function(data){
 				promises[data[0]].resolve(data[1]);
@@ -95,22 +99,22 @@
 	};
 	var rWorker = function(fun,callback){
 		var w = new Communist();
-		var func = 'function(dat,cb){ var fun = '+fun+';\
-			switch(dat[0]){\
-				case "data":\
-					if(!_db._r){\
-						_db._r = dat[1];\
-					}else{\
-						_db._r = fun(_db._r,dat[1]);\
-					}\
-					break;\
-				case "get":\
-					return cb(_db._r);\
-				case "close":\
-					cb(_db._r);\
-					self.close();\
-					break;\
-			}\
+		var func = 'function(dat,cb){ var fun = '+fun+';\n\
+			switch(dat[0]){\n\
+				case "data":\n\
+					if(!_db._r){\n\
+						_db._r = dat[1];\n\
+					}else{\n\
+						_db._r = fun(_db._r,dat[1]);\n\
+					}\n\
+					break;\n\
+				case "get":\n\
+					return cb(_db._r);\n\
+				case "close":\n\
+					cb(_db._r);\n\
+					self.close();\n\
+					break;\n\
+			}\n\
 		};'
 		var cb =function(data){
 			callback(data);	
@@ -346,9 +350,9 @@
 		return w;
 	};
 	var p=function(a,b){
-		if(typeof a === "function" && typeof b === "function"){
+		if(typeof a !== "number" && typeof b === "function"){
 			return mapWorker(a,b);
-		}else if(typeof a === "function" || typeof a === "string"){
+		}else if(typeof a !== "number"){
 			return b ? oneOff(a,b):sticksAround(a);
 		}else if(typeof a === "number"){
 			return b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
@@ -362,17 +366,17 @@
 	p.ajax = function(url,after,notjson){
 		var txt=!notjson?'JSON.parse(request.responseText)':"request.responseText";
 		var resp = after?"("+after.toString()+")("+txt+",_cb)":txt;
-		var func = 'function (url, _cb) {\
-			var request = new XMLHttpRequest();\
-			request.open("GET", url);\
-				request.onreadystatechange = function() {\
-					var _resp;\
-					if (request.readyState === 4 && request.status === 200) {'+
-						'_resp = '+resp+';\
-						if(typeof _resp!=="undefined"){_cb(_resp);}\
-						}\
-				};\
-			request.send();\
+		var func = 'function (url, _cb) {\n\
+			var request = new XMLHttpRequest();\n\
+			request.open("GET", url);\n\
+				request.onreadystatechange = function() {\n\
+					var _resp;\n\
+					if (request.readyState === 4 && request.status === 200) {\n'+
+						'_resp = '+resp+';\n\
+						if(typeof _resp!=="undefined"){_cb(_resp);}\n\
+						}\n\
+				};\n\
+			request.send();\n\
 		}';
 		return p(func,p.makeUrl(url));
 	};
