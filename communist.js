@@ -2,15 +2,21 @@
 	var Communist = function(){};
 	var makeWorker = function(strings){
 		var worker;
+		var script = strings.join("");
+		var match = script.match(/(importScripts\(.*\);)/);
+		if(match){
+			script = match[0]+script.replace(/(importScripts\(.*\);)/,"\n");
+		}
 		var URL = window.URL || window.webkitURL || self.URL;
 		if(window.communist.IEpath){
 			worker = new Worker(window.communist.IEpath);
-			worker.postMessage(strings.join(""));
+			worker.postMessage(script);
 			return worker;
 		}else {
-			return new Worker(URL.createObjectURL(new Blob([strings.join("")],{type: "text/javascript"})));	
+			return new Worker(URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
 		}
 	};
+	
 	var oneOff = function(fun,data){
 		var promise = new RSVP.Promise();
 		var worker = makeWorker(['_self={}\n;_self.fun = ',fun,';\n\
