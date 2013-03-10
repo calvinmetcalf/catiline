@@ -8,17 +8,17 @@
 		if(match){
 			script = match[0].replace(/importScripts\((.*)\);?/,function(a,b){if(b){return "importScripts("+b.split(",").map(function(c){return '"'+p.makeUrl(c.slice(1,-1))+'"'})+");\n";}else{return "";}})+script.replace(/(importScripts\(.*\);?)/,"\n");
 		}
-		var URL = window.URL || window.webkitURL || self.URL;
+		p.URL = p.URL||window.URL || window.webkitURL;// || self.URL;
 		if(window.communist.IEpath){
 			try{
-				worker = new Worker(URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
+				worker = new Worker(p.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
 			} catch(e){
 				worker = new Worker(window.communist.IEpath);
 				worker.postMessage(script);
 			}
 			return worker;
 		}else {
-			return new Worker(URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
+			return new Worker(p.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
 		}
 	};
 	

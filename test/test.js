@@ -184,6 +184,7 @@ describe('communist()', function () {
 	describe('Everything again, but with the IE shim', function () {
 		it('should work with the IE shim', function (done) {
 			communist.IEpath="../IE.js"
+			communist.URL=1;//force IE mode.
 			communist(square, 9).then(function (a) { a.should.equal(81); }).then(done, done);
 		});
 		it('should work when given a function and data async', function (done) {
