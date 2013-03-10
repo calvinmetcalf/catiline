@@ -6,12 +6,16 @@
 		var script = strings.join("");
 		var match = script.match(/(importScripts\(.*\);)/);
 		if(match){
-			script = match[0]+script.replace(/(importScripts\(.*\);)/,"\n");
+			script = match[0].replace(/importScripts\((.*)\);?/,function(a,b){if(b){return "importScripts("+b.split(",").map(function(c){return '"'+p.makeUrl(c.slice(1,-1))+'"'})+");\n";}else{return "";}})+script.replace(/(importScripts\(.*\);?)/,"\n");
 		}
 		var URL = window.URL || window.webkitURL || self.URL;
 		if(window.communist.IEpath){
-			worker = new Worker(window.communist.IEpath);
-			worker.postMessage(script);
+			try{
+				worker = new Worker(URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
+			} catch(e){
+				worker = new Worker(window.communist.IEpath);
+				worker.postMessage(script);
+			}
 			return worker;
 		}else {
 			return new Worker(URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
@@ -20,7 +24,7 @@
 	
 	var oneOff = function(fun,data){
 		var promise = new RSVP.Promise();
-		var worker = makeWorker(['_self={}\n;_self.fun = ',fun,';\n\
+		var worker = makeWorker(['_self={};\n_self.fun = ',fun,';\n\
 		_self.cb=function(data,transfer){\n\
 				self.postMessage(data,transfer);\n\
 				self.close();\n\
@@ -40,7 +44,7 @@
 	};
 	var mapWorker=function(fun,callback,onerr){
 		var w = new Communist();
-		var worker = makeWorker(['var _db={};var _self={};_self.fun = ',fun,';\n\
+		var worker = makeWorker(['var _db={};\nvar _self={};\n_self.fun = ',fun,';\n\
 			_self.cb=function(data,transfer){\n\
 				self.postMessage(data,transfer);\n\
 			};\n\
