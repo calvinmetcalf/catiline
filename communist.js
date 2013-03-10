@@ -1,19 +1,30 @@
 (function(){
+	"use strict";
 	var Communist = function(){};
 	var makeWorker = function(strings){
 		var worker;
-		var URL = window.URL || window.webkitURL || self.URL;
+		var script = strings.join("");
+		var match = script.match(/(importScripts\(.*\);)/);
+		if(match){
+			script = match[0].replace(/importScripts\((.*)\);?/,function(a,b){if(b){return "importScripts("+b.split(",").map(function(c){return '"'+p.makeUrl(c.slice(1,-1))+'"'})+");\n";}else{return "";}})+script.replace(/(importScripts\(.*\);?)/,"\n");
+		}
+		p.URL = p.URL||window.URL || window.webkitURL;// || self.URL;
 		if(window.communist.IEpath){
-			worker = new Worker(window.communist.IEpath);
-			worker.postMessage(strings.join(""));
+			try{
+				worker = new Worker(p.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
+			} catch(e){
+				worker = new Worker(window.communist.IEpath);
+				worker.postMessage(script);
+			}
 			return worker;
 		}else {
-			return new Worker(URL.createObjectURL(new Blob([strings.join("")],{type: "text/javascript"})));	
+			return new Worker(p.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
 		}
 	};
+	
 	var oneOff = function(fun,data){
 		var promise = new RSVP.Promise();
-		var worker = makeWorker(['_self={}\n;_self.fun = ',fun,';\n\
+		var worker = makeWorker(['_self={};\n_self.fun = ',fun,';\n\
 		_self.cb=function(data,transfer){\n\
 				self.postMessage(data,transfer);\n\
 				self.close();\n\
@@ -33,7 +44,7 @@
 	};
 	var mapWorker=function(fun,callback,onerr){
 		var w = new Communist();
-		var worker = makeWorker(['var _db={};var _self={};_self.fun = ',fun,';\n\
+		var worker = makeWorker(['var _db={};\nvar _self={};\n_self.fun = ',fun,';\n\
 			_self.cb=function(data,transfer){\n\
 				self.postMessage(data,transfer);\n\
 			};\n\
