@@ -19,6 +19,7 @@ function square(a){
 function sum(a, b) {
 	return a + b;
 }
+
 describe('communist()', function () {
 	describe('Basic', function () {
 		it('should work when given a function and data directly', function (done) {
@@ -156,6 +157,30 @@ describe('communist()', function () {
 			communist.ajax("test.json",function(a,cb){var b = new Uint32Array(a.split("").map(function(v){return v.charCodeAt()})).buffer; cb(b,[b])},true).then(function(a){ a.should.deep.equal(new Uint32Array([123, 34, 97, 34, 58, 49, 44, 34, 98, 34, 58, 50, 125]).buffer); }).then(done, done);
 		});
 	});
+	describe('Import Scripts', function () {
+		it("should be able to import scripts",function (done){
+			communist(function(a){importScripts('fakeLib.js');return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
+		});
+		it("should be able to import reletive urls",function (done){
+			communist(function(a){importScripts('../test/fakeLib.js');return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
+		});
+		it("should be able to import 2 scripts",function (done){
+			communist(function(a){importScripts("fakeLib.js",'../test/fakeLib.js');return a;}, 9).then(function () {},function(a){a.should.equal("Uncaught tried to import twice")}).then(done, done);
+		});
+		it("should be able to import no scripts",function (done){
+			communist(function(a){importScripts();return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
+		});
+		it("should be able to import scripts in a sticks around",function (done){
+			var comrade = communist(function(a){importScripts('fakeLib.js');return a;});
+			comrade.data(9).then(function (a) { a.should.equal(9); }).then(done, done);
+		});
+		it("should be able to import scripts in a sticks around and call it twice",function (done){
+			var comrade = communist(function(a){importScripts('fakeLib.js');return a;});
+			comrade.data(9).then(function (a) { a.should.equal(9); 
+			comrade.data(7).then(function(aa){aa.should.equal(7)}).then(done,done);
+			});
+		});
+	});
 	describe('Everything again, but with the IE shim', function () {
 		it('should work with the IE shim', function (done) {
 			communist.IEpath="../IE.js"
@@ -291,6 +316,30 @@ describe('communist()', function () {
 		});
 		it('should work with an array buffer', function (done) {
 			communist.ajax("test.json",function(a,cb){var b = new Uint32Array(a.split("").map(function(v){return v.charCodeAt()})).buffer; cb(b,[b])},true).then(function(a){ a.should.deep.equal(new Uint32Array([123, 34, 97, 34, 58, 49, 44, 34, 98, 34, 58, 50, 125]).buffer); }).then(done, done);
+		});
+	});
+	describe('Import Scripts', function () {
+		it("should be able to import scripts",function (done){
+			communist(function(a){importScripts('fakeLib.js');return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
+		});
+		it("should be able to import reletive urls",function (done){
+			communist(function(a){importScripts('../test/fakeLib.js');return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
+		});
+		it("should be able to import 2 scripts",function (done){
+			communist(function(a){importScripts("fakeLib.js",'../test/fakeLib.js');return a;}, 9).then(function () {},function(a){a.should.equal("Uncaught tried to import twice")}).then(done, done);
+		});
+		it("should be able to import no scripts",function (done){
+			communist(function(a){importScripts();return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
+		});
+		it("should be able to import scripts in a sticks around",function (done){
+			var comrade = communist(function(a){importScripts('fakeLib.js');return a;});
+			comrade.data(9).then(function (a) { a.should.equal(9); }).then(done, done);
+		});
+		it("should be able to import scripts in a sticks around and call it twice",function (done){
+			var comrade = communist(function(a){importScripts('fakeLib.js');return a;});
+			comrade.data(9).then(function (a) { a.should.equal(9); 
+			comrade.data(7).then(function(aa){aa.should.equal(7)}).then(done,done);
+			});
 		});
 	});
 });
