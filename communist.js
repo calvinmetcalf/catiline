@@ -1,4 +1,5 @@
 (function(){
+	"use strict";
 	var Communist = function(){};
 	var makeWorker = function(strings){
 		var worker;
