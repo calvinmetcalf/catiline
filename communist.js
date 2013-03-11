@@ -6,19 +6,19 @@
 		var script = strings.join("");
 		var match = script.match(/(importScripts\(.*\);)/);
 		if(match){
-			script = match[0].replace(/importScripts\((.*)\);?/,function(a,b){if(b){return "importScripts("+b.split(",").map(function(c){return '"'+p.makeUrl(c.slice(1,-1))+'"'})+");\n";}else{return "";}})+script.replace(/(importScripts\(.*\);?)/,"\n");
+			script = match[0].replace(/importScripts\((.*)\);?/,function(a,b){if(b){return "importScripts("+b.split(",").map(function(cc){return '"'+c.makeUrl(cc.slice(1,-1))+'"'})+");\n";}else{return "";}})+script.replace(/(importScripts\(.*\);?)/,"\n");
 		}
-		p.URL = p.URL||window.URL || window.webkitURL;// || self.URL;
+		c.URL = c.URL||window.URL || window.webkitURL;// || self.URL;
 		if(window.communist.IEpath){
 			try{
-				worker = new Worker(p.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
+				worker = new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
 			} catch(e){
 				worker = new Worker(window.communist.IEpath);
 				worker.postMessage(script);
 			}
 			return worker;
 		}else {
-			return new Worker(p.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
+			return new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
 		}
 	};
 	
@@ -307,7 +307,7 @@
 		}
 		return w;
 	};
-	var p=function(a,b,c){
+	var c=function(a,b,c){
 		if(typeof a !== "number" && typeof b === "function"){
 			return mapWorker(a,b,c);
 		}else if(typeof a !== "number"){
@@ -316,12 +316,12 @@
 			return b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
 		}
 	};
-	p.makeUrl = function (fileName) {
+	c.makeUrl = function (fileName) {
 		var link = document.createElement("link");
 		link.href = fileName;
 		return link.href;
 	};
-	p.ajax = function(url,after,notjson){
+	c.ajax = function(url,after,notjson){
 		var txt=!notjson?'JSON.parse(request.responseText)':"request.responseText";
 		var resp = after?"("+after.toString()+")("+txt+",_cb)":txt;
 		var func = 'function (url, _cb) {\n\
@@ -336,9 +336,9 @@
 				};\n\
 			request.send();\n\
 		}';
-		return p(func,p.makeUrl(url));
+		return c(func,c.makeUrl(url));
 	};
-	p.reducer = rWorker;
-	p.worker = makeWorker;
-	window.communist=p;
+	c.reducer = rWorker;
+	c.worker = makeWorker;
+	window.communist=c;
 })();
