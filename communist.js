@@ -1,14 +1,23 @@
 (function(){
 	"use strict";
+	//this is mainly so the name shows up when you look at the object in the console
 	var Communist = function(){};
+	//regex out the importScript call and move it up to the top out of the function.
+	var moveImports = function(string){
+		var script;
+		var match = string.match(/(importScripts\(.*\);)/);
+		if(match){
+			script = match[0].replace(/importScripts\((.*)\);?/,function(a,b){if(b){return "importScripts("+b.split(",").map(function(cc){return '"'+c.makeUrl(cc.slice(1,-1))+'"'})+");\n";}else{return "";}})+string.replace(/(importScripts\(.*\);?)/,"\n");
+		}else{
+			script = string;
+		}
+		return script;
+	};
+	//accepts an array of strings, joins them, and turns them into a worker.
 	var makeWorker = function(strings){
 		var worker;
-		var script = strings.join("");
-		var match = script.match(/(importScripts\(.*\);)/);
-		if(match){
-			script = match[0].replace(/importScripts\((.*)\);?/,function(a,b){if(b){return "importScripts("+b.split(",").map(function(cc){return '"'+c.makeUrl(cc.slice(1,-1))+'"'})+");\n";}else{return "";}})+script.replace(/(importScripts\(.*\);?)/,"\n");
-		}
-		c.URL = c.URL||window.URL || window.webkitURL;// || self.URL;
+		var script =moveImports(strings.join(""));
+		c.URL = c.URL||window.URL || window.webkitURL || self.URL;
 		if(window.communist.IEpath){
 			try{
 				worker = new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
@@ -21,7 +30,6 @@
 			return new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
 		}
 	};
-	
 	var oneOff = function(fun,data){
 		var promise = new RSVP.Promise();
 		var worker = makeWorker(['_self={};\n_self.fun = ',fun,';\n\
