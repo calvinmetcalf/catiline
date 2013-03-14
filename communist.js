@@ -30,6 +30,8 @@
 			return new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
 		}
 	};
+	//special case of worker only being called once, instead of sending the data
+	//we can bake the data into the worker when we make it.
 	var oneOff = function(fun,data){
 		var promise = new RSVP.Promise();
 		var worker = makeWorker(['_self={};\n_self.fun = ',fun,';\n\
