@@ -1,6 +1,12 @@
 (function(){
+var r;
+if((function(){return (typeof module !== "undefined")})()){
+	r = require("rsvp");
+}else{
+	r=RSVP;
+}
+(function(RSVP){
 	"use strict";
-	RSVP = RSVP ||require("RSVP");
 	var isNode=(function(){return (typeof module !== "undefined")})();
 	//this is mainly so the name shows up when you look at the object in the console
 	var Communist = function(){};
@@ -42,7 +48,20 @@
 		}
 	};
 	var nodeOneOff = function(fun,data){
-		
+		var promise = new RSVP.Promise();
+		var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
+		_self.cb=function(data){\n\
+				process.send({data:data});\n\
+				process.exit();\n\
+			};\n\
+			_self.result = _self.fun(',JSON.stringify(data),',_self.cb);\n\
+			if(typeof _self.result !== "undefined"){\n\
+				_self.cb(_self.result);\n\
+			}']);
+			worker.on("message",function(e){
+			promise.resolve(e.data);
+		});
+		return promise;
 	};
 	//special case of worker only being called once, instead of sending the data
 	//we can bake the data into the worker when we make it.
@@ -51,7 +70,7 @@
 			return nodeOneOff(fun,data);
 		}
 		var promise = new RSVP.Promise();
-		var worker = makeWorker(['_self={};\n_self.fun = ',fun,';\n\
+		var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
 		_self.cb=function(data,transfer){\n\
 				self.postMessage(data,transfer);\n\
 				self.close();\n\
@@ -69,9 +88,36 @@
 		};
 		return promise;
 	};
-	var mapWorker=function(fun,callback,onerr){
+	var nodeMapWorker=function(fun,callback){
 		var w = new Communist();
-		var worker = makeWorker(['var _db={};\nvar _self={};\n_self.fun = ',fun,';\n\
+		var worker = makeWorker(['var _close=function(){process.exit();};var _db={};\nvar _self={};\n_self.fun = ',fun,';\n\
+			_self.cb=function(data){\n\
+				process.send({data:data});\n\
+			};\n\
+			process.on("message",function(e){\n\
+			_self.result = _self.fun(e.data,_self.cb);\n\
+				if(typeof _self.result !== "undefined"){\n\
+					_self.cb(_self.result);\n\
+				}\n\
+			});']);
+		worker.on("message" , function(e){
+			callback(e.data);	
+		});
+		w.data=function(d){
+			worker.send({data:d});	
+			return w;
+		};
+		w.close=function(){
+			return worker.kill();
+		};
+		return w;
+	};
+	var mapWorker=function(fun,callback,onerr){
+		if(isNode){
+			return nodeMapWorker(fun,callback,onerr);
+		}
+		var w = new Communist();
+		var worker = makeWorker(['var _close=function(){self.close();};var _db={};\nvar _self={};\n_self.fun = ',fun,';\n\
 			_self.cb=function(data,transfer){\n\
 				self.postMessage(data,transfer);\n\
 			};\n\
@@ -116,7 +162,7 @@
 			_self.numberCB = function(num,d,tran){\n\
 			cb([num,d],tran);\n\
 			};\n\
-			_self.boundCB = _self.numberCB.bind(self,data[0]);\n\
+			_self.boundCB = _self.numberCB.bind(null,data[0]);\n\
 			_self.result = _self.fun(data[1],_self.boundCB);\n\
 			if(typeof _self.result !== "undefined"){\n\
 				_self.boundCB(_self.result);\n\
@@ -155,7 +201,7 @@
 					return cb(_db._r);\n\
 				case "close":\n\
 					cb(_db._r);\n\
-					self.close();\n\
+					_close();\n\
 					break;\n\
 			}\n\
 		};'
@@ -343,28 +389,30 @@
 			return b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
 		}
 	};
-	c.makeUrl = function (fileName) {
-		var link = document.createElement("link");
-		link.href = fileName;
-		return link.href;
-	};
-	c.ajax = function(url,after,notjson){
-		var txt=!notjson?'JSON.parse(request.responseText)':"request.responseText";
-		var resp = after?"("+after.toString()+")("+txt+",_cb)":txt;
-		var func = 'function (url, _cb) {\n\
-			var request = new XMLHttpRequest();\n\
-			request.open("GET", url);\n\
-				request.onreadystatechange = function() {\n\
-					var _resp;\n\
-					if (request.readyState === 4 && request.status === 200) {\n'+
-						'_resp = '+resp+';\n\
-						if(typeof _resp!=="undefined"){_cb(_resp);}\n\
-						}\n\
-				};\n\
-			request.send();\n\
-		}';
-		return c(func,c.makeUrl(url));
-	};
+	if(!isNode){
+		c.makeUrl = function (fileName) {
+			var link = document.createElement("link");
+			link.href = fileName;
+			return link.href;
+		};
+		c.ajax = function(url,after,notjson){
+			var txt=!notjson?'JSON.parse(request.responseText)':"request.responseText";
+			var resp = after?"("+after.toString()+")("+txt+",_cb)":txt;
+			var func = 'function (url, _cb) {\n\
+				var request = new XMLHttpRequest();\n\
+				request.open("GET", url);\n\
+					request.onreadystatechange = function() {\n\
+						var _resp;\n\
+						if (request.readyState === 4 && request.status === 200) {\n'+
+							'_resp = '+resp+';\n\
+							if(typeof _resp!=="undefined"){_cb(_resp);}\n\
+							}\n\
+					};\n\
+				request.send();\n\
+			}';
+			return c(func,c.makeUrl(url));
+		};
+	}
 	c.reducer = rWorker;
 	c.worker = makeWorker;
 	if(isNode){
@@ -372,4 +420,5 @@
 	}else{
 		window.communist=c;
 	}
+})(r);
 })();
