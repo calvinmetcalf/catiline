@@ -1,19 +1,30 @@
 (function(){
+	"use strict";
 	var Communist = function(){};
 	var makeWorker = function(strings){
 		var worker;
-		var URL = window.URL || window.webkitURL || self.URL;
+		var script = strings.join("");
+		var match = script.match(/(importScripts\(.*\);)/);
+		if(match){
+			script = match[0].replace(/importScripts\((.*)\);?/,function(a,b){if(b){return "importScripts("+b.split(",").map(function(c){return '"'+p.makeUrl(c.slice(1,-1))+'"'})+");\n";}else{return "";}})+script.replace(/(importScripts\(.*\);?)/,"\n");
+		}
+		p.URL = p.URL||window.URL || window.webkitURL;// || self.URL;
 		if(window.communist.IEpath){
-			worker = new Worker(window.communist.IEpath);
-			worker.postMessage(strings.join(""));
+			try{
+				worker = new Worker(p.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
+			} catch(e){
+				worker = new Worker(window.communist.IEpath);
+				worker.postMessage(script);
+			}
 			return worker;
 		}else {
-			return new Worker(URL.createObjectURL(new Blob([strings.join("")],{type: "text/javascript"})));	
+			return new Worker(p.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
 		}
 	};
+	
 	var oneOff = function(fun,data){
 		var promise = new RSVP.Promise();
-		var worker = makeWorker(['_self={}\n;_self.fun = ',fun,';\n\
+		var worker = makeWorker(['_self={};\n_self.fun = ',fun,';\n\
 		_self.cb=function(data,transfer){\n\
 				self.postMessage(data,transfer);\n\
 				self.close();\n\
@@ -33,7 +44,7 @@
 	};
 	var mapWorker=function(fun,callback,onerr){
 		var w = new Communist();
-		var worker = makeWorker(['var _db={};var _self={};_self.fun = ',fun,';\n\
+		var worker = makeWorker(['var _db={};\nvar _self={};\n_self.fun = ',fun,';\n\
 			_self.cb=function(data,transfer){\n\
 				self.postMessage(data,transfer);\n\
 			};\n\
@@ -140,93 +151,6 @@
 			worker.data(["close"]);
 			return;
 		};
-		return w;
-	};
-	var nonIncrementalMapReduce = function(threads){
-		var data=[];
-		var len = 0;
-		var reducer;
-		var w = new RSVP.Promise();
-		var workers = [];
-		var terminated = threads;
-		var status = {
-			map:false,
-			reduce:false,
-			data:false
-		};
-		var checkStatus = function(){
-			if(status.map && status.reduce && status.data){
-				return go();
-			}else{
-				return w;
-			}
-		};
-		w.map=function(fun,t){
-			if(status.map){
-				return w;
-			}
-			var i = 0;
-			while(i<threads){
-				var dd;
-				(function(){
-					var mw = mapWorker(fun, function(d){
-						if(typeof d !== undefined){
-							reducer.data(d);
-						}
-						if(len>0){
-							len--;
-							dd = data.pop();
-							if(t){
-								mw.data(dd,[dd]);
-							}else{
-							mw.data(dd);
-							}
-						}else{
-							terminated++;
-							mw.close();
-							if(terminated===threads){
-								reducer.close();
-							}
-						}
-					});
-				workers.push(mw);
-				})();
-				i++;
-			}
-			status.map=true;
-			return checkStatus();
-		};
-		w.reduce=function(fun){
-			if(status.reduce){
-				return w;
-			}
-			reducer = rWorker(fun,function(d){
-				w.resolve(d);
-			});
-			status.reduce=true;
-			return checkStatus();
-		};
-		w.data = function(d){
-			len = len + d.length;
-			data = data.concat(d);
-			status.data=true;
-			return checkStatus();
-		};
-		function go(){
-			var i = 0;
-			var wlen = workers.length;
-			while(i<wlen && len>0){
-				len--;
-				workers[i].data(data.pop());
-				i++;
-				terminated--;
-			}
-			w.data=function(){
-				w.reject("can't add data, already called.");
-				return w;
-			};
-			return w;
-		}
 		return w;
 	};
 	var incrementalMapReduce = function(threads){
@@ -351,6 +275,35 @@
 			workers.forEach(function(v){
 				v.close();	
 			});
+		}
+		return w;
+	};
+	var nonIncrementalMapReduce = function(threads){
+		var w = new Communist();
+		var worker = incrementalMapReduce(threads);
+		var steps = {data:false,map:false,reduce:false};
+		w.map = function(f,t){
+			steps.map=true;
+			worker.map(f,t);
+			return check();
+		};
+		w.reduce = function(f){
+			steps.reduce=true;
+			worker.reduce(f);
+			return check();
+		};
+		w.data = function(d){
+			steps.data=true;
+			worker.data(d);
+			return check();
+		};
+		
+		function check(){
+			if(steps.data&&steps.map&&steps.reduce){
+				return worker.close();
+			}else{
+				return w;
+			}
 		}
 		return w;
 	};
