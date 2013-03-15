@@ -2,7 +2,7 @@ Communist
 ==========
 ![communist](logo.png)
 
-A library all about workers that grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).  You want Node.js ~~and IE support~~ (have that now) and for it not to blow up? go use Parallel.js, at the moment that's not what I'm going for here. Requires [RSVP](https://github.com/tildeio/rsvp.js).
+A library all about workers that grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).  You want ~~Node.js~~ (`npm install communist`) and ~~IE support~~ (have that now) and for it not to blow up? go use Parallel.js, at the moment that's not what I'm going for here. Requires [RSVP](https://github.com/tildeio/rsvp.js).
 
 API
 ===
