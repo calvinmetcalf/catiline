@@ -1,0 +1,33 @@
+{
+  "name": "communist",
+  "version": "0.0.1",
+  "description": "Threading with workers in node and the browser.",
+  "keywords": [
+    "workers",
+    "threads",
+    "parallel"
+  ],
+  "author": "Calvin Metcalf <calvin.metalf@gmail.com> (https://github.com/calvinmetcalf)",
+  "bugs": {
+    "url": "https://github.com/calvinmetcalf/communist/issues"
+  },
+  "repositories": [
+    {
+      "type": "git",
+      "url": "https://github.com/calvinmetcalf/communist.git"
+    }
+  ],
+  "dependencies": {
+    "rsvp": "1.x"
+  },
+  "main": "communist.js",
+  "license": "MIT",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/calvinmetcalf/communist.git"
+  },
+  "directories": {
+    "test": "test"
+  }
+}
