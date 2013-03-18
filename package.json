@@ -20,9 +20,16 @@
   "dependencies": {
     "rsvp": "1.x"
   },
-  "main": "communist.js",
+  "main": "lib/communist.js",
   "license": "MIT",
-  "devDependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-uglify": "~0.2.0",
+    "grunt-contrib-concat": "~0.1.3",
+    "grunt-simple-mocha": "~0.3.2",
+    "chai": "~1.5.0",
+    "grunt-cli": "~0.1.6"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/calvinmetcalf/communist.git"
