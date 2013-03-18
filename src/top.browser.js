@@ -1,5 +1,8 @@
 (function(RSVP){
 "use strict";
+function makePromise(){
+	return RSVP.defer();
+}
 //this is mainly so the name shows up when you look at the object in the console
 var Communist = function(){};
 //regex out the importScript call and move it up to the top out of the function.
@@ -34,7 +37,7 @@ var makeWorker = function(strings){
 //special case of worker only being called once, instead of sending the data
 //we can bake the data into the worker when we make it.
 var oneOff = function(fun,data){
-	var promise = new RSVP.Promise();
+	var promise = makePromise();
 	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
 	_self.cb=function(data,transfer){\n\
 			self.postMessage(data,transfer);\n\
@@ -51,7 +54,7 @@ var oneOff = function(fun,data){
 		e.preventDefault();
 		promise.reject(e.message);
 	};
-	return promise;
+	return promise.promise;
 };
 var mapWorker=function(fun,callback,onerr){
 	var w = new Communist();

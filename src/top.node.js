@@ -1,4 +1,11 @@
 var RSVP=require("rsvp");
+function makePromise(){
+	var p = {};
+	p.promise=new RSVP.Promise();
+	p.resolve=function(d){return p.promise.resolve(d);};
+	p.reject=function(d){return p.promise.reject(d);};
+	return p;
+}
 //this is mainly so the name shows up when you look at the object in the console
 var Communist = function(){};
 //accepts an array of strings, joins them, and turns them into a worker.
@@ -11,7 +18,7 @@ var makeWorker = function(strings){
 //special case of worker only being called once, instead of sending the data
 //we can bake the data into the worker when we make it.
 var oneOff = function(fun,data){
-	var promise = new RSVP.Promise();
+	var promise = makePromise();
 	var worker = makeWorker(['\
 	var domain = require("domain");\n\
 	var d = domain.create();\n\
@@ -36,7 +43,7 @@ var oneOff = function(fun,data){
 				promise.reject(e.err);
 			}
 	});
-	return promise;
+	return promise.promise;
 };
 var mapWorker=function(fun,callback, onerr){
 	var w = new Communist();

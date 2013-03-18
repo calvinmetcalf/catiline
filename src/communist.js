@@ -34,9 +34,9 @@ var sticksAround = function(fun){
 	};
 	w.data=function(data, transfer){
 		var i = promises.length;
-		promises[i] = new RSVP.Promise();
+		promises[i] = makePromise();
 		worker.data([i,data],transfer);
-		return promises[i];
+		return promises[i].promise;
 	};
 	return w;
 };
@@ -177,25 +177,25 @@ var incrementalMapReduce = function(threads){
 	}
 	w.fetch=function(now){
 		if(!promise){
-			promise = new RSVP.Promise();
+			promise = makePromise();
 		}
 		if(idle<threads && !now){
 			waiting=true;
 		}else{
 			reducer.fetch();
 		}
-		return promise;
+		return promise.promise;
 	};
 	w.close=function(){
 		if(!promise){
-			promise = new RSVP.Promise();
+			promise = makePromise();
 		}
 		if(idle<threads){
 			closing=true;
 		}else{
 			closeUp();
 		}
-		return promise;
+		return promise.promise;
 	};
 	function closeUp(){
 		reducer.close();
