@@ -18,7 +18,7 @@
     }
   ],
   "dependencies": {
-    "rsvp": "1.x"
+    "promiscuous": "0.2.x"
   },
   "main": "lib/communist.js",
   "license": "MIT",

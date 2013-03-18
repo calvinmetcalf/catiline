@@ -21,4 +21,4 @@ c.ajax = function(url,after,notjson){
 	return c(func,c.makeUrl(url));
 };
 window.communist=c;
-})(RSVP);
+})();

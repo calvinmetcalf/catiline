@@ -1,15 +1,12 @@
-var RSVP=require("rsvp");
+var promiscuous=require("promiscuous");
 function makePromise(){
-	var p = {};
-	p.promise=new RSVP.Promise();
-	p.resolve=function(d){return p.promise.resolve(d);};
-	p.reject=function(d){return p.promise.reject(d);};
+	var p= promiscuous.deferred();
 	return p;
 }
 //this is mainly so the name shows up when you look at the object in the console
 var Communist = function(){};
 //accepts an array of strings, joins them, and turns them into a worker.
-var makeWorker = function(strings){
+function makeWorker(strings){
 	var worker = require("child_process").fork("./node.js");
 	var script = strings.join("");
 	worker.send({data:script});
@@ -17,7 +14,7 @@ var makeWorker = function(strings){
 };
 //special case of worker only being called once, instead of sending the data
 //we can bake the data into the worker when we make it.
-var oneOff = function(fun,data){
+function oneOff(fun,data){
 	var promise = makePromise();
 	var worker = makeWorker(['\
 	var domain = require("domain");\n\
@@ -45,7 +42,7 @@ var oneOff = function(fun,data){
 	});
 	return promise.promise;
 };
-var mapWorker=function(fun,callback, onerr){
+function mapWorker(fun,callback, onerr){
 	var w = new Communist();
 	var worker = makeWorker(['\
 		var _close=function(){process.exit();};\n\

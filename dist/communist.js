@@ -1,13 +1,90 @@
 /*! communist 2013-03-18 */
-(function(RSVP){
+(function(){
 "use strict";
+/** @license MIT - ©2013 Ruben Verborgh https://github.com/RubenVerborgh*/
+(function (exports) {
+  var func = "function",
+      noop = function () {};
+
+  function createDeferred() {
+    var handler,
+        changeState,
+        promise = {
+          then: function (onFulfilled, onRejected) {
+            return handler(onFulfilled, onRejected);
+          }
+        };
+
+    (function () {
+      var pending = [];
+      handler = function (onFulfilled, onRejected) {
+        var d = createDeferred();
+        pending.push({ d: d, resolve: onFulfilled, reject: onRejected });
+        return d.promise;
+      };
+      changeState = function (action, value, success) {
+        for (var i = 0, l = pending.length; i < l; i++) {
+          var p = pending[i], deferred = p.d, callback = p[action];
+          if (typeof callback !== func)
+            deferred[action](value);
+          else
+            execute(callback, value, deferred);
+        }
+        handler = createHandler(promise, value, success);
+        changeState = noop;
+      };
+    })();
+
+    return {
+      resolve: function (value)  { changeState('resolve', value, true); },
+      reject : function (reason) { changeState('reject', reason, false); },
+      promise: promise
+    };
+  }
+
+  function createHandler(promise, value, success) {
+    return function (onFulfilled, onRejected) {
+      var callback = success ? onFulfilled : onRejected, result;
+      if (typeof callback !== func)
+        return promise;
+      setTimeout(execute.bind(promise, callback, value, result = createDeferred()));
+      return result.promise;
+    };
+  }
+
+  function execute(callback, value, deferred) {
+    try {
+      var result = callback(value);
+      if (result && typeof result.then === func)
+        result.then(deferred.resolve, deferred.reject);
+      else
+        deferred.resolve(result);
+    }
+    catch (error) {
+      deferred.reject(error);
+    }
+  }
+
+  exports.resolve= function (value) {
+      var promise = {};
+      promise.then = createHandler(promise, value, true);
+      return promise;
+    };
+    exports.reject= function (reason) {
+      var promise = {};
+      promise.then = createHandler(promise, reason, false);
+      return promise;
+    }
+    exports.deferred=createDeferred;
+})(c);
+
 function makePromise(){
-	return RSVP.defer();
+	return c.deferred();
 }
 //this is mainly so the name shows up when you look at the object in the console
 var Communist = function(){};
 //regex out the importScript call and move it up to the top out of the function.
-var moveImports = function(string){
+function moveImports(string){
 	var script;
 	var match = string.match(/(importScripts\(.*\);)/);
 	if(match){
@@ -19,7 +96,7 @@ var moveImports = function(string){
 };
 
 //accepts an array of strings, joins them, and turns them into a worker.
-var makeWorker = function(strings){
+function makeWorker(strings){
 	var worker;
 	var script =moveImports(strings.join(""));
 	c.URL = c.URL||window.URL || window.webkitURL || self.URL;
@@ -37,7 +114,7 @@ var makeWorker = function(strings){
 };
 //special case of worker only being called once, instead of sending the data
 //we can bake the data into the worker when we make it.
-var oneOff = function(fun,data){
+function oneOff(fun,data){
 	var promise = makePromise();
 	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
 	_self.cb=function(data,transfer){\n\
@@ -57,7 +134,7 @@ var oneOff = function(fun,data){
 	};
 	return promise.promise;
 };
-var mapWorker=function(fun,callback,onerr){
+function mapWorker(fun,callback,onerr){
 	var w = new Communist();
 	var worker = makeWorker(['var _close=function(){self.close();};var _db={};\nvar _self={};\n_self.fun = ',fun,';\n\
 		_self.cb=function(data,transfer){\n\
@@ -86,7 +163,7 @@ var mapWorker=function(fun,callback,onerr){
 	};
 	return w;
 };
-var sticksAround = function(fun){
+function sticksAround(fun){
 	var w = new Communist();
 	var promises = [];
 	var rejectPromises = function(msg){
@@ -128,7 +205,7 @@ var sticksAround = function(fun){
 	};
 	return w;
 };
-var rWorker = function(fun,callback){
+function rWorker(fun,callback){
 	var w = new Communist();
 	var func = 'function(dat,cb){ var fun = '+fun+';\n\
 		switch(dat[0]){\n\
@@ -168,7 +245,7 @@ var rWorker = function(fun,callback){
 	};
 	return w;
 };
-var incrementalMapReduce = function(threads){
+function incrementalMapReduce(threads){
 	var w = new Communist();
 	var len = 0;
 	var promise;
@@ -293,7 +370,7 @@ var incrementalMapReduce = function(threads){
 	}
 	return w;
 };
-var nonIncrementalMapReduce = function(threads){
+function nonIncrementalMapReduce(threads){
 	var w = new Communist();
 	var worker = incrementalMapReduce(threads);
 	var steps = {data:false,map:false,reduce:false};
@@ -322,7 +399,7 @@ var nonIncrementalMapReduce = function(threads){
 	}
 	return w;
 };
-var c=function(a,b,c){
+function c(a,b,c){
 	if(typeof a !== "number" && typeof b === "function"){
 		return mapWorker(a,b,c);
 	}else if(typeof a !== "number"){
@@ -356,4 +433,4 @@ c.ajax = function(url,after,notjson){
 	return c(func,c.makeUrl(url));
 };
 window.communist=c;
-})(RSVP);
+})();

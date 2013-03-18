@@ -1,12 +1,11 @@
-(function(RSVP){
-"use strict";
+
 function makePromise(){
-	return RSVP.defer();
+	return c.deferred();
 }
 //this is mainly so the name shows up when you look at the object in the console
 var Communist = function(){};
 //regex out the importScript call and move it up to the top out of the function.
-var moveImports = function(string){
+function moveImports(string){
 	var script;
 	var match = string.match(/(importScripts\(.*\);)/);
 	if(match){
@@ -18,7 +17,7 @@ var moveImports = function(string){
 };
 
 //accepts an array of strings, joins them, and turns them into a worker.
-var makeWorker = function(strings){
+function makeWorker(strings){
 	var worker;
 	var script =moveImports(strings.join(""));
 	c.URL = c.URL||window.URL || window.webkitURL || self.URL;
@@ -36,7 +35,7 @@ var makeWorker = function(strings){
 };
 //special case of worker only being called once, instead of sending the data
 //we can bake the data into the worker when we make it.
-var oneOff = function(fun,data){
+function oneOff(fun,data){
 	var promise = makePromise();
 	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
 	_self.cb=function(data,transfer){\n\
@@ -56,7 +55,7 @@ var oneOff = function(fun,data){
 	};
 	return promise.promise;
 };
-var mapWorker=function(fun,callback,onerr){
+function mapWorker(fun,callback,onerr){
 	var w = new Communist();
 	var worker = makeWorker(['var _close=function(){self.close();};var _db={};\nvar _self={};\n_self.fun = ',fun,';\n\
 		_self.cb=function(data,transfer){\n\

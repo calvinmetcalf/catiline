@@ -1,4 +1,4 @@
-var sticksAround = function(fun){
+function sticksAround(fun){
 	var w = new Communist();
 	var promises = [];
 	var rejectPromises = function(msg){
@@ -40,7 +40,7 @@ var sticksAround = function(fun){
 	};
 	return w;
 };
-var rWorker = function(fun,callback){
+function rWorker(fun,callback){
 	var w = new Communist();
 	var func = 'function(dat,cb){ var fun = '+fun+';\n\
 		switch(dat[0]){\n\
@@ -80,7 +80,7 @@ var rWorker = function(fun,callback){
 	};
 	return w;
 };
-var incrementalMapReduce = function(threads){
+function incrementalMapReduce(threads){
 	var w = new Communist();
 	var len = 0;
 	var promise;
@@ -205,7 +205,7 @@ var incrementalMapReduce = function(threads){
 	}
 	return w;
 };
-var nonIncrementalMapReduce = function(threads){
+function nonIncrementalMapReduce(threads){
 	var w = new Communist();
 	var worker = incrementalMapReduce(threads);
 	var steps = {data:false,map:false,reduce:false};
@@ -234,7 +234,7 @@ var nonIncrementalMapReduce = function(threads){
 	}
 	return w;
 };
-var c=function(a,b,c){
+function c(a,b,c){
 	if(typeof a !== "number" && typeof b === "function"){
 		return mapWorker(a,b,c);
 	}else if(typeof a !== "number"){
