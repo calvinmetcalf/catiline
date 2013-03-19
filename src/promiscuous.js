@@ -1,4 +1,4 @@
-/** @license MIT - ©2013 Ruben Verborgh https://github.com/RubenVerborgh*/
+/*! Promiscuous ©2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/
 (function (exports) {
   var func = "function",
       noop = function () {};

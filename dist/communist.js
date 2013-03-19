@@ -1,7 +1,8 @@
-/*! communist 2013-03-18 */
+/*! communist 2013-03-19
+©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 (function(){
 "use strict";
-/** @license MIT - ©2013 Ruben Verborgh https://github.com/RubenVerborgh*/
+/*! Promiscuous ©2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/
 (function (exports) {
   var func = "function",
       noop = function () {};
@@ -432,5 +433,5 @@ c.ajax = function(url,after,notjson){
 	}';
 	return c(func,c.makeUrl(url));
 };
-window.communist=c;
+window["communist"]=c;
 })();
