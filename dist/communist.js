@@ -1,5 +1,5 @@
-/*! communist 2013-03-19
-©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
+/*! communist 2013-03-19*/
+/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 (function(){
 "use strict";
 /*! Promiscuous ©2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/
@@ -406,7 +406,7 @@ function c(a,b,c){
 	}else if(typeof a !== "number"){
 		return b ? oneOff(a,b):sticksAround(a);
 	}else if(typeof a === "number"){
-		return b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
+		return !b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
 	}
 };
 c.reducer = rWorker;
