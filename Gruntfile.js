@@ -4,24 +4,22 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     uglify: {
-      options: {
-        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
-      },
       browser: {
         src: 'dist/<%= pkg.name %>.js',
         dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
     concat: {
-      options: {
-        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
-        seperator:";\n"
-      },
-      browser: {
-        files: {'dist/<%= pkg.name %>.js':['src/top.browser.js','src/<%= pkg.name %>.js','src/bottom.browser.js']}
+     
+      browser: { 
+      	options: {
+          banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n(function(){\n"use strict";\n',
+          seperator:";\n"
+        },
+        files: {'dist/<%= pkg.name %>.js':['src/promiscuous.js','src/top.browser.js','src/<%= pkg.name %>.js','src/bottom.browser.js']}
       },
       node:{
-      files: {'lib/<%= pkg.name %>.js':['src/top.node.js','src/<%= pkg.name %>.js','src/bottom.node.js']}
+        files: {'lib/<%= pkg.name %>.js':['src/top.node.js','src/<%= pkg.name %>.js','src/bottom.node.js']}
     }
     },
     simplemocha:{
