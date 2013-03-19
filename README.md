@@ -45,6 +45,8 @@ worker.close().then(function(a){console.log(a)});
 //prints 389
 ```
 
+Note previous version had incremental and non-incremental map reduce, you can still access the non-incremental version by specifying a second parameter but this might be removed in the future but it's better just to call .close() after you specify data,map, and reduce and you will have the same outcome.
+
 If you want access to the reducer function you can with 
 
 ```JavaScript
