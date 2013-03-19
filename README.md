@@ -6,7 +6,7 @@ A library all about workers that grew out of my work with [earlier versions](htt
 
 API
 ===
-Built around a tremendusly overloaded function named communist, version 1:
+Built around a tremendusly overloaded function named communist:
 ```JavaScript
 comunist(function[, data]);
 ```
