@@ -88,13 +88,13 @@ describe('communist()', function () {
 	});
 	describe('MapReduce', function () {
 		it('should work', function (done) {
-			var comrade = communist(1);
+			var comrade = communist(1, true);
 			comrade.data([1,2,3]);
 			comrade.map(square);
 			comrade.reduce(sum).then(function (a) { a.should.equal(14); }).then(done, done);
 		});
 		it('should work with chaining syntax', function (done) {
-		    communist(1)
+		    communist(1,true)
 		        .data([1,2,3])
 		        .map(aSquare)
 		        .reduce(sum)
@@ -103,14 +103,14 @@ describe('communist()', function () {
 	});
 	describe('MapReduce incremental', function () {
 		it('should work', function (done) {
-			var comrade = communist(1,true);
+			var comrade = communist(1);
 			comrade.data([1,2,3]);
 			comrade.map(square);
 			comrade.reduce(sum);
 			comrade.close().then(function (a) { a.should.equal(14); }).then(done, done);
 		});
 		it('should work if we add more data', function (done) {
-			var comrade = communist(1,true);
+			var comrade = communist(1);
 			comrade.data([1,2,3]);
 			comrade.map(square);
 			comrade.reduce(sum);
@@ -119,14 +119,22 @@ describe('communist()', function () {
 			comrade.close().then(function (a) { a.should.equal(91); }).then(done, done);
 		});
 		it('should work with chaining syntax', function (done) {
-		    communist(1,true)
+		    communist(1)
 		        .data([1,2,3])
 		        .map(square)
 		        .reduce(sum)
 		        .close().then(function (a) { a.should.equal(14); }).then(done, done);
 		});
 		it('should work with chaining syntax and more data', function (done) {
-		    communist(1,true)
+		    communist(1)
+		        .data([1,2,3])
+		        .map(square)
+		        .data([4,5,6])
+		        .reduce(sum)
+		        .close().then(function (a) { a.should.equal(91); }).then(done, done);
+		});
+		it('should work with chaining syntax, more data, and more workers', function (done) {
+		    communist(3)
 		        .data([1,2,3])
 		        .map(square)
 		        .data([4,5,6])
