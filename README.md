@@ -2,7 +2,7 @@ Communist
 ==========
 ![communist](logo.png)
 
-A library all about workers that grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).  Uses [Promiscuous](https://github.com/RubenVerborgh/promiscuous/) for promises, either include dist/communist.js or in node `npm install communist`.
+A library all about workers that grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).  Uses [Promiscuous](https://github.com/RubenVerborgh/promiscuous/) for promises, either include dist/communist[.min].js or in node `npm install communist`.
 
 API
 ===
@@ -10,7 +10,7 @@ Built around a tremendusly overloaded function named communist, version 1:
 ```JavaScript
 comunist(function[, data]);
 ```
-creates a worker and if you give it data it imidiatly crunches the data in the worker this returns a promise.  If you don't send datait returns an object which has a data method that returns a promice, i.e.
+creates a worker and if you give it data it immediately crunches the data in the worker and returns a promise, the worker is then closed automatically.  If you don't send data it returns an object which has a data method that returns a promice, i.e.
 
 ```JavaSCript
 var promise = communist(function(a){return a*a;},9);
@@ -80,7 +80,7 @@ don't expect any fanciness here. we also have a couple utility function we have
 Lastly we have communist.ajax(); this is a demo function which uses the above tools (the first worker type actually) to create a function which opens up a worker, does an ajax request, can do some prosesing on it, and returns it.
 
 ```JavaScript
-var promise = communist.ajax(url,after,notjson);//returns promise obv
+var promise = communist.ajax(url[,after,notjson]);//returns promise obv
 //after is an optional function you can add if you want to process the data in the other thread before returning it
 //if notjson is true doesn't try to parse it as json which it does by default. 
 ```
