@@ -234,6 +234,32 @@ function nonIncrementalMapReduce(threads){
 	}
 	return w;
 };
+function objWorker(obj){
+	var w = new Communist();
+	var keys = Object.keys(obj);
+	var fun = 'function(data,cb){\n\
+		var cont\n\
+		if(data[0]==="__start__"){\n\
+			_self.obj = '+obj+'\n\
+		}\n\
+		else{\n\
+		cont =data[1];\n\
+		cont.push(cb)\n\
+		return _self.obj[data[0]].apply(null,cont);\n\
+		}\n\
+	}';
+	var worker = sticksAround(fun);
+	worker.data(["__start__"]);
+	var i = 0;
+	var len = keys.length;
+	while(i<len){
+		w[keys[i]]=function(){
+			return worker.data([w[keys[i]],Array.prototype.slice.call(arguments)]);
+		};
+		i++;
+	}
+	return w;
+}
 function c(a,b,c){
 	if(typeof a !== "number" && typeof b === "function"){
 		return mapWorker(a,b,c);
@@ -241,6 +267,8 @@ function c(a,b,c){
 		return b ? oneOff(a,b):sticksAround(a);
 	}else if(typeof a === "number"){
 		return !b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
+	}else if(typeof a === "object" && !Array.isArray(a)){
+		return objWorker(a);
 	}
 };
 c.reducer = rWorker;
