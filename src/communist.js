@@ -12,12 +12,12 @@ function sticksAround(fun){
 			}	
 		});
 	};
-	var func = 'function(data,cb){var _self={};_self.fun = '+fun+';\n\
+	var func = 'function(data,cb){_self.func = '+fun+';\n\
 		_self.numberCB = function(num,d,tran){\n\
 			cb([num,d],tran);\n\
 		};\n\
 		_self.boundCB = _self.numberCB.bind(null,data[0]);\n\
-		_self.result = _self.fun(data[1],_self.boundCB);\n\
+		_self.result = _self.func(data[1],_self.boundCB);\n\
 		if(typeof _self.result !== "undefined"){\n\
 			_self.boundCB(_self.result);\n\
 		}\n\
@@ -43,7 +43,7 @@ function sticksAround(fun){
 function rWorker(fun,callback){
 	var w = new Communist();
 	var func = 'function(dat,cb){ var fun = '+fun+';\n\
-		switch(dat[0]){\n\
+		switch(data[0]){\n\
 			case "data":\n\
 				if(!_db._r){\n\
 					_db._r = dat[1];\n\
@@ -237,38 +237,52 @@ function nonIncrementalMapReduce(threads){
 function objWorker(obj){
 	var w = new Communist();
 	var keys = Object.keys(obj);
+	var i = 0;
+	var len = keys.length;
+	var key;
+	var fObj="{";
+	var keyFunc=function(key){
+			var args = Array.prototype.slice.call(arguments);
+			args.shift();
+			return worker.data([key,args]);
+		};
+	while(i<len){
+		(function(i){
+		key = keys[i];
+		if(i!==0){
+			fObj=fObj+",";
+		}
+		fObj=fObj+key+":"+obj[key].toString();
+		w[key]=keyFunc.bind(null,key);
+		})(i)
+		i++;
+	}
+	fObj=fObj+"}";
 	var fun = 'function(data,cb){\n\
-		var cont\n\
+		var cont;\n\
 		if(data[0]==="__start__"){\n\
-			_self.obj = '+obj+'\n\
+			_self.obj = '+fObj+';\n\
+			return true;\n\
 		}\n\
 		else{\n\
 		cont =data[1];\n\
-		cont.push(cb)\n\
+		cont.push(cb);\n\
 		return _self.obj[data[0]].apply(null,cont);\n\
 		}\n\
 	}';
 	var worker = sticksAround(fun);
 	worker.data(["__start__"]);
-	var i = 0;
-	var len = keys.length;
-	while(i<len){
-		w[keys[i]]=function(){
-			return worker.data([w[keys[i]],Array.prototype.slice.call(arguments)]);
-		};
-		i++;
-	}
 	return w;
 }
 function c(a,b,c){
 	if(typeof a !== "number" && typeof b === "function"){
 		return mapWorker(a,b,c);
+	}else if(typeof a === "object" && !Array.isArray(a)){
+		return objWorker(a);
 	}else if(typeof a !== "number"){
 		return b ? oneOff(a,b):sticksAround(a);
 	}else if(typeof a === "number"){
 		return !b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
-	}else if(typeof a === "object" && !Array.isArray(a)){
-		return objWorker(a);
 	}
 };
 c.reducer = rWorker;
