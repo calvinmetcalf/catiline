@@ -189,6 +189,28 @@ describe('communist()', function () {
 			});
 		});
 	});
+	describe('Objects', function () {
+		it("should be able create an object worker",function (done){
+			var comrade = communist({sum:sum,aSquare:aSquare,square:square});
+			comrade.aSquare(3).then(function(a){
+				a.should.equal(9);
+			}).then(function(){
+				return comrade.sum(20,100);
+			}).then(function(a){a.should.equal(120)}).then(function(){
+				return comrade.square(5);
+			}).then(function(a){a.should.equal(25)}).then(done,done);
+		});
+		it("and catch an error in it",function (done){
+			var comrade = communist({sum:sum,aSquare:aSquare,square:square});
+			comrade.square("explode").then(function(){},function(a){a.should.equal("Uncaught explode");}).then(done,done);
+		});
+		it("and then do more stuff",function (done){
+			var comrade = communist({sum:sum,aSquare:aSquare,square:square});
+			comrade.square("explode").then(function(){},function(a){a.should.equal("Uncaught explode");
+			comrade.square(9).then(function(a){a.should.equal(81)}).then(done,done);
+			});
+		});
+	});
 	describe('Everything again, but with the IE shim', function () {
 		it('should work with the IE shim', function (done) {
 			communist.IEpath="../IE.js"
@@ -356,6 +378,28 @@ describe('communist()', function () {
 			var comrade = communist(function(a){importScripts('fakeLib.js');return a;});
 			comrade.data(9).then(function (a) { a.should.equal(9); 
 			comrade.data(7).then(function(aa){aa.should.equal(7)}).then(done,done);
+			});
+		});
+	});
+	describe('Objects', function () {
+		it("should be able create an object worker",function (done){
+			var comrade = communist({sum:sum,aSquare:aSquare,square:square});
+			comrade.aSquare(3).then(function(a){
+				a.should.equal(9);
+			}).then(function(){
+				return comrade.sum(20,100);
+			}).then(function(a){a.should.equal(120)}).then(function(){
+				return comrade.square(5);
+			}).then(function(a){a.should.equal(25)}).then(done,done);
+		});
+		it("and catch an error in it",function (done){
+			var comrade = communist({sum:sum,aSquare:aSquare,square:square});
+			comrade.square("explode").then(function(){},function(a){a.should.equal("Uncaught explode");}).then(done,done);
+		});
+		it("and then do more stuff",function (done){
+			var comrade = communist({sum:sum,aSquare:aSquare,square:square});
+			comrade.square("explode").then(function(){},function(a){a.should.equal("Uncaught explode");
+			comrade.square(9).then(function(a){a.should.equal(81)}).then(done,done);
 			});
 		});
 	});

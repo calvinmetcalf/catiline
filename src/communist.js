@@ -238,24 +238,22 @@ function objWorker(obj){
 	var w = new Communist();
 	var keys = Object.keys(obj);
 	var i = 0;
-	var len = keys.length;
-	var key;
 	var fObj="{";
 	var keyFunc=function(key){
+		var out = function(){
 			var args = Array.prototype.slice.call(arguments);
-			args.shift();
 			return worker.data([key,args]);
 		};
-	while(i<len){
-		(function(i){
-		key = keys[i];
+		return out;	
+		};
+	for(var key in obj){
 		if(i!==0){
 			fObj=fObj+",";
+		}else{
+			i++;
 		}
 		fObj=fObj+key+":"+obj[key].toString();
-		w[key]=keyFunc.bind(null,key);
-		})(i)
-		i++;
+		w[key]=keyFunc(key);
 	}
 	fObj=fObj+"}";
 	var fun = 'function(data,cb){\n\
