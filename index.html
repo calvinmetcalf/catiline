@@ -41,7 +41,7 @@
 <div class="highlight"><pre><span class="nx">comunist</span><span class="p">(</span><span class="kd">function</span><span class="p">[,</span> <span class="nx">data</span><span class="p">]);</span>
 </pre></div>
 
-<p>creates a worker and if you give it data it immediately crunches the data in the worker and returns a promise, the worker is then closed automatically.  If you don't send data it returns an object which has a data method that returns a promice, i.e.</p>
+<p>creates a worker and if you give it data it immediately crunches the data in the worker and returns a promise, the worker is then closed automatically.  If you don't send data it returns an object which has a data method that returns a promise, i.e.</p>
 
 <div class="highlight"><pre><span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">communist</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span><span class="k">return</span> <span class="nx">a</span><span class="o">*</span><span class="nx">a</span><span class="p">;},</span><span class="mi">9</span><span class="p">);</span>
 <span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">);</span>
