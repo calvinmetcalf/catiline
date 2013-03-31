@@ -26,7 +26,7 @@ function sticksAround(fun){
 			promises[data[0]].resolve(data[1]);
 			promises[data[0]]=0;
 	};
-	var worker = mapWorker(func, callback,rejectPromises);
+	var worker = mapWorker(func, callback, rejectPromises);
 	w.close = function(){
 		worker.close();
 		rejectPromises("closed");
@@ -256,6 +256,7 @@ function objWorker(obj){
 		w[key]=keyFunc(key);
 	}
 	fObj=fObj+"}";
+	
 	var fun = 'function(data,cb){\n\
 		var cont;\n\
 		if(data[0]==="__start__"){\n\
@@ -269,6 +270,7 @@ function objWorker(obj){
 		}\n\
 	}';
 	var worker = sticksAround(fun);
+	w._close=worker.close
 	worker.data(["__start__"]);
 	return w;
 }
