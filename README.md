@@ -22,6 +22,15 @@ newPromise.then(console.log);
 worker.close();
 ```
 
+You can also pass an object to the constructor __experimental doesn't don't import any scripts with it errors don't work in node__ :
+
+```javascript
+var worker = communist({sum:function(a,b,cb){cb(a+b);},square:function(a){return a*a;});
+worker.sum(2,5).then(function(a){console.log(a);})//prints 7
+worker.square(5).then(function(a){console.log(a);})//prints 25
+worker._close()//closes the worker, if you have a function called _close it will be over written
+```
+
 next up comes the fancy stuff, map reduce
 
 ```JavaScript

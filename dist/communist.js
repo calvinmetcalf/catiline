@@ -1,4 +1,4 @@
-/*! communist 2013-03-19*/
+/*! communist 2013-04-02*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 (function(){
 "use strict";
@@ -178,12 +178,12 @@ function sticksAround(fun){
 			}	
 		});
 	};
-	var func = 'function(data,cb){var _self={};_self.fun = '+fun+';\n\
+	var func = 'function(data,cb){_self.func = '+fun+';\n\
 		_self.numberCB = function(num,d,tran){\n\
 			cb([num,d],tran);\n\
 		};\n\
 		_self.boundCB = _self.numberCB.bind(null,data[0]);\n\
-		_self.result = _self.fun(data[1],_self.boundCB);\n\
+		_self.result = _self.func(data[1],_self.boundCB);\n\
 		if(typeof _self.result !== "undefined"){\n\
 			_self.boundCB(_self.result);\n\
 		}\n\
@@ -192,7 +192,7 @@ function sticksAround(fun){
 			promises[data[0]].resolve(data[1]);
 			promises[data[0]]=0;
 	};
-	var worker = mapWorker(func, callback,rejectPromises);
+	var worker = mapWorker(func, callback, rejectPromises);
 	w.close = function(){
 		worker.close();
 		rejectPromises("closed");
@@ -400,9 +400,51 @@ function nonIncrementalMapReduce(threads){
 	}
 	return w;
 };
+function objWorker(obj){
+	var w = new Communist();
+	var keys = Object.keys(obj);
+	var i = 0;
+	var fObj="{";
+	var keyFunc=function(key){
+		var out = function(){
+			var args = Array.prototype.slice.call(arguments);
+			return worker.data([key,args]);
+		};
+		return out;	
+		};
+	for(var key in obj){
+		if(i!==0){
+			fObj=fObj+",";
+		}else{
+			i++;
+		}
+		fObj=fObj+key+":"+obj[key].toString();
+		w[key]=keyFunc(key);
+	}
+	fObj=fObj+"}";
+	
+	var fun = 'function(data,cb){\n\
+		var cont;\n\
+		if(data[0]==="__start__"){\n\
+			_self.obj = '+fObj+';\n\
+			return true;\n\
+		}\n\
+		else{\n\
+		cont =data[1];\n\
+		cont.push(cb);\n\
+		return _self.obj[data[0]].apply(null,cont);\n\
+		}\n\
+	}';
+	var worker = sticksAround(fun);
+	w._close=worker.close
+	worker.data(["__start__"]);
+	return w;
+}
 function c(a,b,c){
 	if(typeof a !== "number" && typeof b === "function"){
 		return mapWorker(a,b,c);
+	}else if(typeof a === "object" && !Array.isArray(a)){
+		return objWorker(a);
 	}else if(typeof a !== "number"){
 		return b ? oneOff(a,b):sticksAround(a);
 	}else if(typeof a === "number"){
