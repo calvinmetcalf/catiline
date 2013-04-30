@@ -96,7 +96,7 @@ function animateSquare() {
 
 animateSquare();
 </script>
-<script src="rsvp.js"></script>
+
 <script src="https://raw.github.com/timrwood/moment/2.0.0/moment.js"></script>
 <script src="communist.js"></script>
 <script>
@@ -203,7 +203,7 @@ starting.then(function(a){
 				reg.one("click",function(){
 					reg.addClass("disabled").html("<i class='icon-spinner icon-spin'></i> getting my map reduce on");
 					var t1 = moment();
-					var c2 = communist(parseInt($("#mNumber").val(),10),true).map(function(dd){
+					var c2 = communist(parseInt($("#mNumber").val(),10)).map(function(dd){
 							var out={},i=0,len = dd.length,char;
 							while(i<len){
 								char = dd[i];
@@ -263,7 +263,7 @@ starting.then(function(a){
 				trn.one("click",function(){
 					var t1 = moment();
 					trn.addClass("disabled").html("<i class='icon-spinner icon-spin'></i> getting my map reduce on");
-				var c3 = communist(parseInt($("#mNumber").val(),10),true);
+				var c3 = communist(parseInt($("#mNumber").val(),10));
 					c3.map(function(d,cb){
 						var dd = new Uint16Array(d);
 						var out={};

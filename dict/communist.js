@@ -1,370 +1,490 @@
+/*! communist 2013-04-30*/
+/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
+if (typeof document === "undefined") {
+	self.onmessage=function(e){
+		eval(e.data);	
+	}
+} else {
 (function(){
-	var Communist = function(){};
-	var makeWorker = function(strings){
-		var URL = window.URL || window.webkitURL || self.URL;
-		return new Worker(URL.createObjectURL(new Blob([strings.join("")],{type: "text/javascript"})));	
+	"use strict";
+/*! Promiscuous ©2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/
+(function (exports) {
+  var func = "function",
+      noop = function () {};
+
+  function createDeferred() {
+    var handler,
+        changeState,
+        promise = {
+          then: function (onFulfilled, onRejected) {
+            return handler(onFulfilled, onRejected);
+          }
+        };
+
+    (function () {
+      var pending = [];
+      handler = function (onFulfilled, onRejected) {
+        var d = createDeferred();
+        pending.push({ d: d, resolve: onFulfilled, reject: onRejected });
+        return d.promise;
+      };
+      changeState = function (action, value, success) {
+        for (var i = 0, l = pending.length; i < l; i++) {
+          var p = pending[i], deferred = p.d, callback = p[action];
+          if (typeof callback !== func)
+            deferred[action](value);
+          else
+            execute(callback, value, deferred);
+        }
+        handler = createHandler(promise, value, success);
+        changeState = noop;
+      };
+    })();
+
+    return {
+      resolve: function (value)  { changeState('resolve', value, true); },
+      reject : function (reason) { changeState('reject', reason, false); },
+      promise: promise
+    };
+  }
+
+  function createHandler(promise, value, success) {
+    return function (onFulfilled, onRejected) {
+      var callback = success ? onFulfilled : onRejected, result;
+      if (typeof callback !== func)
+        return promise;
+      setTimeout(execute.bind(promise, callback, value, result = createDeferred()));
+      return result.promise;
+    };
+  }
+
+  function execute(callback, value, deferred) {
+    try {
+      var result = callback(value);
+      if (result && typeof result.then === func)
+        result.then(deferred.resolve, deferred.reject);
+      else
+        deferred.resolve(result);
+    }
+    catch (error) {
+      deferred.reject(error);
+    }
+  }
+
+  exports.resolve= function (value) {
+      var promise = {};
+      promise.then = createHandler(promise, value, true);
+      return promise;
+    };
+    exports.reject= function (reason) {
+      var promise = {};
+      promise.then = createHandler(promise, reason, false);
+      return promise;
+    }
+    exports.deferred=createDeferred;
+})(c);
+
+
+//this is mainly so the name shows up when you look at the object in the console
+var Communist = function(){};
+//regex out the importScript call and move it up to the top out of the function.
+function moveImports(string){
+	var script;
+	var match = string.match(/(importScripts\(.*\);)/);
+	if(match){
+		script = match[0].replace(/importScripts\((.*)\);?/,function(a,b){if(b){return "importScripts("+b.split(",").map(function(cc){return '"'+c.makeUrl(cc.slice(1,-1))+'"'})+");\n";}else{return "";}})+string.replace(/(importScripts\(.*\);?)/,"\n");
+	}else{
+		script = string;
+	}
+	return script;
+};
+
+function getPath(){
+	var scripts = document.getElementsByTagName("script");
+        var len = scripts.length;
+        var i = 0;
+        while(i<len){
+            if(/communist(\.min)?\.js/.test(scripts[i].src)){
+               return scripts[i].src;
+            }
+            i++;
+        }
+}
+//accepts an array of strings, joins them, and turns them into a worker.
+function makeWorker(strings){
+	var worker;
+	var script =moveImports(strings.join(""));
+	c.URL = c.URL||window.URL || window.webkitURL;
+	try{
+		worker= new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
+	}catch(e){
+		worker = new Worker(getPath());
+		worker.postMessage(script);
+	}finally{
+		return worker;
+	}
+}
+//special case of worker only being called once, instead of sending the data
+//we can bake the data into the worker when we make it.
+function oneOff(fun,data){
+	var promise = c.deferred();
+	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
+	_self.cb=function(data,transfer){\n\
+			self.postMessage(data,transfer);\n\
+			self.close();\n\
+		};\n\
+		_self.result = _self.fun(',JSON.stringify(data),',_self.cb);\n\
+		if(typeof _self.result !== "undefined"){\n\
+			_self.cb(_self.result);\n\
+		}']);
+	worker.onmessage=function(e){
+		promise.resolve(e.data);
 	};
-	var oneOff = function(fun,data){
-		var promise = new RSVP.Promise();
-		var worker = makeWorker(['var fun = ',fun,';\
-		function _clb(data,transfer){\
-				self.postMessage(data,transfer);\
-				self.close();\
-			}\
-			var _rst = fun(',JSON.stringify(data),',_clb);\
-			if(typeof _rst !== "undefined"){\
-				_clb(_rst);\
-			}']);
-		worker.onmessage=function(e){
-			promise.resolve(e.data);
-		};
-		worker.onerror=function(e){
-			promise.reject(e);
-		};
-		return promise;
+	worker.onerror=function(e){
+		e.preventDefault();
+		promise.reject(e.message);
 	};
-	var mapWorker=function(fun,callback,onerr){
-		var w = new Communist();
-		var worker = makeWorker(['var _db={};var fun = ',fun,';\
-			function _clb(data,transfer){\
-				self.postMessage(data,transfer);\
-			}\
-			self.onmessage=function(e){\
-			var _rst = fun(e.data,_clb);\
-				if(typeof _rst !== "undefined"){\
-					_clb(_rst);\
-				}\
-			}']);
-		worker.onmessage = function(e){
-			callback(e.data);	
-		};
-		worker.onerror=onerr||function(){callback();};
-		w.data=function(d,t){
-			worker.postMessage(d,t);	
-		};
-		w.close=function(){
-			return worker.terminate();
-		};
+	return promise.promise;
+};
+function mapWorker(fun,callback,onerr){
+	var w = new Communist();
+	var worker = makeWorker(['var _close=function(){self.close();};var _db={};\nvar _self={};\n_self.fun = ',fun,';\n\
+		_self.cb=function(data,transfer){\n\
+			self.postMessage(data,transfer);\n\
+		};\n\
+		self.onmessage=function(e){\n\
+		_self.result = _self.fun(e.data,_self.cb);\n\
+			if(typeof _self.result !== "undefined"){\n\
+				_self.cb(_self.result);\n\
+			}\n\
+		}']);
+	worker.onmessage = function(e){
+		callback(e.data);	
+	};
+	if(onerr){
+		worker.onerror=onerr;
+	}else{
+		worker.onerror=function(){callback();};
+	}
+	w.data=function(d,t){
+		worker.postMessage(d,t);	
 		return w;
 	};
-	var sticksAround = function(fun){
-		var w = new Communist();
-		var promises = [];
-		var rejectPromises = function(msg){
-			promises.forEach(function(p){
-				if(p){
-					p.reject(msg);
-				}	
-			});
-		};
-		var func = 'function(data,cb){var _fun = '+fun+';\
-			var _nCB = function(num,d,tran){\
-			cb([num,d],tran);\
-			};\
-			var _bCB = _nCB.bind(self,data[0]);\
-			var _nR = _fun(data[1],_bCB);\
-			if(typeof _nR !== "undefined"){\
-				_bCB(_nR);\
-			}\
-		}';
-		var callback = function(data){
-				promises[data[0]].resolve(data[1]);
-				promises[data[0]]=0;
-		};
-		var worker = mapWorker(func, callback,rejectPromises);
-		w.close = function(){
-			worker.close();
-			rejectPromises("closed");
-			return;
-		};
-		w.data=function(data, transfer){
-			var i = promises.length;
-			promises[i] = new RSVP.Promise();
-			worker.data([i,data],transfer);
-			return promises[i];
-		};
+	w.close=function(){
+		return worker.terminate();
+	};
+	return w;
+};
+function sticksAround(fun){
+	var w = new Communist();
+	var promises = [];
+	var rejectPromises = function(msg){
+		if(typeof msg!=="string" && msg.preventDefault){
+			msg.preventDefault();
+			msg=msg.message;
+		}
+		promises.forEach(function(p){
+			if(p){
+				p.reject(msg);
+			}	
+		});
+	};
+	var func = 'function(data,cb){_self.func = '+fun+';\n\
+		_self.numberCB = function(num,d,tran){\n\
+			cb([num,d],tran);\n\
+		};\n\
+		_self.boundCB = _self.numberCB.bind(null,data[0]);\n\
+		_self.result = _self.func(data[1],_self.boundCB);\n\
+		if(typeof _self.result !== "undefined"){\n\
+			_self.boundCB(_self.result);\n\
+		}\n\
+	}';
+	var callback = function(data){
+			promises[data[0]].resolve(data[1]);
+			promises[data[0]]=0;
+	};
+	var worker = mapWorker(func, callback, rejectPromises);
+	w.close = function(){
+		worker.close();
+		rejectPromises("closed");
+		return;
+	};
+	w.data=function(data, transfer){
+		var i = promises.length;
+		promises[i] = c.deferred();
+		worker.data([i,data],transfer);
+		return promises[i].promise;
+	};
+	return w;
+};
+function rWorker(fun,callback){
+	var w = new Communist();
+	var func = 'function(dat,cb){ var fun = '+fun+';\n\
+		switch(dat[0]){\n\
+			case "data":\n\
+				if(!_db._r){\n\
+					_db._r = dat[1];\n\
+				}else{\n\
+					_db._r = fun(_db._r,dat[1]);\n\
+				}\n\
+				break;\n\
+			case "get":\n\
+				return cb(_db._r);\n\
+			case "close":\n\
+				cb(_db._r);\n\
+				_close();\n\
+				break;\n\
+		}\n\
+	};'
+	var cb =function(data){
+		callback(data);	
+	};
+	var worker = mapWorker(func,cb);
+	w.data=function(data,transfer){
+		worker.data(["data",data],transfer);
 		return w;
 	};
-	var rWorker = function(fun,callback){
-		var w = new Communist();
-		var func = 'function(dat,cb){ var fun = '+fun+';\
-			switch(dat[0]){\
-				case "data":\
-					if(_db==={}){\
-						_db = dat[1];\
-					}else{\
-						_db = fun(_db,dat[1]);\
-					}\
-					break;\
-				case "get":\
-					return cb(_db);\
-				case "close":\
-					cb(_db);\
-					self.close();\
-					break;\
-			}\
-		};'
-		var cb =function(data){
-			callback(data);	
-		};
-		var worker = mapWorker(func,cb);
-		w.data=function(data,transfer){
-			worker.data(["data",data],transfer);
-		};
-		w.fetch=function(){
-			worker.data(["get"]);
-		};
-		w.close=function(silent){
-			if(silent){
-				callback=function(){};
-			}
-			worker.data(["close"]);
-		};
+	w.fetch=function(){
+		worker.data(["get"]);
 		return w;
 	};
-	var nonIncrementalMapReduce = function(threads){
-		var data=[];
-		var len = 0;
-		var reducer;
-		var w = new RSVP.Promise();
-		var workers = [];
-		var terminated = threads;
-		var status = {
-			map:false,
-			reduce:false,
-			data:false
-		};
-		var checkStatus = function(){
-			if(status.map && status.reduce && status.data){
-				return go();
-			}else{
-				return w;
-			}
-		};
-		w.map=function(fun,t){
-			if(status.map){
-				return w;
-			}
-			var i = 0;
-			while(i<threads){
+	w.close=function(silent){
+		if(silent){
+			callback=function(){};
+		}
+		worker.data(["close"]);
+		return;
+	};
+	return w;
+};
+function incrementalMapReduce(threads){
+	var w = new Communist();
+	var len = 0;
+	var promise;
+	var workers = [];
+	var data=[];
+	var idle = threads;
+	var reducer;
+	var waiting=false;
+	var closing=false;
+	var status = {
+		map:false,
+		reduce:false,
+		data:false
+	};
+	var checkStatus = function(){
+		if(status.map && status.reduce && status.data){
+			return go();
+		}else{
+			return w;
+		}
+	};
+	w.map=function(fun, t){
+		if(status.map){
+			return w;
+		}
+		var i = 0;
+		while(i<threads){
+			(function(){
 				var dd;
-				(function(){
-					var mw = mapWorker(fun, function(d){
-						if(typeof d !== undefined){
-							reducer.data(d);
-						}
-						if(len>0){
-							len--;
-							dd = data.pop();
-							if(t){
-								mw.data(dd,[dd]);
-							}else{
-							mw.data(dd);
-							}
+				var mw = mapWorker(fun, function(d){
+					if(typeof d !== undefined){
+						reducer.data(d);
+					}
+					if(len>0){
+						len--;
+						dd = data.pop();
+						if(t){
+							mw.data(dd,[dd]);
 						}else{
-							terminated++;
-							mw.close();
-							if(terminated===threads){
-								reducer.close();
+						mw.data(dd);
+						}
+					}else{ 
+						idle++;
+						if(idle===threads){
+							status.data=false;
+						if(closing){
+							closeUp();
+							}else if(waiting){
+								waiting = false;
+								reducer.fetch();
 							}
 						}
-					});
-				workers.push(mw);
-				})();
-				i++;
-			}
-			status.map=true;
-			return checkStatus();
-		};
-		w.reduce=function(fun){
-			if(status.reduce){
-				return w;
-			}
-			reducer = rWorker(fun,function(d){
-				w.resolve(d);
-			});
-			status.reduce=true;
-			return checkStatus();
-		};
-		w.data = function(d){
-			len = len + d.length;
-			data = data.concat(d);
-			status.data=true;
-			return checkStatus();
-		};
-		function go(){
-			var i = 0;
-			var wlen = workers.length;
-			while(i<wlen && len>0){
-				len--;
-				workers[i].data(data.pop());
-				i++;
-				terminated--;
-			}
-			w.data=function(){
-				w.reject("can't add data, already called.");
-				return w;
-			};
+					}
+				});
+			workers.push(mw);
+			})();
+			i++;
+		}
+		status.map=true;
+		return checkStatus();
+	};
+	w.reduce=function(fun){
+		if(status.reduce){
 			return w;
 		}
-		return w;
+		reducer = rWorker(fun,function(d){
+			if(promise){
+				promise.resolve(d);
+				promise = false;
+			}
+		});
+		status.reduce=true;
+		return checkStatus();
 	};
-	var incrementalMapReduce = function(threads){
-		var w = new Communist();
-		var len = 0;
-		var promise;
-		var workers = [];
-		var data=[];
-		var idle = threads;
-		var reducer;
-		var waiting=false;
-		var closing=false;
-		var status = {
-			map:false,
-			reduce:false,
-			data:false
-		};
-		var checkStatus = function(){
-			if(status.map && status.reduce && status.data){
-				return go();
-			}else{
-				return w;
-			}
-		};
-		w.map=function(fun, t){
-			window._temp=[];
-			if(status.map){
-				return w;
-			}
-			var i = 0;
-			while(i<threads){
-				(function(){
-					var dd;
-					var mw = mapWorker(fun, function(d){
-						if(typeof d !== undefined){
-							reducer.data(d);
-							window._temp.push(d);
-						}
-						if(len>0){
-							len--;
-							dd = data.pop();
-							if(t){
-								mw.data(dd,[dd]);
-							}else{
-							mw.data(dd);
-							}
-						}else{ 
-							idle++;
-							if(idle===threads){
-								status.data=false;
-								if(closing){
-								closeUp();
-								}else if(waiting){
-									waiting = false;
-									reducer.fetch();
-								}
-							}
-						}
-					});
-				workers.push(mw);
-				})();
-				i++;
-			}
-			status.map=true;
-			return checkStatus();
-		};
-		w.reduce=function(fun){
-			if(status.reduce){
-				return w;
-			}
-			reducer = rWorker(fun,function(d){
-				if(promise){
-					promise.resolve(d);
-					promise = false;
-				}
-			});
-			status.reduce=true;
-			return checkStatus();
-		};
-		w.data = function(d){
-			if(closing){
-				return;
-			}
-			len = len + d.length;
-			data = data.concat(d);
-			status.data=true;
-			return checkStatus();
-		};
-		function go(){
-			var i = 0;
-			var wlen = workers.length;
-			while(i<wlen && len>0 && idle>0){
-				len--;
-				workers[i].data(data.pop());
-				i++;
-				idle--;
-			}
+	w.data = function(d){
+		if(closing){
+			return;
+		}
+		len = len + d.length;
+		data = data.concat(d);
+		status.data=true;
+		return checkStatus();
+	};
+	function go(){
+		var i = 0;
+		var wlen = workers.length;
+		while(i<wlen && len>0 && idle>0){
+			len--;
+			workers[i].data(data.pop());
+			i++;
+			idle--;
+		}
+		return w;
+	}
+	w.fetch=function(now){
+		if(!promise){
+			promise = c.deferred();
+		}
+		if(idle<threads && !now){
+			waiting=true;
+		}else{
+			reducer.fetch();
+		}
+		return promise.promise;
+	};
+	w.close=function(){
+		if(!promise){
+			promise = c.deferred();
+		}
+		if(idle<threads){
+			closing=true;
+		}else{
+			closeUp();
+		}
+		return promise.promise;
+	};
+	function closeUp(){
+		reducer.close();
+		workers.forEach(function(v){
+			v.close();	
+		});
+	}
+	return w;
+};
+function nonIncrementalMapReduce(threads){
+	var w = new Communist();
+	var worker = incrementalMapReduce(threads);
+	var steps = {data:false,map:false,reduce:false};
+	w.map = function(f,t){
+		steps.map=true;
+		worker.map(f,t);
+		return check();
+	};
+	w.reduce = function(f){
+		steps.reduce=true;
+		worker.reduce(f);
+		return check();
+	};
+	w.data = function(d){
+		steps.data=true;
+		worker.data(d);
+		return check();
+	};
+	
+	function check(){
+		if(steps.data&&steps.map&&steps.reduce){
+			return worker.close();
+		}else{
 			return w;
 		}
-		w.fetch=function(now){
-			if(!promise){
-				promise = new RSVP.Promise();
-			}
-			if(idle<threads && !now){
-				waiting=true;
-			}else{
-				reducer.fetch();
-			}
-			return promise;
+	}
+	return w;
+};
+function objWorker(obj){
+	var w = new Communist();
+	var keys = Object.keys(obj);
+	var i = 0;
+	var fObj="{";
+	var keyFunc=function(key){
+		var out = function(){
+			var args = Array.prototype.slice.call(arguments);
+			return worker.data([key,args]);
 		};
-		w.close=function(){
-			if(!promise){
-				promise = new RSVP.Promise();
-			}
-			if(idle<threads){
-				closing=true;
-			}else{
-				closeUp();
-			}
-			return promise;
+		return out;	
 		};
-		function closeUp(){
-			reducer.close();
-			workers.forEach(function(v){
-				v.close();	
-			});
+	for(var key in obj){
+		if(i!==0){
+			fObj=fObj+",";
+		}else{
+			i++;
 		}
-		return w;
-	};
-	var p=function(a,b){
-		if(typeof a === "function" && typeof b === "function"){
-			return mapWorker(a,b);
-		}else if(typeof a === "function" || typeof a === "string"){
-			return b ? oneOff(a,b):sticksAround(a);
-		}else if(typeof a === "number"){
-			return b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
-		}
-	};
-	p.makeUrl = function (fileName) {
-		var link = document.createElement("link");
-		link.href = fileName;
-		return link.href;
-	};
-	p.ajax = function(url,after,notjson){
-		var resp = after?"("+after.toString()+")(request.responseText)":"request.responseText";
-		var func = 'function (url, cb) {\
-			var request = new XMLHttpRequest();\
-			request.open("GET", url);\
-				request.onreadystatechange = function() {\
-					if (request.readyState === 4 && request.status === 200) {'+
-						(!notjson?'cb(JSON.parse('+resp+'));':'cb('+resp+');')+'\
-						}\
-				};\
-			request.send();\
-		}';
-		return p(func,p.makeUrl(url));
-	};
-	p.reducer = rWorker;
-	p.worker = makeWorker;
-	window.communist=p;
-})();
+		fObj=fObj+key+":"+obj[key].toString();
+		w[key]=keyFunc(key);
+	}
+	fObj=fObj+"}";
+	
+	var fun = 'function(data,cb){\n\
+		var cont;\n\
+		if(data[0]==="__start__"){\n\
+			_self.obj = '+fObj+';\n\
+			return true;\n\
+		}\n\
+		else{\n\
+		cont =data[1];\n\
+		cont.push(cb);\n\
+		return _self.obj[data[0]].apply(null,cont);\n\
+		}\n\
+	}';
+	var worker = sticksAround(fun);
+	w._close=worker.close
+	worker.data(["__start__"]);
+	return w;
+}
+function c(a,b,c){
+	if(typeof a !== "number" && typeof b === "function"){
+		return mapWorker(a,b,c);
+	}else if(typeof a === "object" && !Array.isArray(a)){
+		return objWorker(a);
+	}else if(typeof a !== "number"){
+		return b ? oneOff(a,b):sticksAround(a);
+	}else if(typeof a === "number"){
+		return !b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
+	}
+};
+c.reducer = rWorker;
+c.worker = makeWorker;
+c.makeUrl = function (fileName) {
+	var link = document.createElement("link");
+	link.href = fileName;
+	return link.href;
+};
+c.ajax = function(url,after,notjson){
+	var txt=!notjson?'JSON.parse(request.responseText)':"request.responseText";
+	var resp = after?"("+after.toString()+")("+txt+",_cb)":txt;
+	var func = 'function (url, _cb) {\n\
+		var request = new XMLHttpRequest();\n\
+		request.open("GET", url);\n\
+			request.onreadystatechange = function() {\n\
+				var _resp;\n\
+				if (request.readyState === 4 && request.status === 200) {\n'+
+					'_resp = '+resp+';\n\
+					if(typeof _resp!=="undefined"){_cb(_resp);}\n\
+					}\n\
+			};\n\
+		request.send();\n\
+	}';
+	return c(func,c.makeUrl(url));
+};
+window["communist"]=c;
+})();}
