@@ -83,8 +83,6 @@ if (typeof document === "undefined") {
     }
     exports.deferred=createDeferred;
 })(c);
-
-
 //this is mainly so the name shows up when you look at the object in the console
 var Communist = function(){};
 //regex out the importScript call and move it up to the top out of the function.
@@ -97,18 +95,18 @@ function moveImports(string){
 		script = string;
 	}
 	return script;
-};
+}
 
 function getPath(){
 	var scripts = document.getElementsByTagName("script");
-        var len = scripts.length;
-        var i = 0;
-        while(i<len){
-            if(/communist(\.min)?\.js/.test(scripts[i].src)){
-               return scripts[i].src;
-            }
-            i++;
-        }
+		var len = scripts.length;
+		var i = 0;
+		while(i<len){
+			if(/communist(\.min)?\.js/.test(scripts[i].src)){
+			   return scripts[i].src;
+			}
+			i++;
+		}
 }
 //accepts an array of strings, joins them, and turns them into a worker.
 function makeWorker(strings){
@@ -130,7 +128,7 @@ function oneOff(fun,data){
 	var promise = c.deferred();
 	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
 	_self.cb=function(data,transfer){\n\
-			self.postMessage(data,transfer);\n\
+			transfer?self.postMessage(data,transfer):self.postMessage(data);\n\
 			self.close();\n\
 		};\n\
 		_self.result = _self.fun(',JSON.stringify(data),',_self.cb);\n\
@@ -150,7 +148,7 @@ function mapWorker(fun,callback,onerr){
 	var w = new Communist();
 	var worker = makeWorker(['var _close=function(){self.close();};var _db={};\nvar _self={};\n_self.fun = ',fun,';\n\
 		_self.cb=function(data,transfer){\n\
-			self.postMessage(data,transfer);\n\
+			transfer?self.postMessage(data,transfer):self.postMessage(data);\n\
 		};\n\
 		self.onmessage=function(e){\n\
 		_self.result = _self.fun(e.data,_self.cb);\n\
@@ -166,8 +164,8 @@ function mapWorker(fun,callback,onerr){
 	}else{
 		worker.onerror=function(){callback();};
 	}
-	w.data=function(d,t){
-		worker.postMessage(d,t);	
+	w.data=function(data,transfer){
+		transfer?worker.postMessage(data,transfer):worker.postMessage(data);	
 		return w;
 	};
 	w.close=function(){
@@ -190,10 +188,9 @@ function sticksAround(fun){
 		});
 	};
 	var func = 'function(data,cb){_self.func = '+fun+';\n\
-		_self.numberCB = function(num,d,tran){\n\
-			cb([num,d],tran);\n\
+		_self.boundCB = function(d,tran){\n\
+			tran?cb([data[0],d],tran):cb([data[0],d]);\n\
 		};\n\
-		_self.boundCB = _self.numberCB.bind(null,data[0]);\n\
 		_self.result = _self.func(data[1],_self.boundCB);\n\
 		if(typeof _self.result !== "undefined"){\n\
 			_self.boundCB(_self.result);\n\
@@ -212,7 +209,7 @@ function sticksAround(fun){
 	w.data=function(data, transfer){
 		var i = promises.length;
 		promises[i] = c.deferred();
-		worker.data([i,data],transfer);
+		transfer?worker.data([i,data],transfer):worker.data([i,data]);
 		return promises[i].promise;
 	};
 	return w;
@@ -235,13 +232,13 @@ function rWorker(fun,callback){
 				_close();\n\
 				break;\n\
 		}\n\
-	};'
+	};';
 	var cb =function(data){
 		callback(data);	
 	};
 	var worker = mapWorker(func,cb);
 	w.data=function(data,transfer){
-		worker.data(["data",data],transfer);
+		transfer?worker.data(["data",data],transfer):worker.data(["data",data]);
 		return w;
 	};
 	w.fetch=function(){
@@ -413,7 +410,6 @@ function nonIncrementalMapReduce(threads){
 };
 function objWorker(obj){
 	var w = new Communist();
-	var keys = Object.keys(obj);
 	var i = 0;
 	var fObj="{";
 	var keyFunc=function(key){
@@ -447,7 +443,7 @@ function objWorker(obj){
 		}\n\
 	}';
 	var worker = sticksAround(fun);
-	w._close=worker.close
+	w._close=worker.close;
 	worker.data(["__start__"]);
 	return w;
 }
@@ -486,5 +482,4 @@ c.ajax = function(url,after,notjson){
 	}';
 	return c(func,c.makeUrl(url));
 };
-window["communist"]=c;
-})();}
+window["communist"]=c;})();}

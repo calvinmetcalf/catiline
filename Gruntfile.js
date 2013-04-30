@@ -23,7 +23,7 @@ module.exports = function(grunt) {
           seperator:";\n",
           footer : '})();}'
         },
-        files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/promiscuous.js','src/<%= pkg.name %>.js']}
+        files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/promiscuous.js','src/utils.js','src/communist.oneoff.js','src/communist.mapworker.js','src/communist.sticksaround.js','src/communist.rworker.js','src/communist.incremental.js','src/communist.nonincremental.js','src/communist.objworker.js','src/communist.js']}
       }
     }
   });
