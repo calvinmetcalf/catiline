@@ -105,10 +105,9 @@ function sticksAround(fun){
 		});
 	};
 	var func = 'function(data,cb){_self.func = '+fun+';\n\
-		_self.numberCB = function(num,d,tran){\n\
-			tran?cb([num,d],tran):cb([num,d]);\n\
+		_self.boundCB = function(d,tran){\n\
+			tran?cb([data[0],d],tran):cb([data[0],d]);\n\
 		};\n\
-		_self.boundCB = _self.numberCB.bind(null,data[0]);\n\
 		_self.result = _self.func(data[1],_self.boundCB);\n\
 		if(typeof _self.result !== "undefined"){\n\
 			_self.boundCB(_self.result);\n\
