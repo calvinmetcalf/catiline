@@ -2,7 +2,7 @@ Communist
 ==========
 ![communist](logo.png)
 
-A library all about workers that grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).  Uses [Promiscuous](https://github.com/RubenVerborgh/promiscuous/) for promises, either include dist/communist[.min].js or in node `npm install communist`.
+A library all about workers that grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).  Uses [Promiscuous](https://github.com/RubenVerborgh/promiscuous/) for promises, either include dist/communist[.min].js.
 
 API
 ===
@@ -12,7 +12,7 @@ comunist(function[, data]);
 ```
 creates a worker and if you give it data it immediately crunches the data in the worker and returns a promise, the worker is then closed automatically.  If you don't send data it returns an object which has a data method that returns a promice, i.e.
 
-```JavaSCript
+```JavaScript
 var promise = communist(function(a){return a*a;},9);
 promise.then(console.log);
 var worker = communist(function(a){return a*a;});
@@ -33,7 +33,7 @@ worker._close()//closes the worker, if you have a function called _close it will
 
 next up comes the fancy stuff, map reduce
 
-```JavaScript
+```javascript
 var worker = communist(4);
 //pass it the number of map workers
 worker.data([1,2,3]);
@@ -58,7 +58,7 @@ Note previous version had incremental and non-incremental map reduce, you can st
 
 If you want access to the reducer function you can with 
 
-```JavaScript
+```javascript
 var worker = communist.reducer(function, callback);
 //give it data with
 worker.data(3);
@@ -72,7 +72,7 @@ worker.close([silent]);
 
 innerally we have a function we use to make most of this is called with 
 
-```JavaScript
+```javascript
 var worker = communist(function,callback,onerr);
 //opens the worker with the function
 worker.data(stuff);
@@ -90,10 +90,8 @@ don't expect any fanciness here. we also have a couple utility function we have
 
 Lastly we have communist.ajax(); this is a demo function which uses the above tools (the first worker type actually) to create a function which opens up a worker, does an ajax request, can do some prosesing on it, and returns it.
 
-```JavaScript
+```javascript
 var promise = communist.ajax(url[,after,notjson]);//returns promise obv
 //after is an optional function you can add if you want to process the data in the other thread before returning it
 //if notjson is true doesn't try to parse it as json which it does by default. 
 ```
-
-makeUrl and ajax arn't available in node, also to get it to work in IE 10 you'll need to put the file IE.js somewhere on the same origin as your web page and call `communist.IEpath = "../path/to/IE.js"`.  Based off [this work around in parallel.js](https://github.com/adambom/parallel.js/pull/16)

@@ -1,7 +1,12 @@
-/*! communist 2013-04-02*/
+/*! communist 2013-04-30*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
+if (typeof document === "undefined") {
+	self.onmessage=function(e){
+		eval(e.data);	
+	}
+} else {
 (function(){
-"use strict";
+	"use strict";
 /*! Promiscuous ©2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/
 (function (exports) {
   var func = "function",
@@ -79,9 +84,7 @@
     exports.deferred=createDeferred;
 })(c);
 
-function makePromise(){
-	return c.deferred();
-}
+
 //this is mainly so the name shows up when you look at the object in the console
 var Communist = function(){};
 //regex out the importScript call and move it up to the top out of the function.
@@ -96,27 +99,35 @@ function moveImports(string){
 	return script;
 };
 
+function getPath(){
+	var scripts = document.getElementsByTagName("script");
+        var len = scripts.length;
+        var i = 0;
+        while(i<len){
+            if(/communist(\.min)?\.js/.test(scripts[i].src)){
+               return scripts[i].src;
+            }
+            i++;
+        }
+}
 //accepts an array of strings, joins them, and turns them into a worker.
 function makeWorker(strings){
 	var worker;
 	var script =moveImports(strings.join(""));
-	c.URL = c.URL||window.URL || window.webkitURL || self.URL;
-	if(window.communist.IEpath){
-		try{
-			worker = new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
-		} catch(e){
-			worker = new Worker(window.communist.IEpath);
-			worker.postMessage(script);
-		}
+	c.URL = c.URL||window.URL || window.webkitURL;
+	try{
+		worker= new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
+	}catch(e){
+		worker = new Worker(getPath());
+		worker.postMessage(script);
+	}finally{
 		return worker;
-	}else {
-		return new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
 	}
-};
+}
 //special case of worker only being called once, instead of sending the data
 //we can bake the data into the worker when we make it.
 function oneOff(fun,data){
-	var promise = makePromise();
+	var promise = c.deferred();
 	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
 	_self.cb=function(data,transfer){\n\
 			self.postMessage(data,transfer);\n\
@@ -200,7 +211,7 @@ function sticksAround(fun){
 	};
 	w.data=function(data, transfer){
 		var i = promises.length;
-		promises[i] = makePromise();
+		promises[i] = c.deferred();
 		worker.data([i,data],transfer);
 		return promises[i].promise;
 	};
@@ -343,7 +354,7 @@ function incrementalMapReduce(threads){
 	}
 	w.fetch=function(now){
 		if(!promise){
-			promise = makePromise();
+			promise = c.deferred();
 		}
 		if(idle<threads && !now){
 			waiting=true;
@@ -354,7 +365,7 @@ function incrementalMapReduce(threads){
 	};
 	w.close=function(){
 		if(!promise){
-			promise = makePromise();
+			promise = c.deferred();
 		}
 		if(idle<threads){
 			closing=true;
@@ -476,4 +487,4 @@ c.ajax = function(url,after,notjson){
 	return c(func,c.makeUrl(url));
 };
 window["communist"]=c;
-})();
+})();}

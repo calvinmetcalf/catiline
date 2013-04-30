@@ -1,6 +1,6 @@
 {
   "name": "communist",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "description": "Threading with workers in node and the browser.",
   "keywords": [
     "workers",
@@ -20,7 +20,7 @@
   "dependencies": {
     "promiscuous": "0.2.x"
   },
-  "main": "lib/communist.js",
+  "main": "dist/communist.js",
   "license": "MIT",
   "devDependencies": {
     "grunt-cli": "~0.1.6",
