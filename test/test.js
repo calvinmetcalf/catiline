@@ -47,7 +47,7 @@ describe('communist()', function () {
 				afterEach();
 			},function(a){
 				a.preventDefault();
-				a.message.should.equal("Uncaught Ermahgerd");
+				a.message.indexOf("Ermahgerd").should.be.at.least(0);
 				afterEach();
 			});
 			function afterEach(){
@@ -60,10 +60,10 @@ describe('communist()', function () {
 		});
 		it('should gracefully handle an error in a sticksaround', function (done) {
 			var comrade = communist(square);
-			comrade.data("Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){a.should.equal("Uncaught Ermahgerd");}).then(done, done);
+			comrade.data("Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){a.indexOf("Ermahgerd").should.be.at.least(0);}).then(done, done);
 		});
 		it('should gracefully handle an error as a oneoff', function (done) {
-			var comrade = communist(square,"Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){a.should.equal("Uncaught Ermahgerd");}).then(done, done);
+			var comrade = communist(square,"Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){a.indexOf("Ermahgerd").should.be.at.least(0);}).then(done, done);
 		});
 	});
 	describe('Worker reuse', function () {
@@ -173,7 +173,7 @@ describe('communist()', function () {
 			communist(function(a){importScripts('../test/fakeLib.js');return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
 		});
 		it("should be able to import 2 scripts",function (done){
-			communist(function(a){importScripts("fakeLib.js",'../test/fakeLib.js');return a;}, 9).then(function () {},function(a){a.should.equal("Uncaught tried to import twice")}).then(done, done);
+			communist(function(a){importScripts("fakeLib.js",'../test/fakeLib.js');return a;}, 9).then(function () {},function(a){a.indexOf("tried to import twice").should.be.at.least(0)}).then(done, done);
 		});
 		it("should be able to import no scripts",function (done){
 			communist(function(a){importScripts();return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
@@ -202,11 +202,11 @@ describe('communist()', function () {
 		});
 		it("and catch an error in it",function (done){
 			var comrade = communist({sum:sum,aSquare:aSquare,square:square});
-			comrade.square("explode").then(function(){},function(a){a.should.equal("Uncaught explode");}).then(done,done);
+			comrade.square("explode").then(function(){},function(a){a.indexOf("explode").should.be.at.least(0);}).then(done,done);
 		});
 		it("and then do more stuff",function (done){
 			var comrade = communist({sum:sum,aSquare:aSquare,square:square});
-			comrade.square("explode").then(function(){},function(a){a.should.equal("Uncaught explode");
+			comrade.square("explode").then(function(){},function(a){a.indexOf("explode").should.be.at.least(0);
 			comrade.square(9).then(function(a){a.should.equal(81)}).then(done,done);
 			});
 		});
