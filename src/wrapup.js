@@ -1,3 +1,16 @@
+function c(a,b,c){
+	if(typeof a !== "number" && typeof b === "function"){
+		return mapWorker(a,b,c);
+	}else if(typeof a === "object" && !Array.isArray(a)){
+		return objWorker(a);
+	}else if(typeof a !== "number"){
+		return b ? oneOff(a,b):sticksAround(a);
+	}else if(typeof a === "number"){
+		return !b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
+	}
+};
+c.reducer = rWorker;
+c.worker = makeWorker;
 c.makeUrl = function (fileName) {
 	var link = document.createElement("link");
 	link.href = fileName;
@@ -16,9 +29,9 @@ c.ajax = function(url,after,notjson){
 					if(typeof _resp!=="undefined"){_cb(_resp);}\n\
 					}\n\
 			};\n\
+			request.onerror=function(e){throw(e);}\n\
 		request.send();\n\
 	}';
 	return c(func,c.makeUrl(url));
 };
 window["communist"]=c;
-})();

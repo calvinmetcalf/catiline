@@ -130,7 +130,7 @@ function oneOff(fun,data){
 	var promise = c.deferred();
 	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
 	_self.cb=function(data,transfer){\n\
-			!self._noTransferable?self.postMessage(data,transfer):self.postMessage(data);\n\
+			(transfer && !self._noTransferable)?self.postMessage(data,transfer):self.postMessage(data);\n\
 			self.close();\n\
 		};\n\
 		_self.result = _self.fun(',JSON.stringify(data),',_self.cb);\n\
@@ -148,24 +148,18 @@ function oneOff(fun,data){
 };
 function mapWorker(fun,callback,onerr){
 	var w = new Communist();
-	var worker = makeWorker(['\n\
-	var _db={};\n\
-	_db.__close__=function(){\n\
-		self.close();\n\
-	};\n\
-	var _self={};\n\
-	_db.__fun__ = ',fun,';\n\
-	_self.cb=function(data,transfer){\n\
-		!self._noTransferable?self.postMessage(data,transfer):self.postMessage(data);\n\
-	};\n\
-	self.onmessage=function(e){\n\
-		_self.result = _db.__fun__(e.data,_self.cb);\n\
+	var worker = makeWorker(['var _close=function(){self.close();};var _db={};\nvar _self={};\n_self.fun = ',fun,';\n\
+		_self.cb=function(data,transfer){\n\
+			(transfer && !self._noTransferable)?self.postMessage(data,transfer):self.postMessage(data);\n\
+		};\n\
+		self.onmessage=function(e){\n\
+		_self.result = _self.fun(e.data,_self.cb);\n\
 			if(typeof _self.result !== "undefined"){\n\
 				_self.cb(_self.result);\n\
-		}\n\
-	}']);
+			}\n\
+		}']);
 	worker.onmessage = function(e){
-		callback(e.data);
+		callback(e.data);	
 	};
 	if(onerr){
 		worker.onerror=onerr;
@@ -173,7 +167,7 @@ function mapWorker(fun,callback,onerr){
 		worker.onerror=function(){callback();};
 	}
 	w.data=function(data,transfer){
-		!c._noTransferable?worker.postMessage(data,transfer):worker.postMessage(data);	
+		(transfer&&!c._noTransferable)?worker.postMessage(data,transfer):worker.postMessage(data);	
 		return w;
 	};
 	w.close=function(){
@@ -195,27 +189,20 @@ function sticksAround(fun){
 			}	
 		});
 	};
-	var worker = makeWorker(['\n\
-	this.__close__=function(){\n\
-		self.close();\n\
-	};\n\
-	var _db={};\n\
-	var _self={};\n\
-	_db.__fun__ = ',fun,';\n\
-	self.onmessage=function(e){\n\
-	var cb=function(data,transfer){\n\
-		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);\n\
-	};\n\
-		var result = _db.__fun__(e.data[1],cb);\n\
-			if(typeof result !== "undefined"){\n\
-				cb(result);\n\
-			}\n\
-	}']);
-	worker.onmessage= function(e){
-			promises[e.data[0]].resolve(e.data[1]);
-			promises[e.data[0]]=0;
+	var func = 'function(data,cb){_self.func = '+fun+';\n\
+		_self.boundCB = function(d,tran){\n\
+			(tran && !self._noTransferable)?cb([data[0],d],tran):cb([data[0],d]);\n\
+		};\n\
+		_self.result = _self.func(data[1],_self.boundCB);\n\
+		if(typeof _self.result !== "undefined"){\n\
+			_self.boundCB(_self.result);\n\
+		}\n\
+	}';
+	var callback = function(data){
+			promises[data[0]].resolve(data[1]);
+			promises[data[0]]=0;
 	};
-	worker.onerror=rejectPromises;
+	var worker = mapWorker(func, callback, rejectPromises);
 	w.close = function(){
 		worker.close();
 		rejectPromises("closed");
@@ -224,74 +211,27 @@ function sticksAround(fun){
 	w.data=function(data, transfer){
 		var i = promises.length;
 		promises[i] = c.deferred();
-		!c._noTransferable?worker.postMessage([i,data],transfer):worker.postMessage([i,data]);
+		(transfer&&!c._noTransferable)?worker.data([i,data],transfer):worker.data([i,data]);
 		return promises[i].promise;
 	};
 	return w;
 };
-function objWorker(obj){
-	var w = new Communist();
-	var i = 0;
-	if(!("initialize" in obj)){
-		obj.initialize=function(){};
-	}
-	var fObj="{";
-	var keyFunc=function(key){
-		var out = function(){
-			var args = Array.prototype.slice.call(arguments);
-			return worker.data([key,args]);
-		};
-		return out;	
-		};
-	for(var key in obj){
-		if(i!==0){
-			fObj=fObj+",";
-		}else{
-			i++;
-		}
-		fObj=fObj+key+":"+obj[key].toString();
-		w[key]=keyFunc(key);
-	}
-	fObj=fObj+"}";
-	
-	var fun = '\n\
-	function(data,cb){\n\
-		var cont,obj,key;\n\
-		if(data[0]==="__start__"){\n\
-			obj = '+fObj+';\n\
-			for(key in obj){\n\
-				this[key]=obj[key];\n\
-			};\n\
-			this.initialize();\n\
-			return true;\n\
-		}\n\
-		else{\n\
-			cont =data[1];\n\
-			cont.push(cb);\n\
-			return this[data[0]].apply(this,cont);\n\
-		}\n\
-	}';
-	var worker = sticksAround(fun);
-	w._close=worker.close;
-	worker.data(["__start__"]);
-	return w;
-}
 function rWorker(fun,callback){
 	var w = new Communist();
 	var func = 'function(dat,cb){ var fun = '+fun+';\n\
 		switch(dat[0]){\n\
 			case "data":\n\
-				if(!this._r){\n\
-					this._r = dat[1];\n\
+				if(!_db._r){\n\
+					_db._r = dat[1];\n\
 				}else{\n\
-					this._r = fun(this._r,dat[1]);\n\
+					_db._r = fun(_db._r,dat[1]);\n\
 				}\n\
 				break;\n\
 			case "get":\n\
-				return cb(this._r);\n\
+				return cb(_db._r);\n\
 			case "close":\n\
-				cb(this._r);\n\
-				this.__close__();\n\
+				cb(_db._r);\n\
+				_close();\n\
 				break;\n\
 		}\n\
 	};';
@@ -300,7 +240,7 @@ function rWorker(fun,callback){
 	};
 	var worker = mapWorker(func,cb);
 	w.data=function(data,transfer){
-		!c._noTransferable?worker.data(["data",data],transfer):worker.data(["data",data]);
+		(transfer&&!c._noTransferable)?worker.data(["data",data],transfer):worker.data(["data",data]);
 		return w;
 	};
 	w.fetch=function(){
@@ -470,6 +410,45 @@ function nonIncrementalMapReduce(threads){
 	}
 	return w;
 };
+function objWorker(obj){
+	var w = new Communist();
+	var i = 0;
+	var fObj="{";
+	var keyFunc=function(key){
+		var out = function(){
+			var args = Array.prototype.slice.call(arguments);
+			return worker.data([key,args]);
+		};
+		return out;	
+		};
+	for(var key in obj){
+		if(i!==0){
+			fObj=fObj+",";
+		}else{
+			i++;
+		}
+		fObj=fObj+key+":"+obj[key].toString();
+		w[key]=keyFunc(key);
+	}
+	fObj=fObj+"}";
+	
+	var fun = 'function(data,cb){\n\
+		var cont;\n\
+		if(data[0]==="__start__"){\n\
+			_self.obj = '+fObj+';\n\
+			return true;\n\
+		}\n\
+		else{\n\
+		cont =data[1];\n\
+		cont.push(cb);\n\
+		return _self.obj[data[0]].apply(null,cont);\n\
+		}\n\
+	}';
+	var worker = sticksAround(fun);
+	w._close=worker.close;
+	worker.data(["__start__"]);
+	return w;
+}
 function c(a,b,c){
 	if(typeof a !== "number" && typeof b === "function"){
 		return mapWorker(a,b,c);
