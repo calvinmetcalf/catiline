@@ -2,7 +2,7 @@ function oneOff(fun,data){
 	var promise = c.deferred();
 	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
 	_self.cb=function(data,transfer){\n\
-			transfer?self.postMessage(data,transfer):self.postMessage(data);\n\
+			(transfer && !self._noTransferable)?self.postMessage(data,transfer):self.postMessage(data);\n\
 			self.close();\n\
 		};\n\
 		_self.result = _self.fun(',JSON.stringify(data),',_self.cb);\n\

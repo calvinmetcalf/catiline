@@ -2,7 +2,7 @@ function mapWorker(fun,callback,onerr){
 	var w = new Communist();
 	var worker = makeWorker(['var _close=function(){self.close();};var _db={};\nvar _self={};\n_self.fun = ',fun,';\n\
 		_self.cb=function(data,transfer){\n\
-			transfer?self.postMessage(data,transfer):self.postMessage(data);\n\
+			(transfer && !self._noTransferable)?self.postMessage(data,transfer):self.postMessage(data);\n\
 		};\n\
 		self.onmessage=function(e){\n\
 		_self.result = _self.fun(e.data,_self.cb);\n\

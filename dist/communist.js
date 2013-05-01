@@ -1,6 +1,7 @@
-/*! communist 2013-04-30*/
+/*! communist 2013-05-01*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
+	self._noTransferable=true;
 	self.onmessage=function(e){
 		eval(e.data);	
 	}
@@ -128,7 +129,7 @@ function oneOff(fun,data){
 	var promise = c.deferred();
 	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
 	_self.cb=function(data,transfer){\n\
-			transfer?self.postMessage(data,transfer):self.postMessage(data);\n\
+			(transfer && !self._noTransferable)?self.postMessage(data,transfer):self.postMessage(data);\n\
 			self.close();\n\
 		};\n\
 		_self.result = _self.fun(',JSON.stringify(data),',_self.cb);\n\
@@ -148,7 +149,7 @@ function mapWorker(fun,callback,onerr){
 	var w = new Communist();
 	var worker = makeWorker(['var _close=function(){self.close();};var _db={};\nvar _self={};\n_self.fun = ',fun,';\n\
 		_self.cb=function(data,transfer){\n\
-			transfer?self.postMessage(data,transfer):self.postMessage(data);\n\
+			(transfer && !self._noTransferable)?self.postMessage(data,transfer):self.postMessage(data);\n\
 		};\n\
 		self.onmessage=function(e){\n\
 		_self.result = _self.fun(e.data,_self.cb);\n\
@@ -189,7 +190,7 @@ function sticksAround(fun){
 	};
 	var func = 'function(data,cb){_self.func = '+fun+';\n\
 		_self.boundCB = function(d,tran){\n\
-			tran?cb([data[0],d],tran):cb([data[0],d]);\n\
+			(tran && !self._noTransferable)?cb([data[0],d],tran):cb([data[0],d]);\n\
 		};\n\
 		_self.result = _self.func(data[1],_self.boundCB);\n\
 		if(typeof _self.result !== "undefined"){\n\
