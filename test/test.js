@@ -20,7 +20,7 @@ function sum(a, b) {
 	return a + b;
 }
 var buf =(new Uint8Array([1,2,3,4,5,6,7,8])).buffer;
-//communist.URL=true;
+
 describe('communist()', function () {
 	describe('Basic', function () {
 		it('should work when given a function and data directly', function (done) {
