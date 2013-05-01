@@ -19,22 +19,29 @@ module.exports = function(grunt) {
      
       browser: { 
       	options: {
-          banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */\n(function(){\n"use strict";\n',
-          seperator:";\n"
+          banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */\n',
+          seperator:";\n",
+          footer : '})();}'
         },
-        files: {'dist/<%= pkg.name %>.js':['src/promiscuous.js','src/top.browser.js','src/<%= pkg.name %>.js','src/bottom.browser.js']}
-      },
-      node:{
-        files: {'lib/<%= pkg.name %>.js':['src/top.node.js','src/<%= pkg.name %>.js','src/bottom.node.js']}
-    }
-    },
-    simplemocha:{
+        files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/promiscuous.js','src/utils.js','src/worker.single.js','src/worker.general.js','src/worker.multiuse.js','src/worker.object.js','src/worker.reducer.js','src/mapreduce.incremental.js','src/mapreduce.nonincremental.js','src/wrapup.js']}
+      }
+    },mocha_phantomjs: {
+    all: {
       options: {
-        globals: ['console'],
-        ui: "bdd",
-        timeout: 20000
-      },
-      all: { src: 'test/node-test.js' }
+        urls: [
+          "http://"+process.env.IP+":"+process.env.PORT+"/test/index.html",
+          "http://"+process.env.IP+":"+process.env.PORT+"/test/index.min.html"
+        ]
+      }
+    }
+  },
+    connect: {
+      server: {
+        options: {
+          port: process.env.PORT,
+          base: '.',
+        }
+      }
     }
   });
 
@@ -42,10 +49,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
  grunt.loadNpmTasks('grunt-contrib-concat');
  grunt.loadNpmTasks('grunt-simple-mocha');
+ grunt.loadNpmTasks('grunt-contrib-connect');
+ grunt.loadNpmTasks('grunt-mocha-phantomjs');
   // Default task(s).
   grunt.registerTask('browser',['concat:browser','uglify:browser']);
-  grunt.registerTask('node',['concat:node']);
-  grunt.registerTask('test', ['concat:node','simplemocha']);
-  grunt.registerTask('default', ['browser','node']);
+grunt.registerTask('test', ['connect', 'mocha_phantomjs']);
+  grunt.registerTask('default', ['browser','test']);
 
 };
