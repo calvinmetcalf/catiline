@@ -1,7 +1,7 @@
 mocha.setup({
     ui: "bdd",
     globals: ["console"],
-    timeout: 2000000000
+    timeout: 20000
 });
 chai.should();
 
@@ -156,7 +156,7 @@ describe('communist()', function () {
 		});
 	});
 	describe('Ajax', function () {
-		it('should work', function (done) {
+		it('should work loading ' + communist.makeUrl('test.json'), function (done) {
 			communist.ajax("test.json").then(function(a){ a.should.deep.equal({"a":1,"b":2}); }).then(done, done);
 		});
 		it('should work with after set', function (done) {

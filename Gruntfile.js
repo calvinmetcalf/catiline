@@ -23,7 +23,24 @@ module.exports = function(grunt) {
           seperator:";\n",
           footer : '})();}'
         },
-        files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/promiscuous.js','src/utils.js','src/communist.oneoff.js','src/communist.mapworker.js','src/communist.sticksaround.js','src/communist.rworker.js','src/communist.incremental.js','src/communist.nonincremental.js','src/communist.objworker.js','src/communist.js']}
+        files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/promiscuous.js','src/utils.js','src/worker.single.js','src/worker.general.js','src/worker.multiuse.js','src/worker.object.js','src/worker.reducer.js','src/mapreduce.incremental.js','src/mapreduce.nonincremental.js','src/wrapup.js']}
+      }
+    },mocha_phantomjs: {
+    all: {
+      options: {
+        urls: [
+          "http://"+process.env.IP+":"+process.env.PORT+"/test/index.html",
+          "http://"+process.env.IP+":"+process.env.PORT+"/test/index.min.html"
+        ]
+      }
+    }
+  },
+    connect: {
+      server: {
+        options: {
+          port: process.env.PORT,
+          base: '.',
+        }
       }
     }
   });
@@ -32,9 +49,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
  grunt.loadNpmTasks('grunt-contrib-concat');
  grunt.loadNpmTasks('grunt-simple-mocha');
+ grunt.loadNpmTasks('grunt-contrib-connect');
+ grunt.loadNpmTasks('grunt-mocha-phantomjs');
   // Default task(s).
   grunt.registerTask('browser',['concat:browser','uglify:browser']);
-
-  grunt.registerTask('default', ['browser']);
+grunt.registerTask('test', ['connect', 'mocha_phantomjs']);
+  grunt.registerTask('default', ['browser','test']);
 
 };
