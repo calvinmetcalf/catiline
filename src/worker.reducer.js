@@ -13,7 +13,7 @@ function rWorker(fun,callback){
 				return cb(this._r);\n\
 			case "close":\n\
 				cb(this._r);\n\
-				_close();\n\
+				this.__close__();\n\
 				break;\n\
 		}\n\
 	};';

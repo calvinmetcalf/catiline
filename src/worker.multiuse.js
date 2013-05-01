@@ -12,20 +12,27 @@ function sticksAround(fun){
 			}	
 		});
 	};
-	var func = 'function(data,cb){this.func = '+fun+';\n\
-		_self.boundCB = function(d,tran){\n\
-			!self._noTransferable?cb([data[0],d],tran):cb([data[0],d]);\n\
-		};\n\
-		_self.results = this.func(data[1],_self.boundCB);\n\
-		if(typeof _self.results !== "undefined"){\n\
-			_self.boundCB(_self.results);\n\
-		}\n\
-	}';
-	var callback = function(data){
-			promises[data[0]].resolve(data[1]);
-			promises[data[0]]=0;
+	var worker = makeWorker(['\n\
+	this.__close__=function(){\n\
+		self.close();\n\
+	};\n\
+	var _db={};\n\
+	var _self={};\n\
+	_db.__fun__ = ',fun,';\n\
+	self.onmessage=function(e){\n\
+	var cb=function(data,transfer){\n\
+		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);\n\
+	};\n\
+		var result = _db.__fun__(e.data[1],cb);\n\
+			if(typeof result !== "undefined"){\n\
+				cb(result);\n\
+			}\n\
+	}']);
+	worker.onmessage= function(e){
+			promises[e.data[0]].resolve(e.data[1]);
+			promises[e.data[0]]=0;
 	};
-	var worker = mapWorker(func, callback, rejectPromises);
+	worker.onerror=rejectPromises;
 	w.close = function(){
 		worker.close();
 		rejectPromises("closed");
@@ -34,7 +41,7 @@ function sticksAround(fun){
 	w.data=function(data, transfer){
 		var i = promises.length;
 		promises[i] = c.deferred();
-		!c._noTransferable?worker.data([i,data],transfer):worker.data([i,data]);
+		!c._noTransferable?worker.postMessage([i,data],transfer):worker.postMessage([i,data]);
 		return promises[i].promise;
 	};
 	return w;
