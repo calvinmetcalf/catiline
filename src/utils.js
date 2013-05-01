@@ -31,6 +31,7 @@ function makeWorker(strings){
 	try{
 		worker= new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
 	}catch(e){
+		c._noTransferable=true;
 		worker = new Worker(getPath());
 		worker.postMessage(script);
 	}finally{

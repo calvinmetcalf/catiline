@@ -117,6 +117,7 @@ function makeWorker(strings){
 	try{
 		worker= new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
 	}catch(e){
+		c._noTransferable=true;
 		worker = new Worker(getPath());
 		worker.postMessage(script);
 	}finally{
@@ -166,7 +167,7 @@ function mapWorker(fun,callback,onerr){
 		worker.onerror=function(){callback();};
 	}
 	w.data=function(data,transfer){
-		transfer?worker.postMessage(data,transfer):worker.postMessage(data);	
+		(transfer&&!c._noTransferable)?worker.postMessage(data,transfer):worker.postMessage(data);	
 		return w;
 	};
 	w.close=function(){
@@ -210,7 +211,7 @@ function sticksAround(fun){
 	w.data=function(data, transfer){
 		var i = promises.length;
 		promises[i] = c.deferred();
-		transfer?worker.data([i,data],transfer):worker.data([i,data]);
+		(transfer&&!c._noTransferable)?worker.data([i,data],transfer):worker.data([i,data]);
 		return promises[i].promise;
 	};
 	return w;
@@ -239,7 +240,7 @@ function rWorker(fun,callback){
 	};
 	var worker = mapWorker(func,cb);
 	w.data=function(data,transfer){
-		transfer?worker.data(["data",data],transfer):worker.data(["data",data]);
+		(transfer&&!c._noTransferable)?worker.data(["data",data],transfer):worker.data(["data",data]);
 		return w;
 	};
 	w.fetch=function(){

@@ -22,7 +22,7 @@ function rWorker(fun,callback){
 	};
 	var worker = mapWorker(func,cb);
 	w.data=function(data,transfer){
-		transfer?worker.data(["data",data],transfer):worker.data(["data",data]);
+		(transfer&&!c._noTransferable)?worker.data(["data",data],transfer):worker.data(["data",data]);
 		return w;
 	};
 	w.fetch=function(){

@@ -19,6 +19,7 @@ function square(a){
 function sum(a, b) {
 	return a + b;
 }
+var buf =(new Uint8Array([1,2,3,4,5,6,7,8])).buffer;
 //communist.URL=true;
 describe('communist()', function () {
 	describe('Basic', function () {
@@ -37,6 +38,12 @@ describe('communist()', function () {
 			var count = 0;
 			var comrade = communist(aSquare, function (a) { count++; a.should.equal(81); if (count === 2) { done(); } });
 			comrade.data(9).data(9);
+		});
+		it('should be able to handle an array buffer', function(done){
+			var comrade = communist(function(data,cb){cb(new Uint8Array(data))}).data(buf).then(function(a){a.should.deep.equal(new Uint8Array([1,2,3,4,5,6,7,8]))}).then(done,done);
+		});
+		it('should be able to handle an array buffer as a transferable object', function(done){
+			var comrade = communist(function(data,cb){cb(data,[data])}).data(buf,[buf]).then(function(a){a.should.deep.equal((new Uint8Array([1,2,3,4,5,6,7,8])).buffer)}).then(done,done);
 		});
 	});
 	describe('errors', function () {

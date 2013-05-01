@@ -34,7 +34,7 @@ function sticksAround(fun){
 	w.data=function(data, transfer){
 		var i = promises.length;
 		promises[i] = c.deferred();
-		transfer?worker.data([i,data],transfer):worker.data([i,data]);
+		(transfer&&!c._noTransferable)?worker.data([i,data],transfer):worker.data([i,data]);
 		return promises[i].promise;
 	};
 	return w;
