@@ -1,10 +1,10 @@
 function mapWorker(fun,callback,onerr){
 	var w = new Communist();
 	var worker = makeWorker(['\n\
-	this.__close__=function(){\n\
+	var _db={};\n\
+	_db.__close__=function(){\n\
 		self.close();\n\
 	};\n\
-	var _db={};\n\
 	var _self={};\n\
 	_db.__fun__ = ',fun,';\n\
 	_self.cb=function(data,transfer){\n\
