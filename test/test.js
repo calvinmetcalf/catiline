@@ -20,7 +20,7 @@ function sum(a, b) {
 	return a + b;
 }
 var buf =(new Uint8Array([1,2,3,4,5,6,7,8])).buffer;
-
+//communist.URL=true;
 describe('communist()', function () {
 	describe('Basic', function () {
 		it('should work when given a function and data directly', function (done) {
@@ -40,10 +40,10 @@ describe('communist()', function () {
 			comrade.data(9).data(9);
 		});
 		it('should be able to handle an array buffer', function(done){
-			var comrade = communist(function(data,cb){cb(new Uint8Array(data))}).data(buf).then(function(a){a.should.deep.equal(new Uint8Array([1,2,3,4,5,6,7,8]))}).then(done,done);
+			var comrade = communist(function(data,cb){cb(data)}).data((new Uint8Array([1,2,3,4,5,6,7,8])).buffer).then(function(a){a.byteLength.should.equal(8)}).then(done,done);
 		});
 		it('should be able to handle an array buffer as a transferable object', function(done){
-			var comrade = communist(function(data,cb){cb(data,[data])}).data(buf,[buf]).then(function(a){a.should.deep.equal((new Uint8Array([1,2,3,4,5,6,7,8])).buffer)}).then(done,done);
+			var comrade = communist(function(data,cb){cb(data,[data])}).data(buf,[buf]).then(function(a){a.byteLength.should.equal(8)}).then(done,done);
 		});
 	});
 	describe('errors', function () {
@@ -169,7 +169,7 @@ describe('communist()', function () {
 			communist.ajax("test.json",function(a){return a.split("");},true).then(function(a){ a.should.deep.equal(["{", '"', "a", '"', ":", "1", ",", '"', "b", '"', ":", "2", "}"]); }).then(done, done);
 		});
 		it('should work with an array buffer', function (done) {
-			communist.ajax("test.json",function(a,cb){var b = new Uint32Array(a.split("").map(function(v){return v.charCodeAt()})).buffer; cb(b,[b])},true).then(function(a){ a.should.deep.equal(new Uint32Array([123, 34, 97, 34, 58, 49, 44, 34, 98, 34, 58, 50, 125]).buffer); }).then(done, done);
+			communist.ajax("test.json",function(a,cb){var b = new Uint32Array(a.split("").map(function(v){return v.charCodeAt()})).buffer; cb(b,[b])},true).then(function(a){ a.byteLength.should.deep.equal(52); }).then(done, done);
 		});
 	});
 	describe('Import Scripts', function () {
