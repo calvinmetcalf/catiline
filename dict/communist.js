@@ -1,6 +1,7 @@
-/*! communist 2013-04-30*/
+/*! communist 2013-05-01*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
+	self._noTransferable=true;
 	self.onmessage=function(e){
 		eval(e.data);	
 	}
@@ -83,8 +84,6 @@ if (typeof document === "undefined") {
     }
     exports.deferred=createDeferred;
 })(c);
-
-
 //this is mainly so the name shows up when you look at the object in the console
 var Communist = function(){};
 //regex out the importScript call and move it up to the top out of the function.
@@ -97,18 +96,18 @@ function moveImports(string){
 		script = string;
 	}
 	return script;
-};
+}
 
 function getPath(){
 	var scripts = document.getElementsByTagName("script");
-        var len = scripts.length;
-        var i = 0;
-        while(i<len){
-            if(/communist(\.min)?\.js/.test(scripts[i].src)){
-               return scripts[i].src;
-            }
-            i++;
-        }
+		var len = scripts.length;
+		var i = 0;
+		while(i<len){
+			if(/communist(\.min)?\.js/.test(scripts[i].src)){
+			   return scripts[i].src;
+			}
+			i++;
+		}
 }
 //accepts an array of strings, joins them, and turns them into a worker.
 function makeWorker(strings){
@@ -118,6 +117,7 @@ function makeWorker(strings){
 	try{
 		worker= new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
 	}catch(e){
+		c._noTransferable=true;
 		worker = new Worker(getPath());
 		worker.postMessage(script);
 	}finally{
@@ -130,7 +130,7 @@ function oneOff(fun,data){
 	var promise = c.deferred();
 	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
 	_self.cb=function(data,transfer){\n\
-			self.postMessage(data,transfer);\n\
+			!self._noTransferable?self.postMessage(data,transfer):self.postMessage(data);\n\
 			self.close();\n\
 		};\n\
 		_self.result = _self.fun(',JSON.stringify(data),',_self.cb);\n\
@@ -148,26 +148,32 @@ function oneOff(fun,data){
 };
 function mapWorker(fun,callback,onerr){
 	var w = new Communist();
-	var worker = makeWorker(['var _close=function(){self.close();};var _db={};\nvar _self={};\n_self.fun = ',fun,';\n\
-		_self.cb=function(data,transfer){\n\
-			self.postMessage(data,transfer);\n\
-		};\n\
-		self.onmessage=function(e){\n\
-		_self.result = _self.fun(e.data,_self.cb);\n\
+	var worker = makeWorker(['\n\
+	var _db={};\n\
+	_db.__close__=function(){\n\
+		self.close();\n\
+	};\n\
+	var _self={};\n\
+	_db.__fun__ = ',fun,';\n\
+	_self.cb=function(data,transfer){\n\
+		!self._noTransferable?self.postMessage(data,transfer):self.postMessage(data);\n\
+	};\n\
+	self.onmessage=function(e){\n\
+		_self.result = _db.__fun__(e.data,_self.cb);\n\
 			if(typeof _self.result !== "undefined"){\n\
 				_self.cb(_self.result);\n\
-			}\n\
-		}']);
+		}\n\
+	}']);
 	worker.onmessage = function(e){
-		callback(e.data);	
+		callback(e.data);
 	};
 	if(onerr){
 		worker.onerror=onerr;
 	}else{
 		worker.onerror=function(){callback();};
 	}
-	w.data=function(d,t){
-		worker.postMessage(d,t);	
+	w.data=function(data,transfer){
+		!c._noTransferable?worker.postMessage(data,transfer):worker.postMessage(data);	
 		return w;
 	};
 	w.close=function(){
@@ -189,21 +195,27 @@ function sticksAround(fun){
 			}	
 		});
 	};
-	var func = 'function(data,cb){_self.func = '+fun+';\n\
-		_self.numberCB = function(num,d,tran){\n\
-			cb([num,d],tran);\n\
-		};\n\
-		_self.boundCB = _self.numberCB.bind(null,data[0]);\n\
-		_self.result = _self.func(data[1],_self.boundCB);\n\
-		if(typeof _self.result !== "undefined"){\n\
-			_self.boundCB(_self.result);\n\
-		}\n\
-	}';
-	var callback = function(data){
-			promises[data[0]].resolve(data[1]);
-			promises[data[0]]=0;
+	var worker = makeWorker(['\n\
+	this.__close__=function(){\n\
+		self.close();\n\
+	};\n\
+	var _db={};\n\
+	var _self={};\n\
+	_db.__fun__ = ',fun,';\n\
+	self.onmessage=function(e){\n\
+	var cb=function(data,transfer){\n\
+		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);\n\
+	};\n\
+		var result = _db.__fun__(e.data[1],cb);\n\
+			if(typeof result !== "undefined"){\n\
+				cb(result);\n\
+			}\n\
+	}']);
+	worker.onmessage= function(e){
+			promises[e.data[0]].resolve(e.data[1]);
+			promises[e.data[0]]=0;
 	};
-	var worker = mapWorker(func, callback, rejectPromises);
+	worker.onerror=rejectPromises;
 	w.close = function(){
 		worker.close();
 		rejectPromises("closed");
@@ -212,36 +224,83 @@ function sticksAround(fun){
 	w.data=function(data, transfer){
 		var i = promises.length;
 		promises[i] = c.deferred();
-		worker.data([i,data],transfer);
+		!c._noTransferable?worker.postMessage([i,data],transfer):worker.postMessage([i,data]);
 		return promises[i].promise;
 	};
 	return w;
 };
+function objWorker(obj){
+	var w = new Communist();
+	var i = 0;
+	if(!("initialize" in obj)){
+		obj.initialize=function(){};
+	}
+	var fObj="{";
+	var keyFunc=function(key){
+		var out = function(){
+			var args = Array.prototype.slice.call(arguments);
+			return worker.data([key,args]);
+		};
+		return out;	
+		};
+	for(var key in obj){
+		if(i!==0){
+			fObj=fObj+",";
+		}else{
+			i++;
+		}
+		fObj=fObj+key+":"+obj[key].toString();
+		w[key]=keyFunc(key);
+	}
+	fObj=fObj+"}";
+	
+	var fun = '\n\
+	function(data,cb){\n\
+		var cont,obj,key;\n\
+		if(data[0]==="__start__"){\n\
+			obj = '+fObj+';\n\
+			for(key in obj){\n\
+				this[key]=obj[key];\n\
+			};\n\
+			this.initialize();\n\
+			return true;\n\
+		}\n\
+		else{\n\
+			cont =data[1];\n\
+			cont.push(cb);\n\
+			return this[data[0]].apply(this,cont);\n\
+		}\n\
+	}';
+	var worker = sticksAround(fun);
+	w._close=worker.close;
+	worker.data(["__start__"]);
+	return w;
+}
 function rWorker(fun,callback){
 	var w = new Communist();
 	var func = 'function(dat,cb){ var fun = '+fun+';\n\
 		switch(dat[0]){\n\
 			case "data":\n\
-				if(!_db._r){\n\
-					_db._r = dat[1];\n\
+				if(!this._r){\n\
+					this._r = dat[1];\n\
 				}else{\n\
-					_db._r = fun(_db._r,dat[1]);\n\
+					this._r = fun(this._r,dat[1]);\n\
 				}\n\
 				break;\n\
 			case "get":\n\
-				return cb(_db._r);\n\
+				return cb(this._r);\n\
 			case "close":\n\
-				cb(_db._r);\n\
-				_close();\n\
+				cb(this._r);\n\
+				this.__close__();\n\
 				break;\n\
 		}\n\
-	};'
+	};';
 	var cb =function(data){
 		callback(data);	
 	};
 	var worker = mapWorker(func,cb);
 	w.data=function(data,transfer){
-		worker.data(["data",data],transfer);
+		!c._noTransferable?worker.data(["data",data],transfer):worker.data(["data",data]);
 		return w;
 	};
 	w.fetch=function(){
@@ -411,46 +470,6 @@ function nonIncrementalMapReduce(threads){
 	}
 	return w;
 };
-function objWorker(obj){
-	var w = new Communist();
-	var keys = Object.keys(obj);
-	var i = 0;
-	var fObj="{";
-	var keyFunc=function(key){
-		var out = function(){
-			var args = Array.prototype.slice.call(arguments);
-			return worker.data([key,args]);
-		};
-		return out;	
-		};
-	for(var key in obj){
-		if(i!==0){
-			fObj=fObj+",";
-		}else{
-			i++;
-		}
-		fObj=fObj+key+":"+obj[key].toString();
-		w[key]=keyFunc(key);
-	}
-	fObj=fObj+"}";
-	
-	var fun = 'function(data,cb){\n\
-		var cont;\n\
-		if(data[0]==="__start__"){\n\
-			_self.obj = '+fObj+';\n\
-			return true;\n\
-		}\n\
-		else{\n\
-		cont =data[1];\n\
-		cont.push(cb);\n\
-		return _self.obj[data[0]].apply(null,cont);\n\
-		}\n\
-	}';
-	var worker = sticksAround(fun);
-	w._close=worker.close
-	worker.data(["__start__"]);
-	return w;
-}
 function c(a,b,c){
 	if(typeof a !== "number" && typeof b === "function"){
 		return mapWorker(a,b,c);
@@ -482,9 +501,9 @@ c.ajax = function(url,after,notjson){
 					if(typeof _resp!=="undefined"){_cb(_resp);}\n\
 					}\n\
 			};\n\
+			request.onerror=function(e){throw(e);}\n\
 		request.send();\n\
 	}';
 	return c(func,c.makeUrl(url));
 };
-window["communist"]=c;
-})();}
+window["communist"]=c;})();}
