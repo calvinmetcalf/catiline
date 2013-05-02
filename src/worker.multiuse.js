@@ -34,7 +34,7 @@ function sticksAround(fun){
 	};
 	worker.onerror=rejectPromises;
 	w.close = function(){
-		worker.close();
+		worker.terminate();
 		rejectPromises("closed");
 		return;
 	};
