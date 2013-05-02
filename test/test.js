@@ -217,6 +217,10 @@ describe('communist()', function () {
 			comrade.square(9).then(function(a){a.should.equal(81)}).then(done,done);
 			});
 		});
+		it("and close it",function (done){
+			communist({sum:sum,aSquare:aSquare,square:square})._close();
+			done();
+		})
 	});
 
 });
