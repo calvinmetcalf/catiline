@@ -230,7 +230,6 @@ L.TileLayer.FractalLayer = L.TileLayer.Canvas.extend({
                 } else {
                     return;
                 }
-                console.log(data);
                 var array=new Uint8Array(data.pixels);
                 var ctx = canvas.getContext('2d');
                 var imagedata = ctx.getImageData(0, 0, 256, 256);
