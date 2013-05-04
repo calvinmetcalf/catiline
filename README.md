@@ -2,36 +2,40 @@ Communist
 ==========
 ![communist](logo.png)
 
-A library all about workers that grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).  Uses [Promiscuous](https://github.com/RubenVerborgh/promiscuous/) for promises, either include dist/communist[.min].js.
+A library all about workers.
 
 API
 ===
-Built around a tremendusly overloaded function named communist:
-```JavaScript
-comunist(function[, data]);
-```
-creates a worker and if you give it data it immediately crunches the data in the worker and returns a promise, the worker is then closed automatically.  If you don't send data it returns an object which has a data method that returns a promice, i.e.
-
-```JavaScript
-var promise = communist(function(a){return a*a;},9);
-promise.then(console.log);
-var worker = communist(function(a){return a*a;});
-var newPromise = worker.data(9);
-newPromise.then(console.log);
-//do this as much as you want then call
-worker.close();
-```
-
-You can also pass an object to the constructor __experimental doesn't don't import any scripts with it errors don't work in node__ :
-
 ```javascript
 var worker = communist({sum:function(a,b,cb){cb(a+b);},square:function(a){return a*a;});
 worker.sum(2,5).then(function(a){console.log(a);})//prints 7
 worker.square(5).then(function(a){console.log(a);})//prints 25
-worker._close()//closes the worker, if you have a function called _close it will be over written
+worker.close()//closes the worker, can be overwritten, worker._close() can't be closed.
 ```
 
-next up comes the fancy stuff, map reduce
+Give it an object of functions, and you can call them by name, your functions can either return a value or call a callback function which is passed after all your arguments.
+It takes two arguments, data and an optional list of any arrayBuffers to transfer ownership of.
+If you want to do things once when the worker is created pass a function called `initialize` this gets called once with no arguments.  All workers are called in the same context so
+`this` can be used to store things, functions can also use `this` to call each other. 
+
+###Want it even simpler?
+
+```javascript
+var worker = communist(function(a,cb){cb(a[0]*a[1])});
+worker.data([2,5]).then(function(a){console.log(a);})//prints 7
+worker.close();//close it up
+```
+
+If you just pass a function then you can call it with data.   Data only takes the same 2 arguments as the callback data to transfer and the optional transfer list. These functions are always called with the same 2 arguments, data and callback.
+
+###Even simpler?
+```javascript
+communist(function(a,cb){cb(a[0]*a[1])},[2,5]).then(function(a){console.log(a);})//prints 7
+```
+
+pass the data as the second argument and it crunches it returns the data and then closes up for you.
+
+###Want it fancy? MAP REDUCE!!!
 
 ```javascript
 var worker = communist(4);
@@ -54,9 +58,7 @@ worker.close().then(function(a){console.log(a)});
 //prints 389
 ```
 
-Note previous version had incremental and non-incremental map reduce, you can still access the non-incremental version by specifying a second parameter but this might be removed in the future but it's better just to call .close() after you specify data,map, and reduce and you will have the same outcome.
-
-If you want access to the reducer function you can with 
+the reducer function is also available for you if you want.
 
 ```javascript
 var worker = communist.reducer(function, callback);
@@ -70,7 +72,7 @@ worker.close([silent]);
 
 ```
 
-innerally we have a function we use to make most of this is called with 
+there is also a map function you can call if you want
 
 ```javascript
 var worker = communist(function,callback,onerr);
@@ -82,16 +84,16 @@ worker.close();
 //close that
 ```
 
-don't expect any fanciness here. we also have a couple utility function we have 
+###Misc
+
+we have a few utility functions you can use
 
 `communist.makeUrl(reletiveURL);` returns an absolute url and
 
 `communist.worker([aray of strings]);` returns worker made from those strings.
 
-Lastly we have communist.ajax(); this is a demo function which uses the above tools (the first worker type actually) to create a function which opens up a worker, does an ajax request, can do some prosesing on it, and returns it.
+```communist.ajax(url[,after,notjson]);``` returns promise, after is a function to call on the data after download in the worker, notjson should be true if you don't want to run JSON.parse on it.
 
-```javascript
-var promise = communist.ajax(url[,after,notjson]);//returns promise obv
-//after is an optional function you can add if you want to process the data in the other thread before returning it
-//if notjson is true doesn't try to parse it as json which it does by default. 
-```
+`communist.deferred();` makes a new promise and returns it, used internally.
+
+This grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).  Uses [Promiscuous](https://github.com/RubenVerborgh/promiscuous/) for promises, either include dist/communist[.min].js.

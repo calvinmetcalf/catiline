@@ -42,6 +42,9 @@ function objWorker(obj){
 	}';
 	var worker = sticksAround(fun);
 	w._close=worker.close;
+    if(!w.close){
+        w.close=w._close;
+    }
 	worker.data(["__start__"]);
 	return w;
 }

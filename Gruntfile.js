@@ -29,8 +29,8 @@ module.exports = function(grunt) {
     all: {
       options: {
         urls: [
-          "http://"+process.env.IP+":"+process.env.PORT+"/test/index.html",
-          "http://"+process.env.IP+":"+process.env.PORT+"/test/index.min.html"
+          "http://localhost:8000/test/index.html",
+          "http://localhost:8000/test/index.min.html"
         ]
       }
     }
@@ -38,8 +38,8 @@ module.exports = function(grunt) {
     connect: {
       server: {
         options: {
-          port: process.env.PORT,
-          base: '.',
+          port: 8000,
+          base: '.'
         }
       }
     }
