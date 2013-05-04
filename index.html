@@ -14,6 +14,7 @@
 			
 		</style>
 	 <link href="dict/bootstrap/css/bootstrap.css" rel="stylesheet">
+	 <link href="marked/style.css" rel="stylesheet">
 	 <link href="dict/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
 	 <link rel="stylesheet" href="dict/bootstrap/css/font-awesome.min.css">
 	 <link rel="stylesheet" href="dict/gh-fork-ribbon.css" />
@@ -33,88 +34,20 @@
 	 </ul></div>
 <div class="span2">
 <img src="https://github.com/calvinmetcalf/communist/raw/master/logo.png" alt="communist" class="">
-</div></div><div class="row-fluid"><div class="span2"></div><div class="span6">
-<p>A library all about workers that grew out of my work with <a href="https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000">earlier versions</a> of  this library and <a href="https://github.com/adambom/parallel.js">Parallel.js</a>.  Uses <a href="https://github.com/RubenVerborgh/promiscuous/">Promiscuous</a> for promises, either include dist/communist[.min].js.</p>
+</div></div><div class="row-fluid"><div class="span2"></div>
 
-<h1>
-<a name="api" class="anchor" href="#api"><span class="mini-icon mini-icon-link"></span></a>API</h1>
 
-<p>Built around a tremendusly overloaded function named communist:</p>
+<div class="span6" id="cont">
 
-<div class="highlight"><pre><span class="nx">comunist</span><span class="p">(</span><span class="kd">function</span><span class="p">[,</span> <span class="nx">data</span><span class="p">]);</span>
-</pre></div>
-
-<p>creates a worker and if you give it data it immediately crunches the data in the worker and returns a promise, the worker is then closed automatically.  If you don't send data it returns an object which has a data method that returns a promise, i.e.</p>
-
-<div class="highlight"><pre><span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">communist</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span><span class="k">return</span> <span class="nx">a</span><span class="o">*</span><span class="nx">a</span><span class="p">;},</span><span class="mi">9</span><span class="p">);</span>
-<span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">worker</span> <span class="o">=</span> <span class="nx">communist</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span><span class="k">return</span> <span class="nx">a</span><span class="o">*</span><span class="nx">a</span><span class="p">;});</span>
-<span class="kd">var</span> <span class="nx">newPromise</span> <span class="o">=</span> <span class="nx">worker</span><span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="mi">9</span><span class="p">);</span>
-<span class="nx">newPromise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">);</span>
-<span class="c1">//do this as much as you want then call</span>
-<span class="nx">worker</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
-</pre></div>
-<p>next up comes the fancy stuff, map reduce</p>
-
-<div class="highlight"><pre><span class="kd">var</span> <span class="nx">worker</span> <span class="o">=</span> <span class="nx">communist</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
-<span class="c1">//pass it the number of map workers</span>
-<span class="nx">worker</span><span class="p">.</span><span class="nx">data</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]);</span>
-<span class="c1">//pass it data</span>
-<span class="nx">worker</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">){</span><span class="k">return</span> <span class="nx">x</span><span class="o">*</span><span class="nx">x</span><span class="p">;});</span>
-<span class="c1">//function do be done once on each datum</span>
-<span class="nx">worker</span><span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="nx">b</span><span class="p">){</span><span class="k">return</span> <span class="nx">a</span><span class="o">+</span><span class="nx">b</span><span class="p">;});</span>
-<span class="c1">//reduce function</span>
-<span class="nx">worker</span><span class="p">.</span><span class="nx">data</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]);</span>
-<span class="nx">worker</span><span class="p">.</span><span class="nx">fetch</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">a</span><span class="p">)});</span>
-<span class="c1">//prints 91</span>
-<span class="nx">worker</span><span class="p">.</span><span class="nx">data</span><span class="p">([</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]).</span><span class="nx">fetch</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">a</span><span class="p">)});</span>
-<span class="c1">//prints 240</span>
-<span class="c1">//fetch takes an argument "now", if it's undefined then </span>
-<span class="nx">worker</span><span class="p">.</span><span class="nx">data</span><span class="p">([</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]).</span><span class="nx">fetch</span><span class="p">(</span><span class="kc">true</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">a</span><span class="p">)});</span>
-<span class="c1">//also prints 240</span>
-<span class="nx">worker</span><span class="p">.</span><span class="nx">close</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">a</span><span class="p">)});</span>
-<span class="c1">//prints 389</span>
-</pre></div>
-<p>Note previous version had incremental and non-incremental map reduce, you can still access the non-incremental version by specifying a second parameter but this might be removed in the future but it's better just to call .close() after you specify data,map, and reduce and you will have the same outcome.</p>
-<p>If you want access to the reducer function you can with </p>
-
-<div class="highlight"><pre><span class="kd">var</span> <span class="nx">worker</span> <span class="o">=</span> <span class="nx">communist</span><span class="p">.</span><span class="nx">reducer</span><span class="p">(</span><span class="kd">function</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
-<span class="c1">//give it data with</span>
-<span class="nx">worker</span><span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
-<span class="c1">//send back data and call the callback</span>
-<span class="nx">worker</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
-<span class="c1">//close it</span>
-<span class="nx">worker</span><span class="p">.</span><span class="nx">close</span><span class="p">([</span><span class="nx">silent</span><span class="p">]);</span>
-<span class="c1">//it'll grab the data one more time and call the callback with it, unless you pass a parameter.</span>
-
-</pre></div>
-
-<p>innerally we have a function we use to make most of this is called with </p>
-
-<div class="highlight"><pre><span class="kd">var</span> <span class="nx">worker</span> <span class="o">=</span> <span class="nx">communist</span><span class="p">(</span><span class="kd">function</span><span class="p">,</span><span class="nx">callback</span><span class="p">,</span><span class="nx">onerr</span><span class="p">);</span>
-<span class="c1">//opens the worker with the function</span>
-<span class="nx">worker</span><span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="nx">stuff</span><span class="p">);</span>
-<span class="c1">//send it data any data that comes back callback is called on</span>
-<span class="c1">//errs got to onerr if that is not specified callback is called with no data.</span>
-<span class="nx">worker</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
-<span class="c1">//close that</span>
-</pre></div>
-
-<p>don't expect any fanciness here. we also have a couple utility function we have </p>
-
-<p><code>communist.makeUrl(reletiveURL);</code> returns an absolute url and</p>
-
-<p><code>communist.worker([aray of strings]);</code> returns worker made from those strings.</p>
-
-<p>Lastly we have communist.ajax(); this is a demo function which uses the above tools (the first worker type actually) to create a function which opens up a worker, does an ajax request, can do some prosesing on it, and returns it.</p>
-
-<div class="highlight"><pre><span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">communist</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">url</span><span class="p">[,</span><span class="nx">after</span><span class="p">,</span><span class="nx">notjson</span><span class="p">]);</span><span class="c1">//returns promise obv</span>
-<span class="c1">//after is an optional function you can add if you want to process the data in the other thread before returning it</span>
-<span class="c1">//if notjson is true doesn't try to parse it as json which it does by default. </span>
-</pre></div>
-
-	 </div></div>
+	 </div>
+	 	
+	 	
+	 </div>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"> </script>
+<script src="highlight.js/highlight.pack.js"></script>
+<script src="marked/marked.js"></script>
+<script src="coffee-script.js"></script>
+<script type="text/coffeescript" src="script.coffee"></script>
 <script type="text/javascript">
 
   var _gaq = _gaq || [];
