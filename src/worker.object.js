@@ -6,9 +6,8 @@ function objWorker(obj){
 	}
 	var fObj="{";
 	var keyFunc=function(key){
-		var out = function(){
-			var args = Array.prototype.slice.call(arguments);
-			return worker.data([key,args]);
+		var out = function(data, transfer){
+			return worker.data([key,data], transfer);
 		};
 		return out;	
 		};
@@ -25,7 +24,7 @@ function objWorker(obj){
 	
 	var fun = '\n\
 	function(data,cb){\n\
-		var cont,obj,key;\n\
+		var obj,key;\n\
 		if(data[0]==="__start__"){\n\
 			obj = '+fObj+';\n\
 			for(key in obj){\n\
@@ -35,9 +34,7 @@ function objWorker(obj){
 			return true;\n\
 		}\n\
 		else{\n\
-			cont =data[1];\n\
-			cont.push(cb);\n\
-			return this[data[0]].apply(this,cont);\n\
+			return this[data[0]](data[1], cb);\n\
 		}\n\
 	}';
 	var worker = sticksAround(fun);

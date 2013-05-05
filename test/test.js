@@ -19,6 +19,10 @@ function square(a){
 function sum(a, b) {
 	return a + b;
 }
+
+function product(a){
+	return a[0]*a[1];
+}
 var buf =(new Uint8Array([1,2,3,4,5,6,7,8])).buffer;
 //communist.URL=true;
 describe('communist()', function () {
@@ -198,27 +202,27 @@ describe('communist()', function () {
 	});
 	describe('Objects', function () {
 		it("should be able create an object worker",function (done){
-			var comrade = communist({sum:sum,aSquare:aSquare,square:square});
+			var comrade = communist({product:product,aSquare:aSquare,square:square});
 			comrade.aSquare(3).then(function(a){
 				a.should.equal(9);
 			}).then(function(){
-				return comrade.sum(20,100);
-			}).then(function(a){a.should.equal(120)}).then(function(){
+				return comrade.product([20,100]);
+			}).then(function(a){a.should.equal(2000)}).then(function(){
 				return comrade.square(5);
 			}).then(function(a){a.should.equal(25)}).then(done,done);
 		});
 		it("and catch an error in it",function (done){
-			var comrade = communist({sum:sum,aSquare:aSquare,square:square});
+			var comrade = communist({product:product,aSquare:aSquare,square:square});
 			comrade.square("explode").then(function(){},function(a){a.indexOf("explode").should.be.at.least(0);}).then(done,done);
 		});
 		it("and then do more stuff",function (done){
-			var comrade = communist({sum:sum,aSquare:aSquare,square:square});
+			var comrade = communist({product:product,aSquare:aSquare,square:square});
 			comrade.square("explode").then(function(){},function(a){a.indexOf("explode").should.be.at.least(0);
 			comrade.square(9).then(function(a){a.should.equal(81)}).then(done,done);
 			});
 		});
 		it("and close it",function (done){
-			communist({sum:sum,aSquare:aSquare,square:square})._close();
+			communist({product:product,aSquare:aSquare,square:square}).close();
 			done();
 		})
 	});
