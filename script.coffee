@@ -2,13 +2,14 @@ md ="""
 API
 ===
 ```javascript
-var worker = communist({sum:function(a,b,cb){cb(a+b);},square:function(a){return a*a;});
-worker.sum(2,5).then(function(a){console.log(a);})//prints 7
+var worker = communist({sum:function(a,cb){cb(a[0]+a[1]);},square:function(a){return a*a;});
+worker.sum([2,5]).then(function(a){console.log(a);})//prints 7
 worker.square(5).then(function(a){console.log(a);})//prints 25
-worker.close()//closes the worker, can be overwritten, worker._close() is a backup
+worker.close()//closes the worker, can be overwritten, worker._close() can't be closed.
 ```
 
-Give it an object of functions, and you can call them by name, your functions can either return a value or call a callback function which is passed after all your arguments.
+Give it an object of functions, and you can call them by name, your functions can either return a value or call a callback function which is passed as the second argument.
+Call the function with the data as the first argument and a transfer list for the second.
 It takes two arguments, data and an optional list of any arrayBuffers to transfer ownership of.
 If you want to do things once when the worker is created pass a function called `initialize` this gets called once with no arguments.  All workers are called in the same context so
 `this` can be used to store things, functions can also use `this` to call each other. 
@@ -32,7 +33,7 @@ pass the data as the second argument and it crunches it returns the data and the
 
 ###Want it fancy? MAP REDUCE!!!
 
-```lang-javascript
+```javascript
 var worker = communist(4);
 //pass it the number of map workers
 worker.data([1,2,3]);
