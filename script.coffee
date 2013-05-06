@@ -1,4 +1,10 @@
 md ="""
+Download It
+===
+Grab the [development version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.js) 
+or [production version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.min.js) from the dist folder. 
+__Important:__ you have to host it yourself, you will have issues if your link to one on a seperate domain.
+
 API
 ===
 ```javascript
