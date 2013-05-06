@@ -2,7 +2,7 @@ Communist
 ==========
 ![communist](logo.png)
 
-A JavaScrit library all about workers.
+A JavaScrit library all about workers, want to use it? Grab the [development version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.js) or [production version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.min.js) from the dist folder. _Important:_ you have to host it yourself, you will have issues if your link to one on a seperate domain.
 
 API
 ===
