@@ -38,5 +38,3 @@ function makeWorker(strings){
 		return worker;
 	}
 }
-//special case of worker only being called once, instead of sending the data
-//we can bake the data into the worker when we make it.

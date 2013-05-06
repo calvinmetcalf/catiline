@@ -1,13 +1,28 @@
-function objWorker(obj){
+function object(obj){
 	var w = new Communist();
 	var i = 0;
+     var promises = [];
+    var rejectPromises = function(msg){
+		if(typeof msg!=="string" && msg.preventDefault){
+			msg.preventDefault();
+			msg=msg.message;
+		}
+		promises.forEach(function(p){
+			if(p){
+				p.reject(msg);
+			}	
+		});
+	};
 	if(!("initialize" in obj)){
 		obj.initialize=function(){};
 	}
 	var fObj="{";
 	var keyFunc=function(key){
 		var out = function(data, transfer){
-			return worker.data([key,data], transfer);
+            var i = promises.length;
+    	    promises[i] = c.deferred();
+			!c._noTransferable?worker.postMessage([i,key,data],transfer):worker.postMessage([i,key,data]);
+            return promises[i].promise;
 		};
 		return out;	
 		};
@@ -22,26 +37,35 @@ function objWorker(obj){
 	}
 	fObj=fObj+"}";
 	
-	var fun = '\n\
-	function(data,cb){\n\
-		var obj,key;\n\
-		if(data[0]==="__start__"){\n\
-			obj = '+fObj+';\n\
-			for(key in obj){\n\
-				this[key]=obj[key];\n\
-			};\n\
-			this.initialize();\n\
-			return true;\n\
-		}\n\
-		else{\n\
-			return this[data[0]](data[1], cb);\n\
-		}\n\
-	}';
-	var worker = sticksAround(fun);
-	w._close=worker.close;
+	var worker = makeWorker(['\n\
+    var _db='+fObj+';\n\
+	self.onmessage=function(e){\n\
+	var cb=function(data,transfer){\n\
+		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);\n\
+	};\n\
+		var result = _db[e.data[1]](e.data[2],cb);\n\
+			if(typeof result !== "undefined"){\n\
+				cb(result);\n\
+			}\n\
+	}']);
+	worker.onmessage= function(e){
+			promises[e.data[0]].resolve(e.data[1]);
+			promises[e.data[0]]=0;
+	};
+	worker.onerror=rejectPromises;
+	w.close = function(){
+		worker.terminate();
+		rejectPromises("closed");
+		return;
+	};
+	w._close = function(){
+    	worker.terminate();
+		rejectPromises("closed");
+		return;
+	};
     if(!w.close){
         w.close=w._close;
     }
-	worker.data(["__start__"]);
+
 	return w;
 }

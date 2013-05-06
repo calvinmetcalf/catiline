@@ -126,7 +126,8 @@ function makeWorker(strings){
 }
 //special case of worker only being called once, instead of sending the data
 //we can bake the data into the worker when we make it.
-function oneOff(fun,data){
+
+function single(fun,data){
 	var promise = c.deferred();
 	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
 	_self.cb=function(data,transfer){\n\
@@ -181,10 +182,14 @@ function mapWorker(fun,callback,onerr){
 	};
 	return w;
 };
-function sticksAround(fun){
+function multiUse(fun){
+	return object({data:fun});
+};
+function object(obj){
 	var w = new Communist();
-	var promises = [];
-	var rejectPromises = function(msg){
+	var i = 0;
+     var promises = [];
+    var rejectPromises = function(msg){
 		if(typeof msg!=="string" && msg.preventDefault){
 			msg.preventDefault();
 			msg=msg.message;
@@ -195,50 +200,16 @@ function sticksAround(fun){
 			}	
 		});
 	};
-	var worker = makeWorker(['\n\
-	this.__close__=function(){\n\
-		self.close();\n\
-	};\n\
-	var _db={};\n\
-	var _self={};\n\
-	_db.__fun__ = ',fun,';\n\
-	self.onmessage=function(e){\n\
-	var cb=function(data,transfer){\n\
-		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);\n\
-	};\n\
-		var result = _db.__fun__(e.data[1],cb);\n\
-			if(typeof result !== "undefined"){\n\
-				cb(result);\n\
-			}\n\
-	}']);
-	worker.onmessage= function(e){
-			promises[e.data[0]].resolve(e.data[1]);
-			promises[e.data[0]]=0;
-	};
-	worker.onerror=rejectPromises;
-	w.close = function(){
-		worker.terminate();
-		rejectPromises("closed");
-		return;
-	};
-	w.data=function(data, transfer){
-		var i = promises.length;
-		promises[i] = c.deferred();
-		!c._noTransferable?worker.postMessage([i,data],transfer):worker.postMessage([i,data]);
-		return promises[i].promise;
-	};
-	return w;
-};
-function objWorker(obj){
-	var w = new Communist();
-	var i = 0;
 	if(!("initialize" in obj)){
 		obj.initialize=function(){};
 	}
 	var fObj="{";
 	var keyFunc=function(key){
 		var out = function(data, transfer){
-			return worker.data([key,data], transfer);
+            var i = promises.length;
+    	    promises[i] = c.deferred();
+			!c._noTransferable?worker.postMessage([i,key,data],transfer):worker.postMessage([i,key,data]);
+            return promises[i].promise;
 		};
 		return out;	
 		};
@@ -253,27 +224,36 @@ function objWorker(obj){
 	}
 	fObj=fObj+"}";
 	
-	var fun = '\n\
-	function(data,cb){\n\
-		var obj,key;\n\
-		if(data[0]==="__start__"){\n\
-			obj = '+fObj+';\n\
-			for(key in obj){\n\
-				this[key]=obj[key];\n\
-			};\n\
-			this.initialize();\n\
-			return true;\n\
-		}\n\
-		else{\n\
-			return this[data[0]](data[1], cb);\n\
-		}\n\
-	}';
-	var worker = sticksAround(fun);
-	w._close=worker.close;
+	var worker = makeWorker(['\n\
+    var _db='+fObj+';\n\
+	self.onmessage=function(e){\n\
+	var cb=function(data,transfer){\n\
+		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);\n\
+	};\n\
+		var result = _db[e.data[1]](e.data[2],cb);\n\
+			if(typeof result !== "undefined"){\n\
+				cb(result);\n\
+			}\n\
+	}']);
+	worker.onmessage= function(e){
+			promises[e.data[0]].resolve(e.data[1]);
+			promises[e.data[0]]=0;
+	};
+	worker.onerror=rejectPromises;
+	w.close = function(){
+		worker.terminate();
+		rejectPromises("closed");
+		return;
+	};
+	w._close = function(){
+    	worker.terminate();
+		rejectPromises("closed");
+		return;
+	};
     if(!w.close){
         w.close=w._close;
     }
-	worker.data(["__start__"]);
+
 	return w;
 }
 
@@ -475,9 +455,9 @@ function c(a,b,c){
 	if(typeof a !== "number" && typeof b === "function"){
 		return mapWorker(a,b,c);
 	}else if(typeof a === "object" && !Array.isArray(a)){
-		return objWorker(a);
+		return object(a);
 	}else if(typeof a !== "number"){
-		return b ? oneOff(a,b):sticksAround(a);
+		return b ? single(a,b):multiUse(a);
 	}else if(typeof a === "number"){
 		return !b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
 	}

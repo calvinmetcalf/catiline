@@ -2,9 +2,9 @@ function c(a,b,c){
 	if(typeof a !== "number" && typeof b === "function"){
 		return mapWorker(a,b,c);
 	}else if(typeof a === "object" && !Array.isArray(a)){
-		return objWorker(a);
+		return object(a);
 	}else if(typeof a !== "number"){
-		return b ? oneOff(a,b):sticksAround(a);
+		return b ? single(a,b):multiUse(a);
 	}else if(typeof a === "number"){
 		return !b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
 	}

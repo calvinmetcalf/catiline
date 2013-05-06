@@ -1,4 +1,7 @@
-function oneOff(fun,data){
+//special case of worker only being called once, instead of sending the data
+//we can bake the data into the worker when we make it.
+
+function single(fun,data){
 	var promise = c.deferred();
 	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
 	_self.cb=function(data,transfer){\n\
