@@ -2,7 +2,7 @@ Communist
 ==========
 ![communist](logo.png)
 
-A library all about workers.
+A JavaScrit library all about workers.
 
 API
 ===
@@ -10,7 +10,7 @@ API
 var worker = communist({sum:function(a,cb){cb(a[0]+a[1]);},square:function(a){return a*a;});
 worker.sum([2,5]).then(function(a){console.log(a);})//prints 7
 worker.square(5).then(function(a){console.log(a);})//prints 25
-worker.close()//closes the worker, can be overwritten, worker._close() can't be closed.
+worker.close()//closes the worker, can be overwritten, worker._close() can't be overwritten.
 ```
 
 Give it an object of functions, and you can call them by name, your functions can either return a value or call a callback function which is passed as the second argument.
