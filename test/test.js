@@ -199,6 +199,10 @@ describe('communist()', function () {
 			comrade.data(7).then(function(aa){aa.should.equal(7)}).then(done,done);
 			});
 		});
+        it("should be able to import scripts in an object function",function (done){
+    		var comrade = communist({data:function(a){importScripts('fakeLib.js');return a;}});
+			comrade.data(9).then(function (a) { a.should.equal(9); }).then(done, done);
+		});
 	});
 	describe('Objects', function () {
 		it("should be able create an object worker",function (done){
