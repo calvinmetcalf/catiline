@@ -188,8 +188,8 @@ function multiUse(fun){
 function object(obj){
 	var w = new Communist();
 	var i = 0;
-     var promises = [];
-    var rejectPromises = function(msg){
+	var promises = [];
+	var rejectPromises = function(msg){
 		if(typeof msg!=="string" && msg.preventDefault){
 			msg.preventDefault();
 			msg=msg.message;
@@ -206,10 +206,10 @@ function object(obj){
 	var fObj="{";
 	var keyFunc=function(key){
 		var out = function(data, transfer){
-            var i = promises.length;
-    	    promises[i] = c.deferred();
+			var i = promises.length;
+			promises[i] = c.deferred();
 			!c._noTransferable?worker.postMessage([i,key,data],transfer):worker.postMessage([i,key,data]);
-            return promises[i].promise;
+			return promises[i].promise;
 		};
 		return out;	
 		};
@@ -225,7 +225,7 @@ function object(obj){
 	fObj=fObj+"}";
 	
 	var worker = makeWorker(['\n\
-    var _db='+fObj+';\n\
+	var _db='+fObj+';\n\
 	self.onmessage=function(e){\n\
 	var cb=function(data,transfer){\n\
 		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);\n\
@@ -246,13 +246,13 @@ function object(obj){
 		return;
 	};
 	w._close = function(){
-    	worker.terminate();
+		worker.terminate();
 		rejectPromises("closed");
 		return;
 	};
-    if(!w.close){
-        w.close=w._close;
-    }
+	if(!w.close){
+		w.close=w._close;
+	}
 
 	return w;
 }
