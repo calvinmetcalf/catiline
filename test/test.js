@@ -230,5 +230,55 @@ describe('communist()', function () {
 			done();
 		})
 	});
+	describe('Queues', function () {
+		it("should be able create an object worker",function (done){
+			var comrade = communist({product:product,aSquare:aSquare,square:square},2);
+			comrade.aSquare(3).then(function(a){
+				a.should.equal(9);
+			}).then(function(){
+				return comrade.product([20,100]);
+			}).then(function(a){a.should.equal(2000)}).then(function(){
+				return comrade.square(5);
+			}).then(function(a){a.should.equal(25)}).then(done,done);
+		});
+		it("and catch an error in it",function (done){
+			var comrade = communist({product:product,aSquare:aSquare,square:square},2);
+			comrade.square("explode").then(function(){},function(a){a.indexOf("explode").should.be.at.least(0);}).then(done,done);
+		});
+		it("and then do more stuff",function (done){
+			var comrade = communist({product:product,aSquare:aSquare,square:square},2);
+			comrade.square("explode").then(function(){},function(a){a.indexOf("explode").should.be.at.least(0);
+			comrade.square(9).then(function(a){a.should.equal(81)}).then(done,done);
+			});
+		});
+		it("and close it",function (done){
+			communist({product:product,aSquare:aSquare,square:square},2).close();
+			done();
+		});
+		it("should work batch",function (done){
+			var num=4;
+			var tot=0;
+			communist({product:product,aSquare:aSquare,square:square},2)
+				.batch
+				.square([2,4,6,8])
+				.then(function(a){
+					a.reduce(function(b,c){return b+c;}).should.equal(120);
+				}
+			).then(done,done);
+		})
+	it("should work if batch has an error",function (done){
+			var num=4;
+			var tot=0;
+			communist({product:product,aSquare:aSquare,square:square},2)
+				.batch
+				.square([2,4,6,8,'explode'])
+				.then(
+					function(){},
+					function(a){
+					a.indexOf("explode").should.be.at.least(0);
+					}
+				).then(done,done);
+		})
+	});
 
 });
