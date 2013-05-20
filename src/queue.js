@@ -12,28 +12,31 @@ function queue(obj,n){
 		idle.push(numIdle);
 		numIdle++;
 	}
-	obj._close=function(){};
-	for(var key in obj){
-		w[key]=(function(k){
-			return function(data,transfer){
+    function keyFunc(k){
+    		return function(data,transfer){
 				return doStuff(k,data,transfer);
-			}
-		})(key);
-		w.batch[key]=(function(k){
-			return function(array){
+			};
+		}
+    function keyFuncBatch(k){
+    		return function(array){
 				return c.all(array.map(function(data){
 					return doStuff(k,data);
 				}));
-			}
-		})(key);
-		w.batchTransfer[key]=(function(k){
-			return function(array){
+			};
+		}
+    function keyFuncBatchTransfer(k){
+    		return function(array){
 				return c.all(array.map(function(data){
 					return doStuff(k,data[0],data[1]);
 				}));
-			}
-		})(key);
-	};
+			};
+		}
+	obj._close=function(){};
+	for(var key in obj){
+		w[key]=keyFunc(key);
+		w.batch[key]=keyFuncBatch(key);
+		w.batchTransfer[key]=keyFuncBatchTransfer(key);
+	}
 	function done(num){
 		var data;
 		if(queueLen){
@@ -51,7 +54,7 @@ function queue(obj,n){
 			idle.push(num);
 		}
 	}
-	function doStuff(key,data,transfer){
+	function doStuff(key,data,transfer){//srsly better name!
 		var promise = c.deferred(),num;
 		if(!queueLen && numIdle){
 			num = idle.pop();
