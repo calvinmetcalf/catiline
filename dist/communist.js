@@ -1,4 +1,4 @@
-/*! communist 2013-05-19*/
+/*! communist 2013-05-20*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -274,7 +274,7 @@ function object(obj){
 	return w;
 }
 
-function queue(obj,n){
+function queue(obj,n,cb){
 	var w = new Communist();
 	w.batch={};
 	w.batchTransfer={};
@@ -288,28 +288,48 @@ function queue(obj,n){
 		idle.push(numIdle);
 		numIdle++;
 	}
-	obj._close=function(){};
-	for(var key in obj){
-		w[key]=(function(k){
-			return function(data,transfer){
-				return doStuff(k,data,transfer);
-			}
-		})(key);
-		w.batch[key]=(function(k){
+	function keyFunc(k){
+		return function(data,transfer){
+			return doStuff(k,data,transfer);
+		};
+	}
+	function keyFuncBatch(k){
+		if(cb){
+			return function(array){
+				array.forEach(function(data){
+					doStuff(k,data).then(cb);
+				});
+			};
+		}else{
 			return function(array){
 				return c.all(array.map(function(data){
 					return doStuff(k,data);
 				}));
-			}
-		})(key);
-		w.batchTransfer[key]=(function(k){
+			};	
+		}
+			
+	}
+	function keyFuncBatchTransfer(k){
+		if(cb){
+			return function(array){
+				array.forEach(function(data){
+					doStuff(k,data[0],data[1]).then(cb);
+				});
+			};
+		}else{
 			return function(array){
 				return c.all(array.map(function(data){
 					return doStuff(k,data[0],data[1]);
 				}));
-			}
-		})(key);
-	};
+			};
+		}
+	}
+	obj._close=function(){};
+	for(var key in obj){
+		w[key]=keyFunc(key);
+		w.batch[key]=keyFuncBatch(key);
+		w.batchTransfer[key]=keyFuncBatchTransfer(key);
+	}
 	function done(num){
 		var data;
 		if(queueLen){
@@ -327,7 +347,7 @@ function queue(obj,n){
 			idle.push(num);
 		}
 	}
-	function doStuff(key,data,transfer){
+	function doStuff(key,data,transfer){//srsly better name!
 		var promise = c.deferred(),num;
 		if(!queueLen && numIdle){
 			num = idle.pop();
@@ -549,7 +569,7 @@ function c(a,b,c){
 		return mapWorker(a,b,c);
 	}else if(typeof a === "object" && !Array.isArray(a)){
 		if(typeof b === "number"){
-			return queue(a,b);
+			return queue(a,b,c);
 		}else{
 			return object(a);
 		}

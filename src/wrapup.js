@@ -3,7 +3,7 @@ function c(a,b,c){
 		return mapWorker(a,b,c);
 	}else if(typeof a === "object" && !Array.isArray(a)){
 		if(typeof b === "number"){
-			return queue(a,b);
+			return queue(a,b,c);
 		}else{
 			return object(a);
 		}

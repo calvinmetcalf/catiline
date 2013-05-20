@@ -278,7 +278,22 @@ describe('communist()', function () {
 					a.indexOf("explode").should.be.at.least(0);
 					}
 				).then(done,done);
-		})
+		});
+		it("should work batch with a callback",function (done){
+			var i = 4;
+			var tot = 0;
+			var comrade = communist({product:product,aSquare:aSquare,square:square},2,function(a){
+				i--;
+				tot+=a;
+				if(!i){
+					tot.should.equal(120);
+					done();
+				}
+			}
+		);
+		comrade.batch
+				.square([2,4,6,8]);
+		});
 	});
 
 });

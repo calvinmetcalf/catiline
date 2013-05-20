@@ -1,4 +1,4 @@
-function queue(obj,n){
+function queue(obj,n,cb){
 	var w = new Communist();
 	w.batch={};
 	w.batchTransfer={};
@@ -12,25 +12,42 @@ function queue(obj,n){
 		idle.push(numIdle);
 		numIdle++;
 	}
-    function keyFunc(k){
-    		return function(data,transfer){
-				return doStuff(k,data,transfer);
+	function keyFunc(k){
+		return function(data,transfer){
+			return doStuff(k,data,transfer);
+		};
+	}
+	function keyFuncBatch(k){
+		if(cb){
+			return function(array){
+				array.forEach(function(data){
+					doStuff(k,data).then(cb);
+				});
 			};
-		}
-    function keyFuncBatch(k){
-    		return function(array){
+		}else{
+			return function(array){
 				return c.all(array.map(function(data){
 					return doStuff(k,data);
 				}));
-			};
+			};	
 		}
-    function keyFuncBatchTransfer(k){
-    		return function(array){
+			
+	}
+	function keyFuncBatchTransfer(k){
+		if(cb){
+			return function(array){
+				array.forEach(function(data){
+					doStuff(k,data[0],data[1]).then(cb);
+				});
+			};
+		}else{
+			return function(array){
 				return c.all(array.map(function(data){
 					return doStuff(k,data[0],data[1]);
 				}));
 			};
 		}
+	}
 	obj._close=function(){};
 	for(var key in obj){
 		w[key]=keyFunc(key);
