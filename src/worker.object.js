@@ -53,17 +53,12 @@ function object(obj){
 			promises[e.data[0]]=0;
 	};
 	worker.onerror=rejectPromises;
-	w.close = function(){
-		worker.terminate();
-		rejectPromises("closed");
-		return;
-	};
 	w._close = function(){
 		worker.terminate();
 		rejectPromises("closed");
-		return;
+		return c.resolve("done");
 	};
-	if(!w.close){
+	if(!('close' in w)){
 		w.close=w._close;
 	}
 
