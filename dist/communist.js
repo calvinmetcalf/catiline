@@ -333,7 +333,7 @@ function queue(obj,n,cb){
 	function done(num){
 		var data;
 		if(queueLen){
-			data = queue.pop();
+			data = queue.shift();
 			queueLen--;
 			workers[num][data[0]](data[1],data[2]).then(function(d){
 				done(num);
