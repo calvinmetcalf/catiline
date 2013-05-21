@@ -47,7 +47,8 @@ function object(obj){
 			if(typeof result !== "undefined"){\n\
 				cb(result);\n\
 			}\n\
-	}']);
+	}\n\
+	_db.initialize()']);
 	worker.onmessage= function(e){
 			promises[e.data[0]].resolve(e.data[1]);
 			promises[e.data[0]]=0;
