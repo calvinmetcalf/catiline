@@ -2,12 +2,8 @@ Communist
 ==========
 ![communist](logo.png)
 
-A JavaScrit library all about workers, want to use it? Grab the [development version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.js) or [production version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.min.js) from the dist folder. __Important:__ you have to host it yourself, you will have issues if your link to one on a seperate domain.
+A JavaScrit library all about workers, want to use it? Grab the [development version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.js) or [production version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.min.js) from the dist folder. 
 
-Download It
-===
-To use, downlaod the [development version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.js) 
-or [production version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.min.js) of the script and use it with your project. 
 __Important:__ you have to host it yourself, you will have issues if your link to one on a seperate domain.
 
 API
