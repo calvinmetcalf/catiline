@@ -228,7 +228,10 @@ describe('communist()', function () {
 		it("and close it",function (done){
 			communist({product:product,aSquare:aSquare,square:square}).close();
 			done();
-		})
+		});
+		it("should work with an initializer function",function (done){
+			communist({initialize:function(){this.a=7},test:function(){return this.a}}).test().then(function(a){a.should.equal(7)}).then(done,done);
+		});
 	});
 	describe('Queues', function () {
 		it("should be able create an object worker",function (done){
@@ -293,6 +296,9 @@ describe('communist()', function () {
 		);
 		comrade.batch
 				.square([2,4,6,8]);
+		});
+		it("should work with an initializer function",function (done){
+			communist({initialize:function(){this.a=7},test:function(){return this.a}}).test().then(function(a){a.should.equal(7)}).then(done,done);
 		});
 	});
 
