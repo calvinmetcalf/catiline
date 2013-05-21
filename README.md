@@ -4,13 +4,19 @@ Communist
 
 A JavaScrit library all about workers, want to use it? Grab the [development version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.js) or [production version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.min.js) from the dist folder. __Important:__ you have to host it yourself, you will have issues if your link to one on a seperate domain.
 
+Download It
+===
+To use, downlaod the [development version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.js) 
+or [production version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.min.js) of the script and use it with your project. 
+__Important:__ you have to host it yourself, you will have issues if your link to one on a seperate domain.
+
 API
 ===
 ```javascript
 var worker = communist({sum:function(a,cb){cb(a[0]+a[1]);},square:function(a){return a*a;});
 worker.sum([2,5]).then(function(a){console.log(a);})//prints 7
 worker.square(5).then(function(a){console.log(a);})//prints 25
-worker.close()//closes the worker, can be overwritten, worker._close() can't be overwritten.
+worker.close()//closes the worker, can be overwritten, worker._close() can't be closed.
 ```
 
 Give it an object of functions, and you can call them by name, your functions can either return a value or call a callback function which is passed as the second argument.
@@ -34,7 +40,22 @@ If you just pass a function then you can call it with data.   Data only takes th
 communist(function(a,cb){cb(a[0]*a[1])},[2,5]).then(function(a){console.log(a);})//prints 7
 ```
 
-pass the data as the second argument and it crunches it returns the data and then closes up for you.
+pass the data as the second argument and it crunches it returns the data and then closes up for you (don't use this if you are every doing more then one thing with workers).
+
+###Experimental Queues
+
+```javascript
+var workers = communist({sum:function(a,cb){cb(a[0]+a[1]);},square:function(a){return a*a;},4);
+```
+
+Just add a number after the object (dosn't work with a function quite yet) and it will create that number or workers. Then calls will be divided among them, you can also call bulk methods works just like the regular method but also can call bulk methods which return arrays:
+
+
+```javascript
+workers.square(4).then(function(a){console.log(a);});//normal way prints 16;
+workers.bulk.square([1,2,3,4,5,6,7,8]).then(function(a){console.log(a);});//bulk prints [1,4,9,16,25,36,49,64]
+```
+
 
 ###Want it fancy? MAP REDUCE!!!
 
@@ -95,6 +116,6 @@ we have a few utility functions you can use
 
 ```communist.ajax(url[,after,notjson]);``` returns promise, after is a function to call on the data after download in the worker, notjson should be true if you don't want to run JSON.parse on it.
 
-`communist.deferred();` makes a new promise and returns it, used internally.
+`communist.deferred();` makes a new promise and returns it, used internally. Technically `communist` is a shortcut to [Promiscuous](https://github.com/RubenVerborgh/promiscuous/) which is used for promises, so any of promiscuouses methods can be used, aka call `communist.resolve(value)` for an already resolved promise and `communist.reject(reason)` for a rejected one. Lastly you can call `communist.all([promises])` on an array of promises, should work just like `Q.all()`.
 
-This grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).  Uses [Promiscuous](https://github.com/RubenVerborgh/promiscuous/) for promises, either include dist/communist[.min].js.
+This grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).
