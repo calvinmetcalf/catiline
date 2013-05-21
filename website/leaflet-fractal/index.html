@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></meta>
+	<title>Julia Set Viewer</title>
+
+   
+
+
+     <link rel="stylesheet" href="leaflet/leaflet.css" />
+    <style>
+        body, html, #map {
+            width: 100%;
+            height: 100%;
+            margin: 0px;
+        }
+        .leaflet-control-layers label {
+            display:inline;
+        }
+    </style>   
+    
+</head>
+
+<body>
+	<div id="map"></div>
+<script src="leaflet/leaflet.js"></script>
+	<script src="FractalLayer.js"></script>
+    <script src="mustache.js"></script>
+    <script src="../communist.js"></script>
+	<script type="text/javascript">
+        var map = L.map('map',{minZoom:1}).setView([0,0], 2);
+        
+      var JuliaControl = L.Control.extend({
+    options: {
+        position: 'topright'
+    },
+formChange:function(map,defaults){
+     var values,inputs,len,i;
+    
+        values={};
+        values.iterations = 500;
+         values.cr = -0.37;
+         values.ci = 0.6;
+         values.fractalType="julia";
+    if(!defaults){
+        
+         inputs = document.getElementsByClassName("juliaInput");
+         len = inputs.length;
+         i = 0;
+        while(i<len){
+            if(inputs[i].name!=="fractalType"){
+            values[inputs[i].name]=parseFloat(inputs[i].value,10);
+            }else{
+              values[inputs[i].name]=inputs[i].value 
+            }
+            i++;
+        }
+        if(this.layer){
+        map.removeLayer(this.layer);
+        }
+       
+    }
+    
+        this.layer = L.tileLayer.fractalLayer(6,values.fractalType,values.iterations,values.cr,values.ci).addTo(map);
+        history.pushState(values,"","#"+values.iterations+"/"+values.cr+"/"+values.ci+"/"+values.fractalType);
+         values.type=values.fractalType;
+         values[values.type]=true;
+         values.iter=values.iterations;
+        var form = document.getElementsByClassName("juliaForm");
+        if(form.length){
+            form[0].innerHTML=this.template(values);
+        }
+    },
+    onAdd: function (map) {
+        // create the control container with a particular class name
+var temp="\n<label class=\"juliaLabel\" for=\"fractalType\">Fractal Type: </label>\n<select class=\"juliaInput\" id=\"fractalType\" name=\"fractalType\">\n<option value=\"julia\" {{#julia}}selected{{/julia}}>Julia</option>\n<option value=\"mandlebrot\" {{#mandlebrot}}selected{{/mandlebrot}}>Mandlebrot</option>\n<option value=\"multibrot3\" {{#multibrot3}}selected{{/multibrot3}}>Multibrot 3</option>\n<option value=\"multibrot5\" {{#multibrot5}}selected{{/multibrot5}}>Multibrot 5</option>\n<option value=\"burningShip\" {{#burningShip}}selected{{/burningShip}}>Burning Ship</option>\n<option value=\"tricorn\" {{#tricorn}}selected{{/tricorn}}>Tricorn</option>\n\n</select>\n{{#julia}}\n<label class=\"juliaLabel\" for=\"cr\">R: </label>\n<input class=\"juliaInput\" id=\"cr\" type=\"number\" name=\"cr\" value=\"{{cr}}\" min=\"-2\" max=\"2\" step=\"0.001\">\n<label class=\"juliaLabel\" for=\"ci\">I: </label>\n<input class=\"juliaInput\" type=\"number\" name=\"ci\" id=\"ci\" value=\"{{ci}}\" min=\"-2\" max=\"2\" step=\"0.001\">\n{{/julia}}\n<label class=\"juliaLabel\" for=\"iterations\">Iterations: </label>\n<input class=\"juliaInput\" type=\"number\" name=\"iterations\" value=\"{{iter}}\" step=\"100\" min=\"0\" id=\"iter\">\n\n";
+var container = L.DomUtil.create('div', 'leaflet-control-layers leaflet-control-layers-expanded leaflet-control');
+        // ... initialize other DOM elements, add listeners, etc.
+        this.template = Mustache.compile(temp);
+        var form = L.DomUtil.create("form","juliaForm", container);
+        var params = {};
+        params.iter=500;
+        params.cr=-0.37;
+        params.ci=0.6;
+        params.type="julia";
+        //form.dispatchFormChange()
+        L.DomEvent.addListener(form,"change",function(e){
+           this.formChange(map);
+        },this);
+        var hashes;
+        if(location.hash){
+            hashes=location.hash.slice(0,1)==="#"?location.hash.slice(1).split("/"):location.hash.split("/");
+            params.iter=parseFloat(hashes[0],10);
+            params.cr=parseFloat(hashes[1],10);
+            params.ci=parseFloat(hashes[2],10);
+            params.type=hashes[3];
+            this.layer = L.tileLayer.fractalLayer(6,params.type,params.iter,params.cr,params.ci).addTo(map);
+        }else{
+             this.formChange(map,true);
+        }
+        var _this=this;
+        window.onpopstate = function(event) {
+            if(event.state){
+           document.getElementById("cr").value=event.state.cr;
+        document.getElementById("ci").value=event.state.ci;
+         document.getElementById("iter").value=event.state.iterations;
+         map.removeLayer(_this.layer);
+          _this.layer = L.tileLayer.fractalLayer(6,"julia",event.state.iterations,event.state.cr,event.state.ci).addTo(map);
+        }};
+        params[params.type]=true;
+       form.innerHTML=this.template(params);
+if (!L.Browser.touch) {
+    		L.DomEvent.disableClickPropagation(container);
+			L.DomEvent.on(container, 'mousewheel', L.DomEvent.stopPropagation);
+		} else {
+			L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation);
+		}
+       
+        return container;
+    }
+    
+    
+});
+var cont = new JuliaControl();
+map.addControl(cont);
+	</script><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-31218444-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</body>
+</html>
