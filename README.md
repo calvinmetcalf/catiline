@@ -12,7 +12,7 @@ API
 var worker = communist({sum:function(a,cb){cb(a[0]+a[1]);},square:function(a){return a*a;});
 worker.sum([2,5]).then(function(a){console.log(a);})//prints 7
 worker.square(5).then(function(a){console.log(a);})//prints 25
-worker.close()//closes the worker, can be overwritten, worker._close() can't be closed.
+worker.close()//closes the worker, can be overwritten, worker._close() can't be.
 ```
 
 Give it an object of functions, and you can call them by name, your functions can either return a value or call a callback function which is passed as the second argument.
@@ -44,7 +44,7 @@ pass the data as the second argument and it crunches it returns the data and the
 var workers = communist({sum:function(a,cb){cb(a[0]+a[1]);},square:function(a){return a*a;},4);
 ```
 
-Just add a number after the object (dosn't work with a function quite yet) and it will create that number or workers. Then calls will be divided among them, you can also call bulk methods works just like the regular method but also can call bulk methods which return arrays:
+Just add a number after the object (for a function just wrap it in `{data:YOUR FUNC}` and it's identical) and it will create that number or workers. Then calls will be divided among them, you can also call bulk methods works just like the regular method but also can call bulk methods which return arrays:
 
 
 ```javascript
