@@ -1,4 +1,4 @@
-/*! communist 2013-05-20*/
+/*! communist 2013-05-22*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -275,7 +275,12 @@ function object(obj){
 	return w;
 }
 
-function queue(obj,n,cb){
+function queue(obj,n,cb,x){
+	if(cb==="dumb"){
+		return dumbQueue(obj,n);
+	}else if(x==="dumb"){
+		return dumbQueue(obj,n,cb);
+	}
 	var w = new Communist();
 	w.batch={};
 	w.batchTransfer={};
@@ -364,6 +369,71 @@ function queue(obj,n,cb){
 			queueLen=queue.push([key,data,transfer,promise]);
 		}
 		return promise.promise;
+	}
+	if(!('close' in w)){
+		w.close=w._close;
+	}
+	return w;
+}
+
+function dumbQueue(obj,n,cb){
+	var w = new Communist();
+	w.batch={};
+	w.batchTransfer={};
+	var workers = new Array(n);
+	var numIdle=0;
+	var idle=[];
+	var queue=[];
+	var queueLen=0;
+	while(numIdle<n){
+		workers[numIdle]=object(obj);
+		idle.push(numIdle);
+		numIdle++;
+	}
+	function keyFunc(k){
+		return function(data,transfer){
+			return doStuff(k,data,transfer);
+		};
+	}
+	function keyFuncBatch(k){
+		if(cb){
+			return function(array){
+				array.forEach(function(data){
+					doStuff(k,data).then(cb);
+				});
+			};
+		}else{
+			return function(array){
+				return c.all(array.map(function(data){
+					return doStuff(k,data);
+				}));
+			};	
+		}
+			
+	}
+	function keyFuncBatchTransfer(k){
+		if(cb){
+			return function(array){
+				array.forEach(function(data){
+					doStuff(k,data[0],data[1]).then(cb);
+				});
+			};
+		}else{
+			return function(array){
+				return c.all(array.map(function(data){
+					return doStuff(k,data[0],data[1]);
+				}));
+			};
+		}
+	}
+	obj._close=function(){};
+	for(var key in obj){
+		w[key]=keyFunc(key);
+		w.batch[key]=keyFuncBatch(key);
+		w.batchTransfer[key]=keyFuncBatchTransfer(key);
+	}
+	function doStuff(key,data,transfer){//srsly better name!
+			return workers[~~(Math.random()*n)][key](data,transfer);
 	}
 	if(!('close' in w)){
 		w.close=w._close;
