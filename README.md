@@ -67,6 +67,7 @@ workers.batch.square([1,2,3,4,5,6,7,8]);/*prints:
 49
 64
 */
+```
 
 If you want to dispence with the queueing system you can also do a dumb queue
 
