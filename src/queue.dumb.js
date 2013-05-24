@@ -1,9 +1,4 @@
-function queue(obj,n,cb,x){
-	if(cb==="dumb"){
-		return dumbQueue(obj,n);
-	}else if(x==="dumb"){
-		return dumbQueue(obj,n,cb);
-	}
+function dumbQueue(obj,n,cb){
 	var w = new Communist();
 	w.batch={};
 	w.batchTransfer={};
@@ -59,39 +54,8 @@ function queue(obj,n,cb,x){
 		w.batch[key]=keyFuncBatch(key);
 		w.batchTransfer[key]=keyFuncBatchTransfer(key);
 	}
-	function done(num){
-		var data;
-		if(queueLen){
-			data = queue.shift();
-			queueLen--;
-			workers[num][data[0]](data[1],data[2]).then(function(d){
-				done(num);
-				data[3].resolve(d);
-			},function(d){
-				done(num);
-				data[3].reject(d);
-			});
-		}else{
-			numIdle++;
-			idle.push(num);
-		}
-	}
 	function doStuff(key,data,transfer){//srsly better name!
-		var promise = c.deferred(),num;
-		if(!queueLen && numIdle){
-			num = idle.pop();
-			numIdle--;
-			workers[num][key](data,transfer).then(function(d){
-				done(num);
-				promise.resolve(d);
-			},function(d){
-				done(num);
-				promise.reject(d);
-			});
-		}else if(queueLen||!numIdle){
-			queueLen=queue.push([key,data,transfer,promise]);
-		}
-		return promise.promise;
+			return workers[~~(Math.random()*n)][key](data,transfer);
 	}
 	if(!('close' in w)){
 		w.close=w._close;
