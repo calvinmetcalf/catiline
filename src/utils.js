@@ -13,6 +13,9 @@ function moveImports(string){
 }
 
 function getPath(){
+	if(typeof SHIM_WORKER_PATH !== "undefined"){
+		return SHIM_WORKER_PATH;
+	}
 	var scripts = document.getElementsByTagName("script");
 		var len = scripts.length;
 		var i = 0;

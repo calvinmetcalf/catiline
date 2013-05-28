@@ -4,7 +4,7 @@ Communist
 
 A JavaScrit library all about workers, want to use it? Grab the [development version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.js) or [production version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.min.js) from the dist folder. 
 
-__Important:__ you have to host it yourself, you will have issues if your link to one on a seperate domain.
+__Important:__ you're going to want to it yourself, on the same domain as your page, if you can't or need to bundle it see [hosting](#hosting).
 
 API
 ===
@@ -142,6 +142,10 @@ worker.data(stuff);
 worker.close();
 //close that
 ```
+
+###Hosting<a id='hosting'></a>
+If you need to host it on a seperate domain, or bundle it with other scripts and still want it to work on IE10, Opera, and Safari. You need to host the file "SHIM_WORKER.js" on the same domain as the html file 
+and set the path to it in a globar variable `SHIM_WORKER_PATH` before you load this script.
 
 ###Misc
 

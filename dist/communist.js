@@ -1,4 +1,4 @@
-/*! communist 2013-05-22*/
+/*! communist 2013-05-28*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -121,6 +121,9 @@ function moveImports(string){
 }
 
 function getPath(){
+	if(typeof SHIM_WORKER_PATH !== "undefined"){
+		return SHIM_WORKER_PATH;
+	}
 	var scripts = document.getElementsByTagName("script");
 		var len = scripts.length;
 		var i = 0;
