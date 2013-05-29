@@ -1,7 +1,7 @@
 mocha.setup({
     ui: "bdd",
     globals: ["console"],
-    timeout: 20000
+    timeout: 30000
 });
 chai.should();
 
@@ -35,19 +35,29 @@ describe('communist()', function () {
 		});
 		it('should allow chaining of data functions, with callback passed to communist()', function (done) {
 			var count = 0;
-			var comrade = communist(square, function (a) { count++; a.should.equal(81); if (count === 2) { done(); } });
+			var comrade = communist(square, function (a) { count++; a.should.equal(81); if (count === 2) { comrade.close();done(); } });
 			comrade.data(9).data(9);
 		});
 		it('should allow chaining of data functions, with callback passed to communist() async', function (done) {
 			var count = 0;
-			var comrade = communist(aSquare, function (a) { count++; a.should.equal(81); if (count === 2) { done(); } });
+			var comrade = communist(aSquare, function (a) { count++; a.should.equal(81); if (count === 2) { comrade.close();done(); } });
 			comrade.data(9).data(9);
 		});
 		it('should be able to handle an array buffer', function(done){
-			var comrade = communist(function(data,cb){cb(data)}).data((new Uint8Array([1,2,3,4,5,6,7,8])).buffer).then(function(a){a.byteLength.should.equal(8)}).then(done,done);
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
+			var comrade = communist(function(data,cb){cb(data)});
+			comrade.data((new Uint8Array([1,2,3,4,5,6,7,8])).buffer).then(function(a){a.byteLength.should.equal(8)}).then(wrapUp,wrapUp);
 		});
 		it('should be able to handle an array buffer as a transferable object', function(done){
-			var comrade = communist(function(data,cb){cb(data,[data])}).data(buf,[buf]).then(function(a){a.byteLength.should.equal(8)}).then(done,done);
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
+			var comrade = communist(function(data,cb){cb(data,[data])});
+			comrade.data(buf,[buf]).then(function(a){a.byteLength.should.equal(8)}).then(wrapUp,wrapUp);
 		});
 	});
 	describe('errors', function () {
@@ -63,42 +73,56 @@ describe('communist()', function () {
 			});
 			function afterEach(){
 				count++;
-				if(count == 3){
+				if(count === 3){
+					comrade.close();
 					done();
 				}
 			}
 			comrade.data(10).data("Ermahgerd").data(10);
 		});
 		it('should gracefully handle an error in a sticksaround', function (done) {
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
 			var comrade = communist(square);
-			comrade.data("Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){a.indexOf("Ermahgerd").should.be.at.least(0);}).then(done, done);
+			comrade.data("Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){a.indexOf("Ermahgerd").should.be.at.least(0);}).then(wrapUp, wrapUp);
 		});
 		it('should gracefully handle an error as a oneoff', function (done) {
-			var comrade = communist(square,"Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){a.indexOf("Ermahgerd").should.be.at.least(0);}).then(done, done);
+			communist(square,"Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){a.indexOf("Ermahgerd").should.be.at.least(0);}).then(done, done);
 		});
 	});
 	describe('Worker reuse', function () {
+		
 		it('should work with callback applied to promise', function (done) {
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
 			var comrade = communist(square)
 			comrade.data(9).then(function (a) { a.should.equal(81); 
-			comrade.data(62).then(function (a) { a.should.equal(3844); }).then(done, done);
+			comrade.data(62).then(function (a) { a.should.equal(3844); }).then(wrapUp, wrapUp);
 			});
 		});
 		it('should work with callback applied to promise async', function (done) {
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
 			var comrade = communist(aSquare)
 			comrade.data(9).then(function (a) { a.should.equal(81); 
-			comrade.data(62).then(function (a) { a.should.equal(3844); }).then(done, done);
+			comrade.data(62).then(function (a) { a.should.equal(3844); }).then(wrapUp, wrapUp);
 			});
 		});
 		it('should work with callback passed to communist()', function (done) {
 			var count = 0;
-			var comrade = communist(square, function (a) { count++; a.should.equal(81); if (count === 2) { done(); } });
+			var comrade = communist(square, function (a) { count++; a.should.equal(81); if (count === 2) { comrade.close();done(); } });
 			comrade.data(9);
 			comrade.data(9);
 		});
 		it('should work with callback passed to communist() async', function (done) {
 			var count = 0;
-			var comrade = communist(aSquare, function (a) { count++; a.should.equal(81); if (count === 2) { done(); } });
+			var comrade = communist(aSquare, function (a) { count++; a.should.equal(81); if (count === 2) { comrade.close();done(); } });
 			comrade.data(9);
 			comrade.data(9);
 		});
@@ -190,23 +214,35 @@ describe('communist()', function () {
 			communist(function(a){importScripts();return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
 		});
 		it("should be able to import scripts in a sticks around",function (done){
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
 			var comrade = communist(function(a){importScripts('fakeLib.js');return a;});
-			comrade.data(9).then(function (a) { a.should.equal(9); }).then(done, done);
+			comrade.data(9).then(function (a) { a.should.equal(9); }).then(wrapUp, wrapUp);
 		});
 		it("should be able to import scripts in a sticks around and call it twice",function (done){
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
 			var comrade = communist(function(a){importScripts('fakeLib.js');return a;});
 			comrade.data(9).then(function (a) { a.should.equal(9); 
-			comrade.data(7).then(function(aa){aa.should.equal(7)}).then(done,done);
+			comrade.data(7).then(function(aa){aa.should.equal(7)}).then(wrapUp,wrapUp);
 			});
 		});
         it("should be able to import scripts in an object function",function (done){
+        	function wrapUp(){
+				comrade.close();
+				done();
+			}
     		var comrade = communist({data:function(a){importScripts('fakeLib.js');return a;}});
-			comrade.data(9).then(function (a) { a.should.equal(9); }).then(done, done);
+			comrade.data(9).then(function (a) { a.should.equal(9); }).then(wrapUp, wrapUp);
 		});
 	});
 	describe('Objects', function () {
+		var comrade = communist({product:product,aSquare:aSquare,square:square});
 		it("should be able create an object worker",function (done){
-			var comrade = communist({product:product,aSquare:aSquare,square:square});
 			comrade.aSquare(3).then(function(a){
 				a.should.equal(9);
 			}).then(function(){
@@ -216,26 +252,29 @@ describe('communist()', function () {
 			}).then(function(a){a.should.equal(25)}).then(done,done);
 		});
 		it("and catch an error in it",function (done){
-			var comrade = communist({product:product,aSquare:aSquare,square:square});
 			comrade.square("explode").then(function(){},function(a){a.indexOf("explode").should.be.at.least(0);}).then(done,done);
 		});
 		it("and then do more stuff",function (done){
-			var comrade = communist({product:product,aSquare:aSquare,square:square});
 			comrade.square("explode").then(function(){},function(a){a.indexOf("explode").should.be.at.least(0);
 			comrade.square(9).then(function(a){a.should.equal(81)}).then(done,done);
 			});
 		});
 		it("and close it",function (done){
-			communist({product:product,aSquare:aSquare,square:square}).close();
+			comrade.close();
 			done();
 		});
 		it("should work with an initializer function",function (done){
-			communist({initialize:function(){this.a=7},test:function(){return this.a}}).test().then(function(a){a.should.equal(7)}).then(done,done);
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
+			var comrade = communist({initialize:function(){this.a=7},test:function(){return this.a}});
+			comrade.test().then(function(a){a.should.equal(7)}).then(wrapUp,wrapUp);
 		});
 	});
 	describe('Queues', function () {
+		var comrade = communist({product:product,aSquare:aSquare,square:square},2);
 		it("should be able create an object worker",function (done){
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2);
 			comrade.aSquare(3).then(function(a){
 				a.should.equal(9);
 			}).then(function(){
@@ -245,44 +284,54 @@ describe('communist()', function () {
 			}).then(function(a){a.should.equal(25)}).then(done,done);
 		});
 		it("and catch an error in it",function (done){
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2);
 			comrade.square("explode").then(function(){},function(a){a.indexOf("explode").should.be.at.least(0);}).then(done,done);
 		});
 		it("and then do more stuff",function (done){
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2);
 			comrade.square("explode").then(function(){},function(a){a.indexOf("explode").should.be.at.least(0);
 			comrade.square(9).then(function(a){a.should.equal(81)}).then(done,done);
 			});
 		});
 		it("and close it",function (done){
-			communist({product:product,aSquare:aSquare,square:square},2).close();
+			comrade.close();
 			done();
 		});
 		it("should work batch",function (done){
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
 			var num=4;
 			var tot=0;
-			communist({product:product,aSquare:aSquare,square:square},2)
-				.batch
+			var comrade = communist({product:product,aSquare:aSquare,square:square},2);
+			comrade.batch
 				.square([2,4,6,8])
 				.then(function(a){
 					a.reduce(function(b,c){return b+c;}).should.equal(120);
 				}
-			).then(done,done);
+			).then(wrapUp,wrapUp);
 		})
-	it("should work if batch has an error",function (done){
+		it("should work if batch has an error",function (done){
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
 			var num=4;
 			var tot=0;
-			communist({product:product,aSquare:aSquare,square:square},2)
-				.batch
+			var comrade = communist({product:product,aSquare:aSquare,square:square},2);
+			comrade.batch
 				.square([2,4,6,8,'explode'])
 				.then(
 					function(){},
 					function(a){
 					a.indexOf("explode").should.be.at.least(0);
 					}
-				).then(done,done);
+				).then(wrapUp,wrapUp);
 		});
 		it("should work batch with a callback",function (done){
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
 			var i = 4;
 			var tot = 0;
 			var comrade = communist({product:product,aSquare:aSquare,square:square},2,function(a){
@@ -290,7 +339,7 @@ describe('communist()', function () {
 				tot+=a;
 				if(!i){
 					tot.should.equal(120);
-					done();
+					wrapUp();
 				}
 			}
 		);
@@ -298,12 +347,17 @@ describe('communist()', function () {
 				.square([2,4,6,8]);
 		});
 		it("should work with an initializer function",function (done){
-			communist({initialize:function(){this.a=7},test:function(){return this.a}}).test().then(function(a){a.should.equal(7)}).then(done,done);
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
+			var comrade = communist({initialize:function(){this.a=7},test:function(){return this.a}});
+			comrade.test().then(function(a){a.should.equal(7)}).then(wrapUp,wrapUp);
 		});
 	});
-describe('dumb Queues', function () {
+	describe('dumb Queues', function () {
+		var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
 		it("should be able create an object worker",function (done){
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
 			comrade.aSquare(3).then(function(a){
 				a.should.equal(9);
 			}).then(function(){
@@ -313,44 +367,54 @@ describe('dumb Queues', function () {
 			}).then(function(a){a.should.equal(25)}).then(done,done);
 		});
 		it("and catch an error in it",function (done){
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
 			comrade.square("explode").then(function(){},function(a){a.indexOf("explode").should.be.at.least(0);}).then(done,done);
 		});
 		it("and then do more stuff",function (done){
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
 			comrade.square("explode").then(function(){},function(a){a.indexOf("explode").should.be.at.least(0);
 			comrade.square(9).then(function(a){a.should.equal(81)}).then(done,done);
 			});
 		});
 		it("and close it",function (done){
-			communist({product:product,aSquare:aSquare,square:square},2,"dumb").close();
+			comrade.close();
 			done();
 		});
 		it("should work batch",function (done){
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
 			var num=4;
 			var tot=0;
-			communist({product:product,aSquare:aSquare,square:square},2,"dumb")
-				.batch
+			var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
+			comrade.batch
 				.square([2,4,6,8])
 				.then(function(a){
 					a.reduce(function(b,c){return b+c;}).should.equal(120);
 				}
-			).then(done,done);
+			).then(wrapUp,wrapUp);
 		})
 	it("should work if batch has an error",function (done){
+		function wrapUp(){
+				comrade.close();
+				done();
+			}
 			var num=4;
 			var tot=0;
-			communist({product:product,aSquare:aSquare,square:square},2,"dumb")
-				.batch
+			var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
+			comrade.batch
 				.square([2,4,6,8,'explode'])
 				.then(
 					function(){},
 					function(a){
 					a.indexOf("explode").should.be.at.least(0);
 					}
-				).then(done,done);
+				).then(wrapUp,wrapUp);
 		});
 		it("should work batch with a callback",function (done){
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
 			var i = 4;
 			var tot = 0;
 			var comrade = communist({product:product,aSquare:aSquare,square:square},2,function(a){
@@ -358,7 +422,7 @@ describe('dumb Queues', function () {
 				tot+=a;
 				if(!i){
 					tot.should.equal(120);
-					done();
+					wrapUp();
 				}
 			},"dumb"
 		);
@@ -366,7 +430,12 @@ describe('dumb Queues', function () {
 				.square([2,4,6,8]);
 		});
 		it("should work with an initializer function",function (done){
-			communist({initialize:function(){this.a=7},test:function(){return this.a}}).test().then(function(a){a.should.equal(7)},"dumb").then(done,done);
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
+			var comrade=communist({initialize:function(){this.a=7},test:function(){return this.a}});
+			comrade.test().then(function(a){a.should.equal(7)},"dumb").then(wrapUp,wrapUp);
 		});
 	});
 });
