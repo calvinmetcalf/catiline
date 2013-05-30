@@ -52,12 +52,12 @@ workers.square(4).then(function(a){console.log(a);});//normal way prints 16;
 workers.batch.square([1,2,3,4,5,6,7,8]).then(function(a){console.log(a);});//bulk prints [1,4,9,16,25,36,49,64]
 ```
 
-if you create it with a callback then it calls the callback for each of the bulk items instead of waiting for all to be done.
+if you give it a callback then it calls the callback for each of the bulk items instead of waiting for all to be done.
 
 ```javascript
-var workers = communist({sum:function(a,cb){cb(a[0]+a[1])},square:function(a){return a*a;}},4,function(a){console.log(a)});
+var workers = communist({sum:function(a,cb){cb(a[0]+a[1])},square:function(a){return a*a;}},4);
 workers.square(4).then(function(a){console.log(a);});//the same way prints 16;
-workers.batch.square([1,2,3,4,5,6,7,8]);/*prints:
+workers.batch(function(a){console.log(a)}).square([1,2,3,4,5,6,7,8]);/*prints:
 1
 4
 9
@@ -81,8 +81,8 @@ can lead to "three stooges syndrome" where all the results come back at exactly 
 can use bulk and callback with it too but results may be different
 
 ```javascript
-var workers = communist({sum:function(a,cb){cb(a[0]+a[1])},square:function(a){return a*a;}},4,function(a){console.log(a)},'dumb');
-workers.batch.square([1,2,3,4,5,6,7,8]);/* prints
+var workers = communist({sum:function(a,cb){cb(a[0]+a[1])},square:function(a){return a*a;}},4,'dumb');
+workers.batch(function(a){console.log(a)}).square([1,2,3,4,5,6,7,8]);/* prints
 1
 25
 16
