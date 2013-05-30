@@ -46,7 +46,6 @@ module.exports = function(grunt) {
 	jshint: {
 		options:{
 			multistr:true,
-			evil:true,
 			expr:true,
 			trailing:true,
 			eqeqeq:true,
