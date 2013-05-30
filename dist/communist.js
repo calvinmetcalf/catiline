@@ -1,10 +1,10 @@
-/*! communist 2013-05-29*/
+/*! communist 2013-05-30*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
 	self.onmessage=function(e){
 		eval(e.data);	
-	}
+	};
 } else {
 (function(){
 	"use strict";
@@ -153,8 +153,12 @@ if (typeof document === "undefined") {
 		return {
 			promise: promise,
 			// Only resolve / reject when there is a deferreds queue
-			resolve: function (value)	{ handler.c && handler(handler, true, value); },
-			reject : function (reason) { handler.c && handler(handler, false, reason); },
+			resolve: function (value)	{ 
+				handler.c && handler(handler, true, value);
+			},
+			reject : function (reason) {
+				handler.c && handler(handler, false, reason);
+			},
 		};
 	}
 
@@ -208,7 +212,6 @@ if (typeof document === "undefined") {
 c.all=function(array){
 	var promise = c.deferred();
 	var len = array.length;
-	var i = 0;
 	var resolved=0;
 	var out = new Array(len);
 	var onSuccess=function(n){
@@ -218,14 +221,15 @@ c.all=function(array){
 			if(resolved===len){
 				promise.resolve(out);
 			}
-		}
-	}
-	while(i<len){
-		array[i].then(onSuccess(i),function(a){promise.reject(a)});
-		i++;
-	}
+		};
+	};
+		array.forEach(function(v,i){
+			v.then(onSuccess(i),function(a){
+				promise.reject(a);
+			});
+		});
 	return promise.promise;
-}
+};
 
 //this is mainly so the name shows up when you look at the object in the console
 var Communist = function(){};
@@ -234,7 +238,16 @@ function moveImports(string){
 	var script;
 	var match = string.match(/(importScripts\(.*\);)/);
 	if(match){
-		script = match[0].replace(/importScripts\((.*\.js\')\);?/,function(a,b){if(b){return "importScripts("+b.split(",").map(function(cc){return "'"+c.makeUrl(cc.slice(1,-1))+"'"})+");\n";}else{return "";}})+string.replace(/(importScripts\(.*\.js\'\);?)/,"\n");
+		script = match[0].replace(/importScripts\((.*\.js\')\);?/,
+		function(a,b){
+			if(b){
+				return "importScripts("+b.split(",").map(function(cc){
+					return "'"+c.makeUrl(cc.slice(1,-1))+"'";
+				})+");\n";
+			} else {
+				return "";
+			}
+		})+string.replace(/(importScripts\(.*\.js\'\);?)/,"\n");
 	}else{
 		script = string;
 	}
@@ -250,7 +263,7 @@ function getPath(){
 		var i = 0;
 		while(i<len){
 			if(/communist(\.min)?\.js/.test(scripts[i].src)){
-			   return scripts[i].src;
+				return scripts[i].src;
 			}
 			i++;
 		}
@@ -292,7 +305,8 @@ function single(fun,data){
 		promise.reject(e.message);
 	};
 	return promise.promise;
-};
+}
+
 function mapWorker(fun,callback,onerr){
 	var w = new Communist();
 	var worker = makeWorker(['\n\
@@ -320,17 +334,17 @@ function mapWorker(fun,callback,onerr){
 		worker.onerror=function(){callback();};
 	}
 	w.data=function(data,transfer){
-		!c._noTransferable?worker.postMessage(data,transfer):worker.postMessage(data);	
+		!c._noTransferable?worker.postMessage(data,transfer):worker.postMessage(data);
 		return w;
 	};
 	w.close=function(){
 		return worker.terminate();
 	};
 	return w;
-};
+}
 function multiUse(fun){
 	return object({data:fun});
-};
+}
 function object(obj){
 	var w = new Communist();
 	var i = 0;
@@ -411,7 +425,7 @@ function queue(obj,n,cb,x){
 	var workers = new Array(n);
 	var numIdle=0;
 	var idle=[];
-	var queue=[];
+	var que=[];
 	var queueLen=0;
 	while(numIdle<n){
 		workers[numIdle]=object(obj);
@@ -463,7 +477,7 @@ function queue(obj,n,cb,x){
 	function done(num){
 		var data;
 		if(queueLen){
-			data = queue.shift();
+			data = que.shift();
 			queueLen--;
 			workers[num][data[0]](data[1],data[2]).then(function(d){
 				done(num);
@@ -490,7 +504,7 @@ function queue(obj,n,cb,x){
 				promise.reject(d);
 			});
 		}else if(queueLen||!numIdle){
-			queueLen=queue.push([key,data,transfer,promise]);
+			queueLen=que.push([key,data,transfer,promise]);
 		}
 		return promise.promise;
 	}
@@ -604,7 +618,7 @@ function rWorker(fun,callback){
 		return;
 	};
 	return w;
-};
+}
 function incrementalMapReduce(threads){
 	var w = new Communist();
 	var len = 0;
@@ -632,8 +646,7 @@ function incrementalMapReduce(threads){
 			return w;
 		}
 		var i = 0;
-		while(i<threads){
-			(function(){
+		function makeMapWorker(){
 				var dd;
 				var mw = mapWorker(fun, function(d){
 					if(typeof d !== undefined){
@@ -661,7 +674,9 @@ function incrementalMapReduce(threads){
 					}
 				});
 			workers.push(mw);
-			})();
+			}
+		while(i<threads){
+			makeMapWorker();
 			i++;
 		}
 		status.map=true;
@@ -729,7 +744,7 @@ function incrementalMapReduce(threads){
 		});
 	}
 	return w;
-};
+}
 function nonIncrementalMapReduce(threads){
 	var w = new Communist();
 	var worker = incrementalMapReduce(threads);
@@ -758,13 +773,13 @@ function nonIncrementalMapReduce(threads){
 		}
 	}
 	return w;
-};
-function c(a,b,c){
+}
+function c(a,b,d){
 	if(typeof a !== "number" && typeof b === "function"){
-		return mapWorker(a,b,c);
+		return mapWorker(a,b,d);
 	}else if(typeof a === "object" && !Array.isArray(a)){
 		if(typeof b === "number"){
-			return queue(a,b,c);
+			return queue(a,b,d);
 		}else{
 			return object(a);
 		}
@@ -773,7 +788,7 @@ function c(a,b,c){
 	}else if(typeof a === "number"){
 		return !b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
 	}
-};
+}
 c.reducer = rWorker;
 c.worker = makeWorker;
 c.makeUrl = function (fileName) {
@@ -799,5 +814,5 @@ c.ajax = function(url,after,notjson){
 	}';
 	return c(func,c.makeUrl(url));
 };
-window["communist"]=c;
+window.communist=c;
 })();}
