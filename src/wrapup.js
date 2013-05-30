@@ -38,4 +38,8 @@ c.ajax = function(url,after,notjson){
 	}';
 	return c(func,c.makeUrl(url));
 };
-window.communist=c;
+if(typeof module === "undefined"){
+	window.communist=c;
+} else {
+	module.exports=c;
+}
