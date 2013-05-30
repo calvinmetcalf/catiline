@@ -25,8 +25,7 @@ function incrementalMapReduce(threads){
 			return w;
 		}
 		var i = 0;
-		while(i<threads){
-			(function(){
+		function makeMapWorker(){
 				var dd;
 				var mw = mapWorker(fun, function(d){
 					if(typeof d !== undefined){
@@ -54,7 +53,9 @@ function incrementalMapReduce(threads){
 					}
 				});
 			workers.push(mw);
-			})();
+			}
+		while(i<threads){
+			makeMapWorker();
 			i++;
 		}
 		status.map=true;
@@ -122,4 +123,4 @@ function incrementalMapReduce(threads){
 		});
 	}
 	return w;
-};
+}

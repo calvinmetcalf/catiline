@@ -10,7 +10,7 @@ function queue(obj,n,cb,x){
 	var workers = new Array(n);
 	var numIdle=0;
 	var idle=[];
-	var queue=[];
+	var que=[];
 	var queueLen=0;
 	while(numIdle<n){
 		workers[numIdle]=object(obj);
@@ -62,7 +62,7 @@ function queue(obj,n,cb,x){
 	function done(num){
 		var data;
 		if(queueLen){
-			data = queue.shift();
+			data = que.shift();
 			queueLen--;
 			workers[num][data[0]](data[1],data[2]).then(function(d){
 				done(num);
@@ -89,7 +89,7 @@ function queue(obj,n,cb,x){
 				promise.reject(d);
 			});
 		}else if(queueLen||!numIdle){
-			queueLen=queue.push([key,data,transfer,promise]);
+			queueLen=que.push([key,data,transfer,promise]);
 		}
 		return promise.promise;
 	}

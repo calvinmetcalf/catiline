@@ -1,9 +1,9 @@
-function c(a,b,c){
+function c(a,b,d){
 	if(typeof a !== "number" && typeof b === "function"){
-		return mapWorker(a,b,c);
+		return mapWorker(a,b,d);
 	}else if(typeof a === "object" && !Array.isArray(a)){
 		if(typeof b === "number"){
-			return queue(a,b,c);
+			return queue(a,b,d);
 		}else{
 			return object(a);
 		}
@@ -12,7 +12,7 @@ function c(a,b,c){
 	}else if(typeof a === "number"){
 		return !b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
 	}
-};
+}
 c.reducer = rWorker;
 c.worker = makeWorker;
 c.makeUrl = function (fileName) {
@@ -38,4 +38,4 @@ c.ajax = function(url,after,notjson){
 	}';
 	return c(func,c.makeUrl(url));
 };
-window["communist"]=c;
+window.communist=c;

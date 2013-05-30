@@ -37,4 +37,4 @@ function rWorker(fun,callback){
 		return;
 	};
 	return w;
-};
+}
