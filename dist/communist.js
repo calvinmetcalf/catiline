@@ -1,109 +1,110 @@
-/*! communist 2013-05-29*/
+/*! communist 2013-05-30*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
 	self.onmessage=function(e){
-		eval(e.data);	
-	}
+		/*jslint evil: true */
+		eval(e.data);
+	};
 } else {
 (function(){
 	"use strict";
 /*!From setImmediate Copyright (c) 2012 Barnesandnoble.com,llc, Donavon West, and Domenic Denicola @license MIT https://github.com/NobleJS/setImmediate */
 (function(attachTo,global) {
-    var tasks = (function () {
-        function Task(handler, args) {
-            this.handler = handler;
-            this.args = args;
-        }
-        Task.prototype.run = function () {
-            // See steps in section 5 of the spec.
-            if (typeof this.handler === "function") {
-                // Choice of `thisArg` is not in the setImmediate spec; `undefined` is in the setTimeout spec though:
-                // http://www.whatwg.org/specs/web-apps/current-work/multipage/timers.html
-                this.handler.apply(undefined, this.args);
-            } else {
-                var scriptSource = "" + this.handler;
-                /*jshint evil: true */
-                eval(scriptSource);
-            }
-        };
+	var tasks = (function () {
+		function Task(handler, args) {
+			this.handler = handler;
+			this.args = args;
+		}
+		Task.prototype.run = function () {
+			// See steps in section 5 of the spec.
+			if (typeof this.handler === "function") {
+				// Choice of `thisArg` is not in the setImmediate spec; `undefined` is in the setTimeout spec though:
+				// http://www.whatwg.org/specs/web-apps/current-work/multipage/timers.html
+				this.handler.apply(undefined, this.args);
+			} else {
+				var scriptSource = "" + this.handler;
+				/*jshint evil: true */
+				eval(scriptSource);
+			}
+		};
 
-        var nextHandle = 1; // Spec says greater than zero
-        var tasksByHandle = {};
-        var currentlyRunningATask = false;
+		var nextHandle = 1; // Spec says greater than zero
+		var tasksByHandle = {};
+		var currentlyRunningATask = false;
 
-        return {
-            addFromSetImmediateArguments: function (args) {
-                var handler = args[0];
-                var argsToHandle = Array.prototype.slice.call(args, 1);
-                var task = new Task(handler, argsToHandle);
+		return {
+			addFromSetImmediateArguments: function (args) {
+				var handler = args[0];
+				var argsToHandle = Array.prototype.slice.call(args, 1);
+				var task = new Task(handler, argsToHandle);
 
-                var thisHandle = nextHandle++;
-                tasksByHandle[thisHandle] = task;
-                return thisHandle;
-            },
-            runIfPresent: function (handle) {
-                // From the spec: "Wait until any invocations of this algorithm started before this one have completed."
-                // So if we're currently running a task, we'll need to delay this invocation.
-                if (!currentlyRunningATask) {
-                    var task = tasksByHandle[handle];
-                    if (task) {
-                        currentlyRunningATask = true;
-                        try {
-                            task.run();
-                        } finally {
-                            delete tasksByHandle[handle];
-                            currentlyRunningATask = false;
-                        }
-                    }
-                } else {
-                    // Delay by doing a setTimeout. setImmediate was tried instead, but in Firefox 7 it generated a
-                    // "too much recursion" error.
-                    global.setTimeout(function () {
-                        tasks.runIfPresent(handle);
-                    }, 0);
-                }
-            },
-            remove: function (handle) {
-                delete tasksByHandle[handle];
-            }
-        };
-    }());
-        // Installs an event handler on `global` for the `message` event: see
-        // * https://developer.mozilla.org/en/DOM/window.postMessage
-        // * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
+				var thisHandle = nextHandle++;
+				tasksByHandle[thisHandle] = task;
+				return thisHandle;
+			},
+			runIfPresent: function (handle) {
+				// From the spec: "Wait until any invocations of this algorithm started before this one have completed."
+				// So if we're currently running a task, we'll need to delay this invocation.
+				if (!currentlyRunningATask) {
+					var task = tasksByHandle[handle];
+					if (task) {
+						currentlyRunningATask = true;
+						try {
+							task.run();
+						} finally {
+							delete tasksByHandle[handle];
+							currentlyRunningATask = false;
+						}
+					}
+				} else {
+					// Delay by doing a setTimeout. setImmediate was tried instead, but in Firefox 7 it generated a
+					// "too much recursion" error.
+					global.setTimeout(function () {
+						tasks.runIfPresent(handle);
+					}, 0);
+				}
+			},
+			remove: function (handle) {
+				delete tasksByHandle[handle];
+			}
+		};
+	}());
+		// Installs an event handler on `global` for the `message` event: see
+		// * https://developer.mozilla.org/en/DOM/window.postMessage
+		// * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
 
-        var MESSAGE_PREFIX = "com.communistjs.setImmediate" + Math.random();
+		var MESSAGE_PREFIX = "com.communistjs.setImmediate" + Math.random();
 
-        function isStringAndStartsWith(string, putativeStart) {
-            return typeof string === "string" && string.substring(0, putativeStart.length) === putativeStart;
-        }
+		function isStringAndStartsWith(string, putativeStart) {
+			return typeof string === "string" && string.substring(0, putativeStart.length) === putativeStart;
+		}
 
-        function onGlobalMessage(event) {
-            // This will catch all incoming messages (even from other windows!), so we need to try reasonably hard to
-            // avoid letting anyone else trick us into firing off. We test the origin is still this window, and that a
-            // (randomly generated) unpredictable identifying prefix is present.
-            if (event.source === global && isStringAndStartsWith(event.data, MESSAGE_PREFIX)) {
-                var handle = event.data.substring(MESSAGE_PREFIX.length);
-                tasks.runIfPresent(handle);
-            }
-        }
-        if (global.addEventListener) {
-            global.addEventListener("message", onGlobalMessage, false);
-        } else {
-            global.attachEvent("onmessage", onGlobalMessage);
-        }
+		function onGlobalMessage(event) {
+			// This will catch all incoming messages (even from other windows!), so we need to try reasonably hard to
+			// avoid letting anyone else trick us into firing off. We test the origin is still this window, and that a
+			// (randomly generated) unpredictable identifying prefix is present.
+			if (event.source === global && isStringAndStartsWith(event.data, MESSAGE_PREFIX)) {
+				var handle = event.data.substring(MESSAGE_PREFIX.length);
+				tasks.runIfPresent(handle);
+			}
+		}
+		if (global.addEventListener) {
+			global.addEventListener("message", onGlobalMessage, false);
+		} else {
+			global.attachEvent("onmessage", onGlobalMessage);
+		}
 
-        attachTo.setImmediate = function () {
-            var handle = tasks.addFromSetImmediateArguments(arguments);
+		attachTo.setImmediate = function () {
+			var handle = tasks.addFromSetImmediateArguments(arguments);
 
-            // Make `global` post a message to itself with the handle and identifying prefix, thus asynchronously
-            // invoking our onGlobalMessage listener above.
-            global.postMessage(MESSAGE_PREFIX + handle, "*");
+			// Make `global` post a message to itself with the handle and identifying prefix, thus asynchronously
+			// invoking our onGlobalMessage listener above.
+			global.postMessage(MESSAGE_PREFIX + handle, "*");
 
-            return handle;
-        };
-    })(c,window);
+			return handle;
+		};
+	})(c,window);
 /*! Promiscuous ©2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/
 (function (exports) {
 	var func = "function";
@@ -153,8 +154,12 @@ if (typeof document === "undefined") {
 		return {
 			promise: promise,
 			// Only resolve / reject when there is a deferreds queue
-			resolve: function (value)	{ handler.c && handler(handler, true, value); },
-			reject : function (reason) { handler.c && handler(handler, false, reason); },
+			resolve: function (value)	{
+				handler.c && handler(handler, true, value);
+			},
+			reject : function (reason) {
+				handler.c && handler(handler, false, reason);
+			},
 		};
 	}
 
@@ -208,7 +213,6 @@ if (typeof document === "undefined") {
 c.all=function(array){
 	var promise = c.deferred();
 	var len = array.length;
-	var i = 0;
 	var resolved=0;
 	var out = new Array(len);
 	var onSuccess=function(n){
@@ -218,14 +222,15 @@ c.all=function(array){
 			if(resolved===len){
 				promise.resolve(out);
 			}
-		}
-	}
-	while(i<len){
-		array[i].then(onSuccess(i),function(a){promise.reject(a)});
-		i++;
-	}
+		};
+	};
+		array.forEach(function(v,i){
+			v.then(onSuccess(i),function(a){
+				promise.reject(a);
+			});
+		});
 	return promise.promise;
-}
+};
 
 //this is mainly so the name shows up when you look at the object in the console
 var Communist = function(){};
@@ -234,7 +239,16 @@ function moveImports(string){
 	var script;
 	var match = string.match(/(importScripts\(.*\);)/);
 	if(match){
-		script = match[0].replace(/importScripts\((.*\.js\')\);?/,function(a,b){if(b){return "importScripts("+b.split(",").map(function(cc){return "'"+c.makeUrl(cc.slice(1,-1))+"'"})+");\n";}else{return "";}})+string.replace(/(importScripts\(.*\.js\'\);?)/,"\n");
+		script = match[0].replace(/importScripts\((.*\.js\')\);?/,
+		function(a,b){
+			if(b){
+				return "importScripts("+b.split(",").map(function(cc){
+					return "'"+c.makeUrl(cc.slice(1,-1))+"'";
+				})+");\n";
+			} else {
+				return "";
+			}
+		})+string.replace(/(importScripts\(.*\.js\'\);?)/,"\n");
 	}else{
 		script = string;
 	}
@@ -250,7 +264,7 @@ function getPath(){
 		var i = 0;
 		while(i<len){
 			if(/communist(\.min)?\.js/.test(scripts[i].src)){
-			   return scripts[i].src;
+				return scripts[i].src;
 			}
 			i++;
 		}
@@ -261,7 +275,7 @@ function makeWorker(strings){
 	var script =moveImports(strings.join(""));
 	c.URL = c.URL||window.URL || window.webkitURL;
 	try{
-		worker= new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
+		worker= new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));
 	}catch(e){
 		c._noTransferable=true;
 		worker = new Worker(getPath());
@@ -292,7 +306,8 @@ function single(fun,data){
 		promise.reject(e.message);
 	};
 	return promise.promise;
-};
+}
+
 function mapWorker(fun,callback,onerr){
 	var w = new Communist();
 	var worker = makeWorker(['\n\
@@ -320,17 +335,17 @@ function mapWorker(fun,callback,onerr){
 		worker.onerror=function(){callback();};
 	}
 	w.data=function(data,transfer){
-		!c._noTransferable?worker.postMessage(data,transfer):worker.postMessage(data);	
+		!c._noTransferable?worker.postMessage(data,transfer):worker.postMessage(data);
 		return w;
 	};
 	w.close=function(){
 		return worker.terminate();
 	};
 	return w;
-};
+}
 function multiUse(fun){
 	return object({data:fun});
-};
+}
 function object(obj){
 	var w = new Communist();
 	var i = 0;
@@ -343,7 +358,7 @@ function object(obj){
 		promises.forEach(function(p){
 			if(p){
 				p.reject(msg);
-			}	
+			}
 		});
 	};
 	if(!("initialize" in obj)){
@@ -357,7 +372,7 @@ function object(obj){
 			!c._noTransferable?worker.postMessage([i,key,data],transfer):worker.postMessage([i,key,data]);
 			return promises[i].promise;
 		};
-		return out;	
+		return out;
 		};
 	for(var key in obj){
 		if(i!==0){
@@ -411,7 +426,7 @@ function queue(obj,n,cb,x){
 	var workers = new Array(n);
 	var numIdle=0;
 	var idle=[];
-	var queue=[];
+	var que=[];
 	var queueLen=0;
 	while(numIdle<n){
 		workers[numIdle]=object(obj);
@@ -435,7 +450,7 @@ function queue(obj,n,cb,x){
 				return c.all(array.map(function(data){
 					return doStuff(k,data);
 				}));
-			};	
+			};
 		}
 			
 	}
@@ -463,7 +478,7 @@ function queue(obj,n,cb,x){
 	function done(num){
 		var data;
 		if(queueLen){
-			data = queue.shift();
+			data = que.shift();
 			queueLen--;
 			workers[num][data[0]](data[1],data[2]).then(function(d){
 				done(num);
@@ -490,7 +505,7 @@ function queue(obj,n,cb,x){
 				promise.reject(d);
 			});
 		}else if(queueLen||!numIdle){
-			queueLen=queue.push([key,data,transfer,promise]);
+			queueLen=que.push([key,data,transfer,promise]);
 		}
 		return promise.promise;
 	}
@@ -507,8 +522,6 @@ function dumbQueue(obj,n,cb){
 	var workers = new Array(n);
 	var numIdle=0;
 	var idle=[];
-	var queue=[];
-	var queueLen=0;
 	while(numIdle<n){
 		workers[numIdle]=object(obj);
 		idle.push(numIdle);
@@ -531,7 +544,7 @@ function dumbQueue(obj,n,cb){
 				return c.all(array.map(function(data){
 					return doStuff(k,data);
 				}));
-			};	
+			};
 		}
 			
 	}
@@ -585,7 +598,7 @@ function rWorker(fun,callback){
 		}\n\
 	};';
 	var cb =function(data){
-		callback(data);	
+		callback(data);
 	};
 	var worker = mapWorker(func,cb);
 	w.data=function(data,transfer){
@@ -604,7 +617,7 @@ function rWorker(fun,callback){
 		return;
 	};
 	return w;
-};
+}
 function incrementalMapReduce(threads){
 	var w = new Communist();
 	var len = 0;
@@ -632,8 +645,7 @@ function incrementalMapReduce(threads){
 			return w;
 		}
 		var i = 0;
-		while(i<threads){
-			(function(){
+		function makeMapWorker(){
 				var dd;
 				var mw = mapWorker(fun, function(d){
 					if(typeof d !== undefined){
@@ -647,7 +659,7 @@ function incrementalMapReduce(threads){
 						}else{
 						mw.data(dd);
 						}
-					}else{ 
+					}else{
 						idle++;
 						if(idle===threads){
 							status.data=false;
@@ -661,7 +673,9 @@ function incrementalMapReduce(threads){
 					}
 				});
 			workers.push(mw);
-			})();
+			}
+		while(i<threads){
+			makeMapWorker();
 			i++;
 		}
 		status.map=true;
@@ -725,11 +739,11 @@ function incrementalMapReduce(threads){
 	function closeUp(){
 		reducer.close();
 		workers.forEach(function(v){
-			v.close();	
+			v.close();
 		});
 	}
 	return w;
-};
+}
 function nonIncrementalMapReduce(threads){
 	var w = new Communist();
 	var worker = incrementalMapReduce(threads);
@@ -758,13 +772,13 @@ function nonIncrementalMapReduce(threads){
 		}
 	}
 	return w;
-};
-function c(a,b,c){
+}
+function c(a,b,d){
 	if(typeof a !== "number" && typeof b === "function"){
-		return mapWorker(a,b,c);
+		return mapWorker(a,b,d);
 	}else if(typeof a === "object" && !Array.isArray(a)){
 		if(typeof b === "number"){
-			return queue(a,b,c);
+			return queue(a,b,d);
 		}else{
 			return object(a);
 		}
@@ -773,7 +787,7 @@ function c(a,b,c){
 	}else if(typeof a === "number"){
 		return !b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
 	}
-};
+}
 c.reducer = rWorker;
 c.worker = makeWorker;
 c.makeUrl = function (fileName) {
@@ -799,5 +813,5 @@ c.ajax = function(url,after,notjson){
 	}';
 	return c(func,c.makeUrl(url));
 };
-window["communist"]=c;
+window.communist=c;
 })();}

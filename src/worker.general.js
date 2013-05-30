@@ -25,11 +25,11 @@ function mapWorker(fun,callback,onerr){
 		worker.onerror=function(){callback();};
 	}
 	w.data=function(data,transfer){
-		!c._noTransferable?worker.postMessage(data,transfer):worker.postMessage(data);	
+		!c._noTransferable?worker.postMessage(data,transfer):worker.postMessage(data);
 		return w;
 	};
 	w.close=function(){
 		return worker.terminate();
 	};
 	return w;
-};
+}

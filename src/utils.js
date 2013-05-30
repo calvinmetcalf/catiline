@@ -5,7 +5,16 @@ function moveImports(string){
 	var script;
 	var match = string.match(/(importScripts\(.*\);)/);
 	if(match){
-		script = match[0].replace(/importScripts\((.*\.js\')\);?/,function(a,b){if(b){return "importScripts("+b.split(",").map(function(cc){return "'"+c.makeUrl(cc.slice(1,-1))+"'"})+");\n";}else{return "";}})+string.replace(/(importScripts\(.*\.js\'\);?)/,"\n");
+		script = match[0].replace(/importScripts\((.*\.js\')\);?/,
+		function(a,b){
+			if(b){
+				return "importScripts("+b.split(",").map(function(cc){
+					return "'"+c.makeUrl(cc.slice(1,-1))+"'";
+				})+");\n";
+			} else {
+				return "";
+			}
+		})+string.replace(/(importScripts\(.*\.js\'\);?)/,"\n");
 	}else{
 		script = string;
 	}
@@ -21,7 +30,7 @@ function getPath(){
 		var i = 0;
 		while(i<len){
 			if(/communist(\.min)?\.js/.test(scripts[i].src)){
-			   return scripts[i].src;
+				return scripts[i].src;
 			}
 			i++;
 		}
@@ -32,7 +41,7 @@ function makeWorker(strings){
 	var script =moveImports(strings.join(""));
 	c.URL = c.URL||window.URL || window.webkitURL;
 	try{
-		worker= new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
+		worker= new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));
 	}catch(e){
 		c._noTransferable=true;
 		worker = new Worker(getPath());
