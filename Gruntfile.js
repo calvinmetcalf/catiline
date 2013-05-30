@@ -47,7 +47,11 @@ module.exports = function(grunt) {
 		options:{
 			multistr:true,
 			evil:true,
-			expr:true
+			expr:true,
+			trailing:true,
+			eqeqeq:true,
+			curly:true,
+			camelcase:true
 		},
 		beforeconcat: ['src/*.js'],
 		afterconcat: ['dist/communist.js']
