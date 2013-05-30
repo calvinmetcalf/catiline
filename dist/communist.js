@@ -3,7 +3,7 @@
 if (typeof document === "undefined") {
 	self._noTransferable=true;
 	self.onmessage=function(e){
-		eval(e.data);	
+		eval(e.data);
 	};
 } else {
 (function(){
@@ -153,7 +153,7 @@ if (typeof document === "undefined") {
 		return {
 			promise: promise,
 			// Only resolve / reject when there is a deferreds queue
-			resolve: function (value)	{ 
+			resolve: function (value)	{
 				handler.c && handler(handler, true, value);
 			},
 			reject : function (reason) {
@@ -274,7 +274,7 @@ function makeWorker(strings){
 	var script =moveImports(strings.join(""));
 	c.URL = c.URL||window.URL || window.webkitURL;
 	try{
-		worker= new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
+		worker= new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));
 	}catch(e){
 		c._noTransferable=true;
 		worker = new Worker(getPath());
@@ -357,7 +357,7 @@ function object(obj){
 		promises.forEach(function(p){
 			if(p){
 				p.reject(msg);
-			}	
+			}
 		});
 	};
 	if(!("initialize" in obj)){
@@ -371,7 +371,7 @@ function object(obj){
 			!c._noTransferable?worker.postMessage([i,key,data],transfer):worker.postMessage([i,key,data]);
 			return promises[i].promise;
 		};
-		return out;	
+		return out;
 		};
 	for(var key in obj){
 		if(i!==0){
@@ -449,7 +449,7 @@ function queue(obj,n,cb,x){
 				return c.all(array.map(function(data){
 					return doStuff(k,data);
 				}));
-			};	
+			};
 		}
 			
 	}
@@ -521,8 +521,6 @@ function dumbQueue(obj,n,cb){
 	var workers = new Array(n);
 	var numIdle=0;
 	var idle=[];
-	var queue=[];
-	var queueLen=0;
 	while(numIdle<n){
 		workers[numIdle]=object(obj);
 		idle.push(numIdle);
@@ -545,7 +543,7 @@ function dumbQueue(obj,n,cb){
 				return c.all(array.map(function(data){
 					return doStuff(k,data);
 				}));
-			};	
+			};
 		}
 			
 	}
@@ -599,7 +597,7 @@ function rWorker(fun,callback){
 		}\n\
 	};';
 	var cb =function(data){
-		callback(data);	
+		callback(data);
 	};
 	var worker = mapWorker(func,cb);
 	w.data=function(data,transfer){
@@ -660,7 +658,7 @@ function incrementalMapReduce(threads){
 						}else{
 						mw.data(dd);
 						}
-					}else{ 
+					}else{
 						idle++;
 						if(idle===threads){
 							status.data=false;
@@ -740,7 +738,7 @@ function incrementalMapReduce(threads){
 	function closeUp(){
 		reducer.close();
 		workers.forEach(function(v){
-			v.close();	
+			v.close();
 		});
 	}
 	return w;
