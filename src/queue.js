@@ -1,12 +1,15 @@
-function queue(obj,n,cb,x){
-	if(cb==="dumb"){
-		return dumbQueue(obj,n);
-	}else if(x==="dumb"){
-		return dumbQueue(obj,n,cb);
-	}
+function queue(obj,n,dumb){
 	var w = new Communist();
-	w.batch={};
-	w.batchTransfer={};
+	w.__batchcb__=new Communist();
+	w.__batchtcb__=new Communist();
+	w.batch = function(cb){
+		w.__batchcb__.__cb__=cb;
+		return w.__batchcb__;
+	};
+	w.batchTransfer = function(cb){
+		w.__batchtcb__.__cb__=cb;
+		return w.__batchtcb__;
+	};
 	var workers = new Array(n);
 	var numIdle=0;
 	var idle=[];
@@ -23,41 +26,42 @@ function queue(obj,n,cb,x){
 		};
 	}
 	function keyFuncBatch(k){
-		if(cb){
-			return function(array){
-				array.forEach(function(data){
-					doStuff(k,data).then(cb);
-				});
-			};
-		}else{
-			return function(array){
-				return c.all(array.map(function(data){
-					return doStuff(k,data);
-				}));
-			};
-		}
-			
+		return function(array){
+			return c.all(array.map(function(data){
+				return doStuff(k,data);
+			}));
+		};
+	}
+	function keyFuncBatchCB(k){
+		return function(array){
+			var self = this;
+			return c.all(array.map(function(data){
+				return doStuff(k,data).then(self.__cb__);
+			}));
+		};
 	}
 	function keyFuncBatchTransfer(k){
-		if(cb){
-			return function(array){
-				array.forEach(function(data){
-					doStuff(k,data[0],data[1]).then(cb);
-				});
-			};
-		}else{
-			return function(array){
-				return c.all(array.map(function(data){
-					return doStuff(k,data[0],data[1]);
-				}));
-			};
-		}
+		return function(array){
+			return c.all(array.map(function(data){
+				return doStuff(k,data[0],data[1]);
+			}));
+		};
+	}
+	function keyFuncBatchTransferCB(k){
+		return function(array){
+			var self = this;
+			return c.all(array.map(function(data){
+				return doStuff(k,data[0],data[1]).then(self.__cb__);
+			}));
+		};
 	}
 	obj._close=function(){};
 	for(var key in obj){
 		w[key]=keyFunc(key);
 		w.batch[key]=keyFuncBatch(key);
+		w.__batchcb__[key]=keyFuncBatchCB(key);
 		w.batchTransfer[key]=keyFuncBatchTransfer(key);
+		w.__batchtcb__[key]=keyFuncBatchTransferCB(key);
 	}
 	function done(num){
 		var data;
@@ -77,6 +81,9 @@ function queue(obj,n,cb,x){
 		}
 	}
 	function doStuff(key,data,transfer){//srsly better name!
+		if(dumb){
+			return workers[~~(Math.random()*n)][key](data,transfer);
+			}
 		var promise = c.deferred(),num;
 		if(!queueLen && numIdle){
 			num = idle.pop();
