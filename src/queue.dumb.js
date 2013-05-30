@@ -5,8 +5,6 @@ function dumbQueue(obj,n,cb){
 	var workers = new Array(n);
 	var numIdle=0;
 	var idle=[];
-	var queue=[];
-	var queueLen=0;
 	while(numIdle<n){
 		workers[numIdle]=object(obj);
 		idle.push(numIdle);
@@ -29,7 +27,7 @@ function dumbQueue(obj,n,cb){
 				return c.all(array.map(function(data){
 					return doStuff(k,data);
 				}));
-			};	
+			};
 		}
 			
 	}

@@ -10,7 +10,7 @@ function object(obj){
 		promises.forEach(function(p){
 			if(p){
 				p.reject(msg);
-			}	
+			}
 		});
 	};
 	if(!("initialize" in obj)){
@@ -24,7 +24,7 @@ function object(obj){
 			!c._noTransferable?worker.postMessage([i,key,data],transfer):worker.postMessage([i,key,data]);
 			return promises[i].promise;
 		};
-		return out;	
+		return out;
 		};
 	for(var key in obj){
 		if(i!==0){

@@ -1,7 +1,6 @@
 c.all=function(array){
 	var promise = c.deferred();
 	var len = array.length;
-	var i = 0;
 	var resolved=0;
 	var out = new Array(len);
 	var onSuccess=function(n){
@@ -11,11 +10,12 @@ c.all=function(array){
 			if(resolved===len){
 				promise.resolve(out);
 			}
-		}
-	}
-	while(i<len){
-		array[i].then(onSuccess(i),function(a){promise.reject(a)});
-		i++;
-	}
+		};
+	};
+		array.forEach(function(v,i){
+			v.then(onSuccess(i),function(a){
+				promise.reject(a);
+			});
+		});
 	return promise.promise;
-}
+};

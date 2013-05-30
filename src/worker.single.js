@@ -20,4 +20,4 @@ function single(fun,data){
 		promise.reject(e.message);
 	};
 	return promise.promise;
-};
+}

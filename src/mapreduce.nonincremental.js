@@ -26,4 +26,4 @@ function nonIncrementalMapReduce(threads){
 		}
 	}
 	return w;
-};
+}
