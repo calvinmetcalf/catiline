@@ -260,13 +260,11 @@ describe('communist()', function () {
 			});
 		});
 		it("and close it",function (done){
-			comrade.close();
-			done();
+			comrade.close().then(done,done);
 		});
 		it("should work with an initializer function",function (done){
 			function wrapUp(){
-				comrade.close();
-				done();
+				comrade.close().then(done,done);
 			}
 			var comrade = communist({initialize:function(){this.a=7},test:function(){return this.a}});
 			comrade.test().then(function(a){a.should.equal(7)}).then(wrapUp,wrapUp);
@@ -291,33 +289,29 @@ describe('communist()', function () {
 			comrade.square(9).then(function(a){a.should.equal(81)}).then(done,done);
 			});
 		});
-		it("and close it",function (done){
-			comrade.close();
-			done();
+		it("should work batch with a callback",function (done){
+			var i = 4;
+			var tot = 0;
+		comrade.batch(function(a){
+				i--;
+				tot+=a;
+				if(!i){
+					tot.should.equal(120);
+					done();
+				}
+			})
+				.square([2,4,6,8]);
 		});
 		it("should work batch",function (done){
-			function wrapUp(){
-				comrade.close();
-				done();
-			}
-			var num=4;
-			var tot=0;
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2);
 			comrade.batch
 				.square([2,4,6,8])
 				.then(function(a){
 					a.reduce(function(b,c){return b+c;}).should.equal(120);
 				}
-			).then(wrapUp,wrapUp);
-		})
+			).then(done,done);
+		});
 		it("should work if batch has an error",function (done){
-			function wrapUp(){
-				comrade.close();
-				done();
-			}
-			var num=4;
-			var tot=0;
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2);
+
 			comrade.batch
 				.square([2,4,6,8,'explode'])
 				.then(
@@ -325,31 +319,14 @@ describe('communist()', function () {
 					function(a){
 					a.indexOf("explode").should.be.at.least(0);
 					}
-				).then(wrapUp,wrapUp);
+				).then(done,done);
 		});
-		it("should work batch with a callback",function (done){
-			function wrapUp(){
-				comrade.close();
-				done();
-			}
-			var i = 4;
-			var tot = 0;
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2,function(a){
-				i--;
-				tot+=a;
-				if(!i){
-					tot.should.equal(120);
-					wrapUp();
-				}
-			}
-		);
-		comrade.batch
-				.square([2,4,6,8]);
+		it("and close it",function (done){
+			comrade.close().then(done,done);
 		});
 		it("should work with an initializer function",function (done){
 			function wrapUp(){
-				comrade.close();
-				done();
+				comrade.close().then(done,done);
 			}
 			var comrade = communist({initialize:function(){this.a=7},test:function(){return this.a}});
 			comrade.test().then(function(a){a.should.equal(7)}).then(wrapUp,wrapUp);
@@ -375,13 +352,11 @@ describe('communist()', function () {
 			});
 		});
 		it("and close it",function (done){
-			comrade.close();
-			done();
+			comrade.close().then(done,done);
 		});
 		it("should work batch",function (done){
 			function wrapUp(){
-				comrade.close();
-				done();
+				comrade.close().then(done,done);
 			}
 			var num=4;
 			var tot=0;
@@ -395,8 +370,7 @@ describe('communist()', function () {
 		})
 	it("should work if batch has an error",function (done){
 		function wrapUp(){
-				comrade.close();
-				done();
+				comrade.close().then(done,done);
 			}
 			var num=4;
 			var tot=0;
@@ -412,27 +386,25 @@ describe('communist()', function () {
 		});
 		it("should work batch with a callback",function (done){
 			function wrapUp(){
-				comrade.close();
-				done();
+				comrade.close().then(done,done);
 			}
 			var i = 4;
 			var tot = 0;
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2,function(a){
+			var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb"
+		);
+		comrade.batch(function(a){
 				i--;
 				tot+=a;
 				if(!i){
 					tot.should.equal(120);
 					wrapUp();
 				}
-			},"dumb"
-		);
-		comrade.batch
+			})
 				.square([2,4,6,8]);
 		});
 		it("should work with an initializer function",function (done){
 			function wrapUp(){
-				comrade.close();
-				done();
+				comrade.close().then(done,done);
 			}
 			var comrade=communist({initialize:function(){this.a=7},test:function(){return this.a}});
 			comrade.test().then(function(a){a.should.equal(7)},"dumb").then(wrapUp,wrapUp);
