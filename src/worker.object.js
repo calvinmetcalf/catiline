@@ -57,7 +57,7 @@ function object(obj){
 	w._close = function(){
 		worker.terminate();
 		rejectPromises("closed");
-		return c.resolve("done");
+		return c.resolve();
 	};
 	if(!('close' in w)){
 		w.close=w._close;
