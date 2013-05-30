@@ -159,4 +159,6 @@ we have a few utility functions you can use
 
 `communist.deferred();` makes a new promise and returns it, used internally. Technically `communist` is a shortcut to [Promiscuous](https://github.com/RubenVerborgh/promiscuous/) which is used for promises, so any of promiscuouses methods can be used, aka call `communist.resolve(value)` for an already resolved promise and `communist.reject(reason)` for a rejected one. Lastly you can call `communist.all([promises])` on an array of promises, should work just like `Q.all()`.
 
+`communist.setImmediate();` implements [setImmediate](https://github.com/NobleJS/setImmediate), at least the parts that apply to non web workers that can create web workers.
+
 This grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).

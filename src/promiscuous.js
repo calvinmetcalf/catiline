@@ -1,76 +1,100 @@
 /*! Promiscuous ©2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/
 (function (exports) {
-  var func = "function",
-      noop = function () {};
+	var func = "function";
+	// Creates a deferred: an object with a promise and corresponding resolve/reject methods
+	function createDeferred() {
+		// The `handler` variable points to the function that will
+		// 1) handle a .then(onFulfilled, onRejected) call
+		// 2) handle a .resolve or .reject call (if not fulfilled)
+		// Before 2), `handler` holds a queue of callbacks.
+		// After 2), `handler` is a simple .then handler.
+		// We use only one function to save memory and complexity.
+		var handler = function (onFulfilled, onRejected, value) {
+			// Case 1) handle a .then(onFulfilled, onRejected) call
+			var d;
+			if (onFulfilled !== handler) {
+				d = createDeferred();
+				handler.c.push({ d: d, resolve: onFulfilled, reject: onRejected });
+				return d.promise;
+			}
 
-  function createDeferred() {
-    var handler,
-        changeState,
-        promise = {
-          then: function (onFulfilled, onRejected) {
-            return handler(onFulfilled, onRejected);
-          }
-        };
+			// Case 2) handle a .resolve or .reject call
+			// (`onFulfilled` acts as a sentinel)
+			// The actual function signature is
+			// .re[ject|solve](sentinel, success, value)
+			var action = onRejected ? 'resolve' : 'reject',c,deferred,callback;
+			for (var i = 0, l = handler.c.length; i < l; i++) {
+				c = handler.c[i];
+				deferred = c.d;
+				callback = c[action];
+				if (typeof callback !== func) {
+					deferred[action](value);
+				} else {
+					execute(callback, value, deferred);
+				}
+			}
+			// Replace this handler with a simple resolved or rejected handler
+			handler = createHandler(promise, value, onRejected);
+		},
+		promise = {
+			then: function (onFulfilled, onRejected) {
+				return handler(onFulfilled, onRejected);
+			}
+		};
+		// The queue of deferreds
+		handler.c = [];
 
-    (function () {
-      var pending = [];
-      handler = function (onFulfilled, onRejected) {
-        var d = createDeferred();
-        pending.push({ d: d, resolve: onFulfilled, reject: onRejected });
-        return d.promise;
-      };
-      changeState = function (action, value, success) {
-        for (var i = 0, l = pending.length; i < l; i++) {
-          var p = pending[i], deferred = p.d, callback = p[action];
-          if (typeof callback !== func)
-            deferred[action](value);
-          else
-            execute(callback, value, deferred);
-        }
-        handler = createHandler(promise, value, success);
-        changeState = noop;
-      };
-    })();
+		return {
+			promise: promise,
+			// Only resolve / reject when there is a deferreds queue
+			resolve: function (value)	{ handler.c && handler(handler, true, value); },
+			reject : function (reason) { handler.c && handler(handler, false, reason); },
+		};
+	}
 
-    return {
-      resolve: function (value)  { changeState('resolve', value, true); },
-      reject : function (reason) { changeState('reject', reason, false); },
-      promise: promise
-    };
-  }
+	// Creates a fulfilled or rejected .then function
+	function createHandler(promise, value, success) {
+		return function (onFulfilled, onRejected) {
+			var callback = success ? onFulfilled : onRejected, result;
+			if (typeof callback !== func) {
+				return promise;
+			}
+			execute(callback, value, result = createDeferred());
+			return result.promise;
+		};
+	}
 
-  function createHandler(promise, value, success) {
-    return function (onFulfilled, onRejected) {
-      var callback = success ? onFulfilled : onRejected, result;
-      if (typeof callback !== func)
-        return promise;
-      setTimeout(execute.bind(promise, callback, value, result = createDeferred()));
-      return result.promise;
-    };
-  }
-
-  function execute(callback, value, deferred) {
-    try {
-      var result = callback(value);
-      if (result && typeof result.then === func)
-        result.then(deferred.resolve, deferred.reject);
-      else
-        deferred.resolve(result);
-    }
-    catch (error) {
-      deferred.reject(error);
-    }
-  }
-
-  exports.resolve= function (value) {
-      var promise = {};
-      promise.then = createHandler(promise, value, true);
-      return promise;
-    };
-    exports.reject= function (reason) {
-      var promise = {};
-      promise.then = createHandler(promise, reason, false);
-      return promise;
-    }
-    exports.deferred=createDeferred;
+	// Executes the callback with the specified value,
+	// resolving or rejecting the deferred
+	function execute(callback, value, deferred) {
+		exports.setImmediate(function () {
+			var result;
+			try {
+				result = callback(value);
+				if (result && typeof result.then === func) {
+					result.then(deferred.resolve, deferred.reject);
+				} else {
+					deferred.resolve(result);
+				}
+			}
+			catch (error) {
+				deferred.reject(error);
+			}
+		});
+	}
+ 
+	// Returns a resolved promise
+	exports.resolve= function (value) {
+		var promise = {};
+		promise.then = createHandler(promise, value, true);
+		return promise;
+	};
+	// Returns a rejected promise
+	exports.reject= function (reason) {
+		var promise = {};
+		promise.then = createHandler(promise, reason, false);
+		return promise;
+	};
+	// Returns a deferred
+	exports.deferred= createDeferred;
 })(c);
