@@ -18,7 +18,7 @@ function rWorker(fun,callback){
 		}\n\
 	};';
 	var cb =function(data){
-		callback(data);	
+		callback(data);
 	};
 	var worker = mapWorker(func,cb);
 	w.data=function(data,transfer){

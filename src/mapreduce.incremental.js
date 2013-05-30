@@ -39,7 +39,7 @@ function incrementalMapReduce(threads){
 						}else{
 						mw.data(dd);
 						}
-					}else{ 
+					}else{
 						idle++;
 						if(idle===threads){
 							status.data=false;
@@ -119,7 +119,7 @@ function incrementalMapReduce(threads){
 	function closeUp(){
 		reducer.close();
 		workers.forEach(function(v){
-			v.close();	
+			v.close();
 		});
 	}
 	return w;

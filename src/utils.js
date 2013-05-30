@@ -41,7 +41,7 @@ function makeWorker(strings){
 	var script =moveImports(strings.join(""));
 	c.URL = c.URL||window.URL || window.webkitURL;
 	try{
-		worker= new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));	
+		worker= new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));
 	}catch(e){
 		c._noTransferable=true;
 		worker = new Worker(getPath());

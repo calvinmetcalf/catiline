@@ -34,7 +34,7 @@ function queue(obj,n,cb,x){
 				return c.all(array.map(function(data){
 					return doStuff(k,data);
 				}));
-			};	
+			};
 		}
 			
 	}
