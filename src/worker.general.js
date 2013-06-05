@@ -1,4 +1,7 @@
 function mapWorker(fun,callback,onerr){
+	if(typeof Worker === 'undefined'){
+		return fakeMapWorker(fun,callback,onerr);
+	}
 	var w = new Communist();
 	var worker = makeWorker(['\n\
 	var _db={};\n\

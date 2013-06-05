@@ -2,6 +2,9 @@
 //we can bake the data into the worker when we make it.
 
 function single(fun,data){
+	if(typeof Worker === 'undefined'){
+		return fakeSingle(fun,data);
+	}
 	var promise = c.deferred();
 	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
 	_self.cb=function(data,transfer){\n\

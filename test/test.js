@@ -23,6 +23,7 @@ function sum(a, b) {
 function product(a){
 	return a[0]*a[1];
 }
+
 var buf =(new Uint8Array([1,2,3,4,5,6,7,8])).buffer;
 //communist.URL=true;
 describe('communist()', function () {
