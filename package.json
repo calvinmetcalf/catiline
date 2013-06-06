@@ -31,7 +31,8 @@
     "phantomjs": ">=0.0.1",
     "grunt-mocha-phantomjs": "~0.2.7",
     "grunt-contrib-connect": "~0.3.0",
-    "grunt-contrib-jshint": "~0.5.4"
+    "grunt-contrib-jshint": "~0.5.4",
+    "grunt-saucelabs": "~4.0.4"
   },
   "repository": {
     "type": "git",
