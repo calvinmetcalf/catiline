@@ -3,7 +3,7 @@
 
 function single(fun,data){
 	if(typeof Worker === 'undefined'){
-		return fakeSingle(fun,data);
+		return multiUse(fun).data(data);
 	}
 	var promise = c.deferred();
 	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\

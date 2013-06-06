@@ -48,15 +48,32 @@ w.initialize();
 	return w;
 }
 
-function fakeSingle(fun,data){
-	return multiUse(fun).data(data);
-}
 function fakeMapWorker(fun,callback,onerr){
 	var w = new Communist();
 	var worker = fakeObject({data:fun});
 	w.data=function(data){
 		worker.data(data).then(callback,onerr);
 		return w;
+	};
+	return w;
+}
+
+function fakeReducer(fun,callback){
+	var w = new Communist();
+	var accum;
+	w.data=function(data){
+		accum=accum?fun(accum,data):data;
+		return w;
+	};
+	w.fetch=function(){
+		callback(accum);
+		return w;
+	};
+	w.close=function(silent){
+		if(!silent){
+			callback(accum);
+		}
+		return;
 	};
 	return w;
 }
