@@ -1,4 +1,4 @@
-/*! communist 2013-06-05*/
+/*! communist 2013-06-08*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -289,7 +289,7 @@ function makeWorker(strings){
 
 function single(fun,data){
 	if(typeof Worker === 'undefined'){
-		return fakeSingle(fun,data);
+		return multiUse(fun).data(data);
 	}
 	var promise = c.deferred();
 	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
@@ -402,9 +402,6 @@ w.initialize();
 	return w;
 }
 
-function fakeSingle(fun,data){
-	return multiUse(fun).data(data);
-}
 function fakeMapWorker(fun,callback,onerr){
 	var w = new Communist();
 	var worker = fakeObject({data:fun});
@@ -414,6 +411,27 @@ function fakeMapWorker(fun,callback,onerr){
 	};
 	return w;
 }
+
+function fakeReducer(fun,callback){
+	var w = new Communist();
+	var accum;
+	w.data=function(data){
+		accum=accum?fun(accum,data):data;
+		return w;
+	};
+	w.fetch=function(){
+		callback(accum);
+		return w;
+	};
+	w.close=function(silent){
+		if(!silent){
+			callback(accum);
+		}
+		return;
+	};
+	return w;
+}
+
 function object(obj){
 	if(typeof Worker === 'undefined'){
 		return fakeObject(obj);
@@ -594,6 +612,9 @@ function queue(obj,n,dumb){
 }
 
 function rWorker(fun,callback){
+	if(typeof Worker === 'undefined'){
+		return fakeReducer(fun,callback);
+	}
 	var w = new Communist();
 	var func = 'function(dat,cb){ var fun = '+fun+';\n\
 		switch(dat[0]){\n\
@@ -633,6 +654,7 @@ function rWorker(fun,callback){
 	};
 	return w;
 }
+
 function incrementalMapReduce(threads){
 	var w = new Communist();
 	var len = 0;

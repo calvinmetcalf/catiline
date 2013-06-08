@@ -94,7 +94,7 @@ workers.batch(function(a){console.log(a)}).square([1,2,3,4,5,6,7,8]);/* prints
 */
 ```
 
-###Want it fancy? MAP REDUCE!!!
+###Goodies: Map/Reduce
 
 ```javascript
 var worker = communist(4);
@@ -162,3 +162,5 @@ we have a few utility functions you can use
 `communist.setImmediate();` implements [setImmediate](https://github.com/NobleJS/setImmediate), at least the parts that apply to non web workers that can create web workers.
 
 This grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).
+
+[![Selenium Test Status](https://saucelabs.com/browser-matrix/calvinmetcalf.svg)](https://saucelabs.com/u/calvinmetcalf)

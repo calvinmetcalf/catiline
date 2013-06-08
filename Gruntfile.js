@@ -53,7 +53,61 @@ module.exports = function(grunt) {
 		},
 		beforeconcat: ['src/*.js'],
 		afterconcat: ['dist/communist.js']
-	}
+	},
+	"saucelabs-mocha":{
+		all:{
+			options:{
+				username:"calvinmetcalf",
+				key: "f288b74b-589a-4fb4-9e65-d8b6ddd09d0e",
+				concurrency:3,
+				build: process.env.TRAVIS_JOB_ID,
+				browsers: [
+					{
+						browserName: "chrome",
+						platform: "OS X 10.8",
+					},{
+						browserName: "safari",
+						platform: "OS X 10.8",
+						version:'6'
+					},{
+						browserName: "safari",
+						platform: "OS X 10.6",
+						version:'5'
+					},{
+						browserName: "iphone",
+						platform: "OS X 10.8",
+						version:'6'
+					}, {
+						browserName: 'chrome',
+						platform: 'XP'
+					}, {
+						browserName: 'chrome',
+						platform: 'linux'
+					}, {
+						browserName: 'internet explorer',
+						platform: 'WIN8',
+						version: '10'
+					}, {
+						browserName: 'opera',
+						platform: 'linux',
+						version: '12'
+					},{
+						browserName: 'opera',
+						platform: 'win7',
+						version: '12'
+					},{
+						browserName: 'safari',
+						platform: 'win7',
+						version: '5'
+					}
+				],
+				urls:[
+					"http://localhost:8000/test/index.html",
+					"http://localhost:8000/test/index.min.html"
+				]
+			}
+		}	
+	},
 	});
 
 	// Load the plugin that provides the "uglify" task.
@@ -63,10 +117,13 @@ module.exports = function(grunt) {
  grunt.loadNpmTasks('grunt-contrib-connect');
  grunt.loadNpmTasks('grunt-mocha-phantomjs');
  grunt.loadNpmTasks('grunt-contrib-jshint');
+ grunt.loadNpmTasks('grunt-saucelabs');
 	// Default task(s).
+	grunt.registerTask('sauce',['server','saucelabs-mocha']);
+	grunt.registerTask('server',['connect']);
 	grunt.registerTask('browser',['concat:browser','uglify:browser']);
 	grunt.registerTask('lint',['jshint:afterconcat']);
 grunt.registerTask('test', ['connect', 'mocha_phantomjs']);
-	grunt.registerTask('default', ['browser','lint','test']);
+	grunt.registerTask('default', ['browser','lint','sauce']);
 
 };
