@@ -60,14 +60,11 @@ module.exports = function(grunt) {
 				username:"calvinmetcalf",
 				key: "f288b74b-589a-4fb4-9e65-d8b6ddd09d0e",
 				concurrency:3,
+				build: process.env.TRAVIS_JOB_ID,
 				browsers: [
 					{
 						browserName: "chrome",
 						platform: "OS X 10.8",
-					},{
-						browserName: "android",
-						platform: "Linux",
-						version: "4"
 					},{
 						browserName: "safari",
 						platform: "OS X 10.8",
@@ -94,6 +91,14 @@ module.exports = function(grunt) {
 						browserName: 'opera',
 						platform: 'linux',
 						version: '12'
+					},{
+						browserName: 'opera',
+						platform: 'win7',
+						version: '12'
+					},{
+						browserName: 'safari',
+						platform: 'win7',
+						version: '5'
 					}
 				],
 				urls:[
