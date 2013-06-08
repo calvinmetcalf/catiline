@@ -60,26 +60,38 @@ module.exports = function(grunt) {
 				username:"calvinmetcalf",
 				key: "f8fc3a7c-9529-4a04-861d-91614ec7afd2",
 				concurrency:3,
-				browsers: [{browserName: "chrome",
-platform: "OS X 10.8",
-},{browserName: "safari",
-platform: "OS X 10.8",
-version:'6'
-}, {
-browserName: 'chrome',
-platform: 'XP'
-}, {
-browserName: 'chrome',
-platform: 'linux'
-}, {
-browserName: 'internet explorer',
-platform: 'WIN8',
-version: '10'
-}, {
-browserName: 'opera',
-platform: 'linux',
-version: '12'
-}],
+				browsers: [
+					{
+						browserName: "chrome",
+						platform: "OS X 10.8",
+					},{
+						browserName: "safari",
+						platform: "OS X 10.8",
+						version:'6'
+					},{
+						browserName: "safari",
+						platform: "OS X 10.6",
+						version:'5'
+					},{
+						browserName: "iphone",
+						platform: "OS X 10.8",
+						version:'6'
+					}, {
+						browserName: 'chrome',
+						platform: 'XP'
+					}, {
+						browserName: 'chrome',
+						platform: 'linux'
+					}, {
+						browserName: 'internet explorer',
+						platform: 'WIN8',
+						version: '10'
+					}, {
+						browserName: 'opera',
+						platform: 'linux',
+						version: '12'
+					}
+				],
 				urls:[
 					"http://localhost:8000/test/index.html",
 					"http://localhost:8000/test/index.min.html"
