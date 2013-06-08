@@ -66,7 +66,7 @@ module.exports = function(grunt) {
 						browserName: "android",
 						platform: "Linux",
 						version: "4"
-					}{
+					},{
 						browserName: "safari",
 						platform: "OS X 10.8",
 						version:'6'
