@@ -1,3 +1,16 @@
+---
 language: node_js
 node_js:
-  - "0.8"
+- '0.8'
+env:
+  matrix:
+  - secure: ! 'H1c1cIMl2Fzov+GKOkj96RQyku6NYQUak0zbK6nM2sNRvTnIn10UYCUbKxA/
+
+      Wo5J6Kl58udmaE3ilQOBYWCKqJjAJYPVNKU7offxAV6NKbj7vqwJvlGMMhAv
+
+      4fDT8AUrtVlx+t+HGceBvHG6Pd1B0u4qtH52AreCMZXUQSsJRis='
+  - secure: ! 'h75wuGnuITgsoyOSt59gM1Z9b9hkQ098fBpzJxeSBFkAEAaayGychK+gQVjG
+
+      a/wDE/N82LjYFHSs0QDUDEZeOdy0YUyGsAKaEGjTLhd/MrkBBBrrC44C9h3e
+
+      ytsc/Su7Nh1B3+x6pL8PbRgjENoZb5XK4/nEv5l6hmLCTC4N62M='

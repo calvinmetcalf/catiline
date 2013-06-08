@@ -57,14 +57,16 @@ module.exports = function(grunt) {
 	"saucelabs-mocha":{
 		all:{
 			options:{
-				username:"calvinmetcalf",
-				key: "f8fc3a7c-9529-4a04-861d-91614ec7afd2",
 				concurrency:3,
 				browsers: [
 					{
 						browserName: "chrome",
 						platform: "OS X 10.8",
 					},{
+						browserName: "android",
+						platform: "Linux",
+						version: "4"
+					}{
 						browserName: "safari",
 						platform: "OS X 10.8",
 						version:'6'
