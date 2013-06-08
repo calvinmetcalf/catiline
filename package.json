@@ -17,8 +17,8 @@
       "url": "https://github.com/calvinmetcalf/communist.git"
     }
   ],
-  "dependencies": {
-    "promiscuous": "0.2.x"
+  "scripts": {
+    "test": "grunt"
   },
   "main": "dist/communist.js",
   "license": "MIT",
