@@ -94,7 +94,7 @@ workers.batch(function(a){console.log(a)}).square([1,2,3,4,5,6,7,8]);/* prints
 */
 ```
 
-###Want it fancy? MAP REDUCE!!!
+###Goodies: Map/Reduce
 
 ```javascript
 var worker = communist(4);
