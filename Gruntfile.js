@@ -63,8 +63,12 @@ module.exports = function(grunt) {
 				build: process.env.TRAVIS_JOB_ID,
 				browsers: [
 					{
+						browserName: 'firefox',
+						platform: 'linux',
+						version: '21'
+					},{
 						browserName: "chrome",
-						platform: "OS X 10.8",
+						platform: "OS X 10.8"
 					},{
 						browserName: "safari",
 						platform: "OS X 10.8",
