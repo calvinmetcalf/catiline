@@ -63,16 +63,16 @@ describe('communist()', function () {
 			var count = 0;
 			var comrade = communist(square,function(a){
 				assert.equal(a,100,'are equel');
-				afterEach();
+				afterEach(a);
 			},function(a){
 				a.preventDefault();
 				assert.include(a,"Ermahgerd",'should be an error');
-				afterEach();
+				afterEach(a);
 			});
-			function afterEach(){
+			function afterEach(a){
 				count++;
+				console.log(count,a);
 				if(count === 3){
-					comrade.close();
 					done();
 				}
 			}
