@@ -147,7 +147,7 @@ module.exports = function(grunt) {
  grunt.loadNpmTasks('grunt-contrib-jshint');
  grunt.loadNpmTasks('grunt-saucelabs');
 	// Default task(s).
-	grunt.registerTask('sauce',['server','saucelabs-mocha:big']);
+	grunt.registerTask('sauce',['server','saucelabs-mocha:big','saucelabs-mocha:shim']);
 	grunt.registerTask('server',['connect']);
 	grunt.registerTask('browser',['concat:browser','uglify:browser']);
 	grunt.registerTask('lint',['jshint:afterconcat']);
