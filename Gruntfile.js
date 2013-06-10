@@ -55,13 +55,11 @@ module.exports = function(grunt) {
 		afterconcat: ['dist/communist.js']
 	},
 	"saucelabs-mocha":{
-		all:{
-			options:{
-				username:"calvinmetcalf",
-				key: "f288b74b-589a-4fb4-9e65-d8b6ddd09d0e",
-				concurrency:3,
-				build: process.env.TRAVIS_JOB_ID
-			}
+		options:{
+			username:"calvinmetcalf",
+			key: "f288b74b-589a-4fb4-9e65-d8b6ddd09d0e",
+			concurrency:3,
+			build: process.env.TRAVIS_JOB_ID
 		},
 		big:{
 			options:{
