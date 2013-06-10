@@ -108,7 +108,33 @@ module.exports = function(grunt) {
 					"http://localhost:8000/test/index.min.html"
 				]
 			}
-		}	
+		},
+		shim:{
+			options:{
+				browsers: [
+					{
+						browserName: 'internet explorer',
+						platform: 'WIN8',
+						version: '10'
+					},{
+						browserName: 'opera',
+						platform: 'linux',
+						version: '12'
+					},{
+						browserName: 'opera',
+						platform: 'win7',
+						version: '12'
+					},{
+						browserName: 'safari',
+						platform: 'win7',
+						version: '5'
+					}
+				],
+			urls:[
+					"http://localhost:8000/test/index.shim.html"
+				]
+			}
+		}
 	},
 	});
 
