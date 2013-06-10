@@ -28,19 +28,33 @@ function product(a){
 describe('communist()', function () {
 	describe('Basic', function () {
 		it('should work when given a function and data directly', function (done) {
-			communist(square, 9).then(function (a) { assert.equal(a,81,'are equel'); }).then(done, done);
+			communist(square, 9).then(function (a) {
+				assert.equal(a,81,'are equel');
+			}).then(done, done);
 		});
 		it('should work when given a function and data async', function (done) {
-			communist(aSquare, 9).then(function (a) { assert.equal(a,81,'are equel'); }).then(done, done);
+			communist(aSquare, 9).then(function (a) {
+				assert.equal(a,81,'are equel');
+			}).then(done, done);
 		});
 		it('should allow chaining of data functions, with callback passed to communist()', function (done) {
 			var count = 0;
-			var comrade = communist(square, function (a) { count++; assert.equal(a,81,'are equel'); if (count === 2) { comrade.close();done(); } });
+			var comrade = communist(square, function (a) {
+				count++; assert.equal(a,81,'are equel');
+				if (count === 2) {
+					done();
+				}
+			});
 			comrade.data(9).data(9);
 		});
 		it('should allow chaining of data functions, with callback passed to communist() async', function (done) {
 			var count = 0;
-			var comrade = communist(aSquare, function (a) { count++; assert.equal(a,81,'are equel'); if (count === 2) { done(); } });
+			var comrade = communist(aSquare, function (a){
+				count++; assert.equal(a,81,'are equel');
+				if (count === 2) {
+					done();
+				}
+			});
 			comrade.data(9).data(9);
 		});
 	});
@@ -111,7 +125,62 @@ describe('communist()', function () {
 			comrade.data(9);
 		});
 	});
-
+	describe('MapReduce', function () {
+		it('should work', function (done) {
+			var comrade = communist(1, true);
+			comrade.data([1,2,3]);
+			comrade.map(square);
+			comrade.reduce(sum).then(function (a) { assert.equal(a,14); }).then(done, done);
+		});
+		it('should work with chaining syntax', function (done) {
+		    communist(1, true)
+		        .data([1,2,3])
+		        .map(aSquare)
+		        .reduce(sum)
+		        .then(function (a) { assert.equal(a,14); }).then(done, done);
+		});
+	});
+	describe('MapReduce incremental', function () {
+		it('should work', function (done) {
+			var comrade = communist(1);
+			comrade.data([1,2,3]);
+			comrade.map(square);
+			comrade.reduce(sum);
+			comrade.close().then(function (a) { assert.equal(a,14); }).then(done, done);
+		});
+		it('should work if we add more data', function (done) {
+			var comrade = communist(1);
+			comrade.data([1,2,3]);
+			comrade.map(square);
+			comrade.reduce(sum);
+			comrade.fetch().then(function (a) { assert.equal(a,14); });
+			comrade.data([4,5,6]);
+			comrade.close().then(function (a) { assert.equal(a,91); }).then(done, done);
+		});
+		it('should work with chaining syntax', function (done) {
+		    communist(1)
+		        .data([1,2,3])
+		        .map(square)
+		        .reduce(sum)
+		        .close().then(function (a) { assert.equal(a,14); }).then(done, done);
+		});
+		it('should work with chaining syntax and more data', function (done) {
+		    communist(1)
+		        .data([1,2,3])
+		        .map(square)
+		        .data([4,5,6])
+		        .reduce(sum)
+		        .close().then(function (a) { assert.equal(a,91); }).then(done, done);
+		});
+		it('should work with chaining syntax, more data, and more workers', function (done) {
+		    communist(3)
+		        .data([1,2,3])
+		        .map(square)
+		        .data([4,5,6])
+		        .reduce(sum)
+		        .close().then(function (a) {  assert.equal(a,91); }).then(done, done);
+		});
+	});
 
 	
 	describe('Objects', function () {

@@ -134,6 +134,20 @@ module.exports = function(grunt) {
 					"http://localhost:8000/test/index.shim.html"
 				]
 			}
+		},
+		legacy:{
+			options:{
+				browsers: [
+					{
+						browserName: 'internet explorer',
+						platform: 'WIN7',
+						version: '9'
+					}
+				],
+			urls:[
+					"http://localhost:8000/test/index.leg.html"
+				]
+			}
 		}
 	},
 	});
@@ -147,7 +161,7 @@ module.exports = function(grunt) {
  grunt.loadNpmTasks('grunt-contrib-jshint');
  grunt.loadNpmTasks('grunt-saucelabs');
 	// Default task(s).
-	grunt.registerTask('sauce',['server','saucelabs-mocha:big','saucelabs-mocha:shim']);
+	grunt.registerTask('sauce',['server','saucelabs-mocha:shim','saucelabs-mocha:big','saucelabs-mocha:legacy']);
 	grunt.registerTask('server',['connect']);
 	grunt.registerTask('browser',['concat:browser','uglify:browser']);
 	grunt.registerTask('lint',['jshint:afterconcat']);
