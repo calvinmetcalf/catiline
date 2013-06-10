@@ -60,7 +60,11 @@ module.exports = function(grunt) {
 				username:"calvinmetcalf",
 				key: "f288b74b-589a-4fb4-9e65-d8b6ddd09d0e",
 				concurrency:3,
-				build: process.env.TRAVIS_JOB_ID,
+				build: process.env.TRAVIS_JOB_ID
+			}
+		},
+		big:{
+			options:{
 				browsers: [
 					{
 						browserName: "chrome",
@@ -119,7 +123,7 @@ module.exports = function(grunt) {
  grunt.loadNpmTasks('grunt-contrib-jshint');
  grunt.loadNpmTasks('grunt-saucelabs');
 	// Default task(s).
-	grunt.registerTask('sauce',['server','saucelabs-mocha']);
+	grunt.registerTask('sauce',['server','saucelabs-mocha:big']);
 	grunt.registerTask('server',['connect']);
 	grunt.registerTask('browser',['concat:browser','uglify:browser']);
 	grunt.registerTask('lint',['jshint:afterconcat']);
