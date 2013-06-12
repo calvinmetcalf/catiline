@@ -29,8 +29,8 @@ module.exports = function(grunt) {
 		all: {
 			options: {
 				urls: [
-					"http://localhost:8000/test/index.html",
-					"http://localhost:8000/test/index.min.html"
+						"http://127.0.0.1:8080/test/index.html",
+					"http://127.0.0.1:8080/test/index.min.html"
 				]
 			}
 		}
@@ -38,7 +38,7 @@ module.exports = function(grunt) {
 		connect: {
 			server: {
 				options: {
-					port: 8000,
+					port: 8080,
 					base: '.'
 				}
 			}
@@ -65,9 +65,6 @@ module.exports = function(grunt) {
 			options:{
 				browsers: [
 					{
-						browserName: "chrome",
-						platform: "OS X 10.8",
-					},{
 						browserName: "safari",
 						platform: "OS X 10.8",
 						version:'6'
@@ -79,12 +76,6 @@ module.exports = function(grunt) {
 						browserName: "iphone",
 						platform: "OS X 10.8",
 						version:'6'
-					}, {
-						browserName: 'chrome',
-						platform: 'XP'
-					}, {
-						browserName: 'chrome',
-						platform: 'linux'
 					}, {
 						browserName: 'internet explorer',
 						platform: 'WIN8',
@@ -101,11 +92,20 @@ module.exports = function(grunt) {
 						browserName: 'safari',
 						platform: 'win7',
 						version: '5'
+					},{
+						browserName: 'chrome',
+						platform: 'XP'
+					}, {
+						browserName: 'chrome',
+						platform: 'linux'
+					}, {
+						browserName: "chrome",
+						platform: "OS X 10.8",
 					}
 				],
 				urls:[
-					"http://localhost:8000/test/index.html",
-					"http://localhost:8000/test/index.min.html"
+					"http://127.0.0.1:8080/test/index.html",
+					"http://127.0.0.1:8080/test/index.min.html"
 				]
 			}
 		},
@@ -131,7 +131,7 @@ module.exports = function(grunt) {
 					}
 				],
 			urls:[
-					"http://localhost:8000/test/index.shim.html"
+					"http://127.0.0.1:8080/test/index.shim.html"
 				]
 			}
 		},
@@ -145,7 +145,7 @@ module.exports = function(grunt) {
 					}
 				],
 			urls:[
-					"http://localhost:8000/test/index.leg.html"
+					"http://127.0.0.1:8080/test/index.leg.html"
 				]
 			}
 		}
@@ -161,11 +161,12 @@ module.exports = function(grunt) {
  grunt.loadNpmTasks('grunt-contrib-jshint');
  grunt.loadNpmTasks('grunt-saucelabs');
 	// Default task(s).
-	grunt.registerTask('sauce',['server','saucelabs-mocha:shim','saucelabs-mocha:big'/*,'saucelabs-mocha:legacy'*/]);
+	grunt.registerTask('sauce',['server','saucelabs-mocha:legacy','saucelabs-mocha:shim','saucelabs-mocha:big']);
 	grunt.registerTask('server',['connect']);
 	grunt.registerTask('browser',['concat:browser','uglify:browser']);
 	grunt.registerTask('lint',['jshint:afterconcat']);
 grunt.registerTask('test', ['connect', 'mocha_phantomjs']);
 	grunt.registerTask('default', ['browser','lint','sauce']);
+	grunt.registerTask('c9', ['browser','lint','test']);
 
 };
