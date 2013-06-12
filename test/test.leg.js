@@ -70,7 +70,6 @@ describe('communist()', function () {
 			});
 			function afterEach(a){
 				count++;
-				console.log(count,a);
 				if(count === 3){
 					done();
 				}
