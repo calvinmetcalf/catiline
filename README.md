@@ -110,7 +110,7 @@ worker.fetch().then(function(a){console.log(a)});
 //prints 91
 worker.data([6,7,8]).fetch().then(function(a){console.log(a)});
 //prints 240
-//fetch takes an argument "now", if it's undefined then 
+//fetch takes an argument "now", if it's undefined then waitins until it's done
 worker.data([6,7,8]).fetch(true).then(function(a){console.log(a)});
 //also prints 240
 worker.close().then(function(a){console.log(a)});
