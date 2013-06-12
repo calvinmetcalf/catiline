@@ -1,4 +1,7 @@
 function rWorker(fun,callback){
+	if(typeof Worker === 'undefined'){
+		return fakeReducer(fun,callback);
+	}
 	var w = new Communist();
 	var func = 'function(dat,cb){ var fun = '+fun+';\n\
 		switch(dat[0]){\n\

@@ -23,14 +23,14 @@ module.exports = function(grunt) {
 					seperator:";\n",
 					footer : '})();}'
 				},
-				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/all.js','src/utils.js','src/worker.single.js','src/worker.general.js','src/worker.multiuse.js','src/worker.object.js','src/queue.js','src/worker.reducer.js','src/mapreduce.incremental.js','src/mapreduce.nonincremental.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/all.js','src/utils.js','src/worker.single.js','src/worker.general.js','src/worker.multiuse.js','src/fakeWorkers.js','src/worker.object.js','src/queue.js','src/worker.reducer.js','src/mapreduce.incremental.js','src/mapreduce.nonincremental.js','src/wrapup.js']}
 			}
 		},mocha_phantomjs: {
 		all: {
 			options: {
 				urls: [
-					"http://localhost:8000/test/index.html",
-					"http://localhost:8000/test/index.min.html"
+						"http://127.0.0.1:8080/test/index.html",
+					"http://127.0.0.1:8080/test/index.min.html"
 				]
 			}
 		}
@@ -38,7 +38,7 @@ module.exports = function(grunt) {
 		connect: {
 			server: {
 				options: {
-					port: 8000,
+					port: 8080,
 					base: '.'
 				}
 			}
@@ -55,12 +55,14 @@ module.exports = function(grunt) {
 		afterconcat: ['dist/communist.js']
 	},
 	"saucelabs-mocha":{
-		all:{
+		options:{
+			username:"calvinmetcalf",
+			key: "f288b74b-589a-4fb4-9e65-d8b6ddd09d0e",
+			concurrency:3,
+			build: process.env.TRAVIS_JOB_ID
+		},
+		big:{
 			options:{
-				username:"calvinmetcalf",
-				key: "f288b74b-589a-4fb4-9e65-d8b6ddd09d0e",
-				concurrency:3,
-				build: process.env.TRAVIS_JOB_ID,
 				browsers: [
 					{
 						browserName: 'firefox',
@@ -82,16 +84,36 @@ module.exports = function(grunt) {
 						platform: "OS X 10.8",
 						version:'6'
 					}, {
-						browserName: 'chrome',
-						platform: 'XP'
-					}, {
-						browserName: 'chrome',
-						platform: 'linux'
-					}, {
 						browserName: 'internet explorer',
 						platform: 'WIN8',
 						version: '10'
 					}, {
+						browserName: 'opera',
+						platform: 'linux',
+						version: '12'
+					},{
+						browserName: 'safari',
+						platform: 'win7',
+						version: '5'
+					},{
+						browserName: 'chrome',
+						platform: 'XP'
+					}
+				],
+				urls:[
+					"http://127.0.0.1:8080/test/index.html",
+					"http://127.0.0.1:8080/test/index.min.html"
+				]
+			}
+		},
+		shim:{
+			options:{
+				browsers: [
+					{
+						browserName: 'internet explorer',
+						platform: 'WIN8',
+						version: '10'
+					},{
 						browserName: 'opera',
 						platform: 'linux',
 						version: '12'
@@ -105,12 +127,25 @@ module.exports = function(grunt) {
 						version: '5'
 					}
 				],
-				urls:[
-					"http://localhost:8000/test/index.html",
-					"http://localhost:8000/test/index.min.html"
+			urls:[
+					"http://127.0.0.1:8080/test/index.shim.html"
 				]
 			}
-		}	
+		},
+		legacy:{
+			options:{
+				browsers: [
+					{
+						browserName: 'internet explorer',
+						platform: 'WIN7',
+						version: '9'
+					}
+				],
+			urls:[
+					"http://127.0.0.1:8080/test/index.leg.html"
+				]
+			}
+		}
 	},
 	});
 
@@ -123,11 +158,12 @@ module.exports = function(grunt) {
  grunt.loadNpmTasks('grunt-contrib-jshint');
  grunt.loadNpmTasks('grunt-saucelabs');
 	// Default task(s).
-	grunt.registerTask('sauce',['server','saucelabs-mocha']);
+	grunt.registerTask('sauce',['server','saucelabs-mocha:legacy','saucelabs-mocha:shim','saucelabs-mocha:big']);
 	grunt.registerTask('server',['connect']);
 	grunt.registerTask('browser',['concat:browser','uglify:browser']);
 	grunt.registerTask('lint',['jshint:afterconcat']);
 grunt.registerTask('test', ['connect', 'mocha_phantomjs']);
 	grunt.registerTask('default', ['browser','lint','sauce']);
+	grunt.registerTask('c9', ['browser','lint','test']);
 
 };
