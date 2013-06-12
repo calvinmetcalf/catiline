@@ -1,7 +1,7 @@
 mocha.setup({
     ui: "bdd",
     globals: ["console"],
-    timeout: 30000
+    timeout: 300000
 });
 chai.should();
 
