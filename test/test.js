@@ -1,6 +1,6 @@
 mocha.setup({
     ui: "bdd",
-    globals: ["console"],
+    globals: ["console","__fxdriver_unwrapped"],
     timeout: 300000
 });
 chai.should();
