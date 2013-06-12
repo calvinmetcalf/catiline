@@ -85,22 +85,12 @@ module.exports = function(grunt) {
 						platform: 'linux',
 						version: '12'
 					},{
-						browserName: 'opera',
-						platform: 'win7',
-						version: '12'
-					},{
 						browserName: 'safari',
 						platform: 'win7',
 						version: '5'
 					},{
 						browserName: 'chrome',
 						platform: 'XP'
-					}, {
-						browserName: 'chrome',
-						platform: 'linux'
-					}, {
-						browserName: "chrome",
-						platform: "OS X 10.8",
 					}
 				],
 				urls:[
