@@ -1,4 +1,4 @@
-/*! communist 2013-06-10*/
+/*! communist 2013-06-12*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -409,6 +409,7 @@ function fakeMapWorker(fun,callback,onerr){
 		worker.data(data).then(callback,onerr);
 		return w;
 	};
+	w.close=worker.close;
 	return w;
 }
 

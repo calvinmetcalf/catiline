@@ -55,6 +55,7 @@ function fakeMapWorker(fun,callback,onerr){
 		worker.data(data).then(callback,onerr);
 		return w;
 	};
+	w.close=worker.close;
 	return w;
 }
 
