@@ -1,4 +1,4 @@
-/*! communist 2013-06-08*/
+/*! communist 2013-06-12*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -288,6 +288,9 @@ function makeWorker(strings){
 //we can bake the data into the worker when we make it.
 
 function single(fun,data){
+	if(typeof Worker === 'undefined'){
+		return multiUse(fun).data(data);
+	}
 	var promise = c.deferred();
 	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
 	_self.cb=function(data,transfer){\n\
@@ -309,6 +312,9 @@ function single(fun,data){
 }
 
 function mapWorker(fun,callback,onerr){
+	if(typeof Worker === 'undefined'){
+		return fakeMapWorker(fun,callback,onerr);
+	}
 	var w = new Communist();
 	var worker = makeWorker(['\n\
 	var _db={};\n\
@@ -346,7 +352,91 @@ function mapWorker(fun,callback,onerr){
 function multiUse(fun){
 	return object({data:fun});
 }
+function fakeObject(obj){
+	var w = new Communist();
+	var promises = [];
+	var rejectPromises = function(msg){
+		if(typeof msg!=="string" && msg.preventDefault){
+			msg.preventDefault();
+			msg=msg.message;
+		}
+		promises.forEach(function(p){
+			if(p){
+				p.reject(msg);
+			}
+		});
+	};
+	if(!("initialize" in obj)){
+		obj.initialize=function(){};
+	}
+	var keyFunc=function(key){
+		var result;
+		var out = function(data){
+			var i = promises.length;
+			promises[i] = c.deferred();
+			var callback = function(data){
+				promises[i].resolve(data);
+			};
+			try{
+				result = obj[key](data,callback);
+				if(typeof result !== "undefined"){
+					callback(result);
+				}
+			} catch (e){
+				promises[i].reject(e);
+			}
+			return promises[i].promise;
+		};
+		return out;
+		};
+	for(var key in obj){
+		w[key]=keyFunc(key);
+	}
+	w._close = function(){
+		return c.resolve();
+	};
+	if(!('close' in w)){
+		w.close=w._close;
+	}
+w.initialize();
+	return w;
+}
+
+function fakeMapWorker(fun,callback,onerr){
+	var w = new Communist();
+	var worker = fakeObject({data:fun});
+	w.data=function(data){
+		worker.data(data).then(callback,onerr);
+		return w;
+	};
+	w.close=worker.close;
+	return w;
+}
+
+function fakeReducer(fun,callback){
+	var w = new Communist();
+	var accum;
+	w.data=function(data){
+		accum=accum?fun(accum,data):data;
+		return w;
+	};
+	w.fetch=function(){
+		callback(accum);
+		return w;
+	};
+	w.close=function(silent){
+		if(!silent){
+			callback(accum);
+		}
+		return;
+	};
+	return w;
+}
+
 function object(obj){
+	if(typeof Worker === 'undefined'){
+		return fakeObject(obj);
+	}
 	var w = new Communist();
 	var i = 0;
 	var promises = [];
@@ -523,6 +613,9 @@ function queue(obj,n,dumb){
 }
 
 function rWorker(fun,callback){
+	if(typeof Worker === 'undefined'){
+		return fakeReducer(fun,callback);
+	}
 	var w = new Communist();
 	var func = 'function(dat,cb){ var fun = '+fun+';\n\
 		switch(dat[0]){\n\
@@ -562,6 +655,7 @@ function rWorker(fun,callback){
 	};
 	return w;
 }
+
 function incrementalMapReduce(threads){
 	var w = new Communist();
 	var len = 0;

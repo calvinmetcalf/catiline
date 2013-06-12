@@ -1,4 +1,7 @@
 function object(obj){
+	if(typeof Worker === 'undefined'){
+		return fakeObject(obj);
+	}
 	var w = new Communist();
 	var i = 0;
 	var promises = [];
