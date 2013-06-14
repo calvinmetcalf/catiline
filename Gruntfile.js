@@ -149,20 +149,19 @@ module.exports = function(grunt) {
 	},
 	});
 
-	// Load the plugin that provides the "uglify" task.
 	grunt.loadNpmTasks('grunt-contrib-uglify');
- grunt.loadNpmTasks('grunt-contrib-concat');
- grunt.loadNpmTasks('grunt-simple-mocha');
- grunt.loadNpmTasks('grunt-contrib-connect');
- grunt.loadNpmTasks('grunt-mocha-phantomjs');
- grunt.loadNpmTasks('grunt-contrib-jshint');
- grunt.loadNpmTasks('grunt-saucelabs');
-	// Default task(s).
+	grunt.loadNpmTasks('grunt-contrib-concat');
+	grunt.loadNpmTasks('grunt-simple-mocha');
+	grunt.loadNpmTasks('grunt-contrib-connect');
+	grunt.loadNpmTasks('grunt-mocha-phantomjs');
+	grunt.loadNpmTasks('grunt-contrib-jshint');
+	grunt.loadNpmTasks('grunt-saucelabs');
+	
 	grunt.registerTask('sauce',['server','saucelabs-mocha:legacy','saucelabs-mocha:shim','saucelabs-mocha:big']);
 	grunt.registerTask('server',['connect']);
 	grunt.registerTask('browser',['concat:browser','uglify:browser']);
 	grunt.registerTask('lint',['jshint:afterconcat']);
-grunt.registerTask('test', ['connect', 'mocha_phantomjs']);
+	grunt.registerTask('test', ['connect', 'mocha_phantomjs']);
 	grunt.registerTask('default', ['browser','lint','sauce']);
 	grunt.registerTask('c9', ['browser','lint','test']);
 
