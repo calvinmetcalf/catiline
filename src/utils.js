@@ -9,7 +9,7 @@ function moveImports(string){
 		function(a,b){
 			if(b){
 				return "importScripts("+b.split(",").map(function(cc){
-					return "'"+c.makeUrl(cc.slice(1,-1))+"'";
+					return cc.slice(0,1)+c.makeUrl(cc.slice(1,-1))+cc.slice(-1);
 				})+");\n";
 			} else {
 				return "";
