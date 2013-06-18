@@ -5,16 +5,16 @@ function moveImports(string){
 	var script;
 	var match = string.match(/(importScripts\(.*\);)/);
 	if(match){
-		script = match[0].replace(/importScripts\((.*\.js\')\);?/,
+		script = match[0].replace(/importScripts\((.*\.js[\'\"])\);?/,
 		function(a,b){
 			if(b){
 				return "importScripts("+b.split(",").map(function(cc){
-					return "'"+c.makeUrl(cc.slice(1,-1))+"'";
+					return cc.slice(0,1)+c.makeUrl(cc.slice(1,-1))+cc.slice(-1);
 				})+");\n";
 			} else {
 				return "";
 			}
-		})+string.replace(/(importScripts\(.*\.js\'\);?)/,"\n");
+		})+string.replace(/(importScripts\(.*\.js[\'\"]\);?)/,"\n");
 	}else{
 		script = string;
 	}

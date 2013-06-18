@@ -1,6 +1,6 @@
 {
   "name": "communist",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "Threading with workers in  the browser.",
   "keywords": [
     "workers",
