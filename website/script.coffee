@@ -7,7 +7,7 @@ setUp()
 if typeof window.Worker is 'function'
 	setUp()
 	communist.ajax('README.md',(d)->
-		d.slice(45)
+		d.slice(66)
 	,true).then (md)->
 		$('#cont').html(marked(md))
 else
