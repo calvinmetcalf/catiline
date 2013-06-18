@@ -1,6 +1,6 @@
 Communist
 ==========
-![communist](logo.png)
+![communist](http://communistjs.com/logo.png)
 
 A JavaScrit library all about workers, want to use it? Grab the [development version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.js) or [production version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.min.js) from the dist folder. 
 
