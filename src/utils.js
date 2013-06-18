@@ -5,7 +5,7 @@ function moveImports(string){
 	var script;
 	var match = string.match(/(importScripts\(.*\);)/);
 	if(match){
-		script = match[0].replace(/importScripts\((.*\.js\')\);?/,
+		script = match[0].replace(/importScripts\((.*\.js[\'\"])\);?/,
 		function(a,b){
 			if(b){
 				return "importScripts("+b.split(",").map(function(cc){
@@ -14,7 +14,7 @@ function moveImports(string){
 			} else {
 				return "";
 			}
-		})+string.replace(/(importScripts\(.*\.js\'\);?)/,"\n");
+		})+string.replace(/(importScripts\(.*\.js[\'\"]\);?)/,"\n");
 	}else{
 		script = string;
 	}

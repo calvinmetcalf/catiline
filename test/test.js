@@ -205,6 +205,9 @@ describe('communist()', function () {
 		it("should be able to import scripts",function (done){
 			communist(function(a){importScripts('fakeLib.js');return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
 		});
+		it("should be able to import scripts with double quotes",function (done){
+			communist(function(a){importScripts("fakeLib.js");return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
+		});
 		it("should be able to import reletive urls",function (done){
 			communist(function(a){importScripts('../test/fakeLib.js');return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
 		});
