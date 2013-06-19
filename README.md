@@ -2,7 +2,17 @@ Communist
 ==========
 ![communist](http://communistjs.com/logo.png)
 
+
 A JavaScrit library all about workers, want to use it? Grab the [development version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.js) or [production version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.min.js) from the dist folder. 
+
+A few demos:
+- [Parsing a dictionary](http://communistjs.com/website/dict/)
+- [Fractal Map](http://communistjs.com/website/leaflet-fractal/)
+- [RTree Bounding Boxes](http://leaflet-extras.github.io/RTree/examples/worker.html)
+- [Census Visualization](http://data-otp.rhcloud.com/)
+- [Vector Map Tiles](http://calvinmetcalf.github.io/vector-layers/)
+- [Unzipping files and reprojecting maps](http://calvinmetcalf.github.io/shapefile-js/proj.html)
+
 
 __Important:__ you're going to want to it yourself, on the same domain as your page, if you can't or need to bundle it see [hosting](#hosting).
 
