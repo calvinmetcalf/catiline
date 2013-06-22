@@ -283,7 +283,7 @@ describe('communist()', function () {
 				return comrade.product([20,100]);
 			}).then(function(a){a.should.equal(2000)}).then(function(){
 				return comrade.square(5);
-			}).then(function(a){a.should.equal(25)}).then(done,done);
+			}).then(function(a){a.should.equal(25)}).then(function(){done()},function(){done()});
 		});
 		it("and catch an error in it",function (done){
 			comrade.square("explode").then(function(){},function(a){a.indexOf("explode").should.be.at.least(0);}).then(done,done);
@@ -312,7 +312,7 @@ describe('communist()', function () {
 				.then(function(a){
 					a.reduce(function(b,c){return b+c;}).should.equal(120);
 				}
-			).then(done,done);
+			).then(function(){done()},function(){done()});
 		});
 		it("should work if batch has an error",function (done){
 
@@ -323,14 +323,14 @@ describe('communist()', function () {
 					function(a){
 					a.indexOf("explode").should.be.at.least(0);
 					}
-				).then(done,done);
+				).then(function(){done()},function(){done()});
 		});
 		it("and close it",function (done){
-			comrade.close().then(done,done);
+			comrade.close().then(function(){done()},function(){done()});
 		});
 		it("should work with an initializer function",function (done){
 			function wrapUp(){
-				comrade.close().then(done,done);
+				comrade.close().then(function(){done()},function(){done()});
 			}
 			var comrade = communist({initialize:function(){this.a=7},test:function(){return this.a}});
 			comrade.test().then(function(a){a.should.equal(7)}).then(wrapUp,wrapUp);
@@ -356,11 +356,11 @@ describe('communist()', function () {
 			});
 		});
 		it("and close it",function (done){
-			comrade.close().then(done,done);
+			comrade._close().then(function(){done()},function(){done()});
 		});
 		it("should work batch",function (done){
 			function wrapUp(){
-				comrade.close().then(done,done);
+				comrade.close().then(function(){done()},function(){done()});
 			}
 			var num=4;
 			var tot=0;
@@ -374,7 +374,7 @@ describe('communist()', function () {
 		})
 	it("should work if batch has an error",function (done){
 		function wrapUp(){
-				comrade.close().then(done,done);
+				comrade.close().then(function(){done()},function(){done()});
 			}
 			var num=4;
 			var tot=0;
@@ -390,7 +390,7 @@ describe('communist()', function () {
 		});
 		it("should work batch with a callback",function (done){
 			function wrapUp(){
-				comrade.close().then(done,done);
+				comrade.close().then(function(){done()},function(){done()});
 			}
 			var i = 4;
 			var tot = 0;
@@ -408,7 +408,7 @@ describe('communist()', function () {
 		});
 		it("should work with an initializer function",function (done){
 			function wrapUp(){
-				comrade.close().then(done,done);
+				comrade.close().then(function(){done()},function(){done()});
 			}
 			var comrade=communist({initialize:function(){this.a=7},test:function(){return this.a}});
 			comrade.test().then(function(a){a.should.equal(7)},"dumb").then(wrapUp,wrapUp);
