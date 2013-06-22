@@ -264,7 +264,7 @@ describe('communist()', function () {
 				).then(done,done);
 		});
 		it("and close it",function (done){
-			comrade.close().then(done,done);
+			comrade.close().then(function(){done()},function(){done()});
 		});
 		it("should work with an initializer function",function (done){
 			function wrapUp(){
@@ -326,7 +326,7 @@ describe('communist()', function () {
 				).then(done,done);
 		});
 		it("and close it",function (done){
-			comrade.close().then(done,done);
+			comrade.close().then(function(){done()},function(){done()});
 		});
 		it("should work with an initializer function",function (done){
 			function wrapUp(){
