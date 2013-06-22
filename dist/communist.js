@@ -1,4 +1,4 @@
-/*! communist 2013-06-18*/
+/*! communist 2013-06-22*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -561,7 +561,6 @@ function queue(obj,n,dumb){
 			}));
 		};
 	}
-	obj._close=function(){};
 	for(var key in obj){
 		w[key]=keyFunc(key);
 		w.batch[key]=keyFuncBatch(key);
@@ -606,6 +605,11 @@ function queue(obj,n,dumb){
 		}
 		return promise.promise;
 	}
+	w._close = function(){
+		return c.all(workers.map(function(ww){
+			return ww._close();
+		}));
+	};
 	if(!('close' in w)){
 		w.close=w._close;
 	}
