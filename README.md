@@ -20,9 +20,20 @@ __Important:__ you're going to want to it yourself, on the same domain as your p
 API
 ===
 ```javascript
-var worker = communist({sum:function(a,cb){cb(a[0]+a[1]);},square:function(a){return a*a;});
-worker.sum([2,5]).then(function(a){console.log(a);})//prints 7
-worker.square(5).then(function(a){console.log(a);})//prints 25
+var worker = communist({
+	sum:function(a,cb){
+		cb(a[0]+a[1]);
+	},
+	square:function(a){
+		return a*a;
+	}
+});
+worker.sum([2,5]).then(function(a){
+	console.log(a);
+})//prints 7
+worker.square(5).then(function(a){
+	console.log(a);
+})//prints 25
 worker.close()//closes the worker, can be overwritten, worker._close() can't be.
 ```
 
@@ -35,8 +46,12 @@ If you want to do things once when the worker is created pass a function called 
 ###Want it even simpler?
 
 ```javascript
-var worker = communist(function(a,cb){cb(a[0]*a[1])});
-worker.data([2,5]).then(function(a){console.log(a);})//prints 7
+var worker = communist(function(a,cb){
+	cb(a[0]*a[1]);
+});
+worker.data([2,5]).then(function(a){
+	console.log(a);
+})//prints 7
 worker.close();//close it up
 ```
 
@@ -44,31 +59,57 @@ If you just pass a function then you can call it with data.   Data only takes th
 
 ###Even simpler?
 ```javascript
-communist(function(a,cb){cb(a[0]*a[1])},[2,5]).then(function(a){console.log(a);})//prints 7
+communist(function(a,cb){
+	cb(a[0]*a[1]);
+},[2,5]).then(function(a){
+	console.log(a);
+})//prints 7
 ```
 
 pass the data as the second argument and it crunches it returns the data and then closes up for you (don't use this if you are every doing more then one thing with workers).
 
-###Experimental Queues
+###Queues
 
 ```javascript
-var workers = communist({sum:function(a,cb){cb(a[0]+a[1])},square:function(a){return a*a;}},4);
+var workers = communist({
+	sum:function(a,cb){
+		cb(a[0]+a[1]);
+	},
+	square:function(a){
+		return a*a;
+	}
+},4);
 ```
 
 Just add a number after the object (for a function just wrap it in `{data:YOUR FUNC}` and it's identical) and it will create that number or workers. Then calls will be divided among them, you can also call bulk methods works just like the regular method but also can call bulk methods which return arrays:
 
 
 ```javascript
-workers.square(4).then(function(a){console.log(a);});//normal way prints 16;
-workers.batch.square([1,2,3,4,5,6,7,8]).then(function(a){console.log(a);});//bulk prints [1,4,9,16,25,36,49,64]
+workers.square(4).then(function(a){
+	console.log(a);
+});//normal way prints 16;
+workers.batch.square([1,2,3,4,5,6,7,8]).then(function(a){
+	console.log(a);
+});//bulk prints [1,4,9,16,25,36,49,64]
 ```
 
 if you give it a callback then it calls the callback for each of the bulk items instead of waiting for all to be done.
 
 ```javascript
-var workers = communist({sum:function(a,cb){cb(a[0]+a[1])},square:function(a){return a*a;}},4);
-workers.square(4).then(function(a){console.log(a);});//the same way prints 16;
-workers.batch(function(a){console.log(a)}).square([1,2,3,4,5,6,7,8]);/*prints:
+var workers = communist({
+	sum:function(a,cb){
+		cb(a[0]+a[1])
+	},
+	square:function(a){
+		return a*a;
+	}
+},4);
+workers.square(4).then(function(a){
+	console.log(a);
+});//the same way prints 16;
+workers.batch(function(a){
+	console.log(a);
+}).square([1,2,3,4,5,6,7,8]);/*prints:
 1
 4
 9
@@ -83,7 +124,14 @@ workers.batch(function(a){console.log(a)}).square([1,2,3,4,5,6,7,8]);/*prints:
 If you want to dispence with the queueing system you can also do a dumb queue
 
 ```javascript
-var workers = communist({sum:function(a,cb){cb(a[0]+a[1]);},square:function(a){return a*a;},4,'dumb');
+var workers = communist({
+	sum:function(a,cb){
+		cb(a[0]+a[1]);
+	},
+	square:function(a){
+		return a*a;
+	}
+},4,'dumb');
 ```
 
 which is exactly like the other queue but instead of carefully queueing and only giving data to workers that are ready, it sprays the workers with the data completly randomly until it's out of data, think very carefully before using
@@ -92,8 +140,17 @@ can lead to "three stooges syndrome" where all the results come back at exactly 
 can use bulk and callback with it too but results may be different
 
 ```javascript
-var workers = communist({sum:function(a,cb){cb(a[0]+a[1])},square:function(a){return a*a;}},4,'dumb');
-workers.batch(function(a){console.log(a)}).square([1,2,3,4,5,6,7,8]);/* prints
+var workers = communist({
+	sum:function(a,cb){
+		cb(a[0]+a[1]);
+	},
+	square:function(a){
+		return a*a;
+	}
+},4,'dumb');
+workers.batch(function(a){
+	console.log(a);
+}).square([1,2,3,4,5,6,7,8]);/* prints
 1
 25
 16
@@ -112,19 +169,31 @@ var worker = communist(4);
 //pass it the number of map workers
 worker.data([1,2,3]);
 //pass it data
-worker.map(function(x){return x*x;});
+worker.map(function(x){
+	return x*x;
+});
 //function do be done once on each datum
-worker.reduce(function(a,b){return a+b;});
+worker.reduce(function(a,b){
+	return a+b;
+});
 //reduce function
 worker.data([4,5,6]);
-worker.fetch().then(function(a){console.log(a)});
+worker.fetch().then(function(a){
+	console.log(a);
+});
 //prints 91
-worker.data([6,7,8]).fetch().then(function(a){console.log(a)});
+worker.data([6,7,8]).fetch().then(function(a){
+	console.log(a;)
+});
 //prints 240
 //fetch takes an argument "now", if it's undefined then waitins until it's done
-worker.data([6,7,8]).fetch(true).then(function(a){console.log(a)});
+worker.data([6,7,8]).fetch(true).then(function(a){
+	console.log(a);
+});
 //also prints 240
-worker.close().then(function(a){console.log(a)});
+worker.close().then(function(a){
+	console.log(a);
+});
 //prints 389
 ```
 
