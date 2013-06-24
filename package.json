@@ -11,7 +11,7 @@
   "bugs": {
     "url": "https://github.com/calvinmetcalf/communist/issues"
   },
-  "repositories": [
+  "repository": [
     {
       "type": "git",
       "url": "https://github.com/calvinmetcalf/communist.git"
