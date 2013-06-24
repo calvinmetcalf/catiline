@@ -4,7 +4,8 @@ marked.setOptions
 setUp=()->
 	$('#cont').html "<p class='text-center'><i class='icon-spinner icon-spin icon-4x'></i>loading...</p>"
 setUp()
-if typeof window.Worker is 'function'
+type = typeof window.Worker
+if type in ['function','object']
 	setUp()
 	communist.ajax('README.md',(d)->
 		d.slice(66)
