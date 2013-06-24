@@ -1,4 +1,4 @@
-/*! communist 2013-06-22*/
+/*! communist 2013-06-24*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -7,7 +7,7 @@ if (typeof document === "undefined") {
 		eval(e.data);
 	};
 } else {
-(function(){
+(function(global){
 	"use strict";
 /*!From setImmediate Copyright (c) 2012 Barnesandnoble.com,llc, Donavon West, and Domenic Denicola @license MIT https://github.com/NobleJS/setImmediate */
 (function(attachTo,global) {
@@ -104,7 +104,7 @@ if (typeof document === "undefined") {
 
 			return handle;
 		};
-	})(c,window);
+	})(c,global);
 /*! Promiscuous ©2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/
 (function (exports) {
 	var func = "function";
@@ -855,9 +855,18 @@ c.ajax = function(url,after,notjson){
 	}';
 	return c(func,c.makeUrl(url));
 };
-if(typeof module === "undefined"){
-	window.communist=c;
+function initBrowser(c){
+	var origCW = global.cw;
+	c.noConflict=function(){
+		global.cw = origCW;
+	};
+	global.communist = c;
+	global.cw = c;
+	
+}
+if(typeof module === "undefined" ){
+	initBrowser(c);
 } else {
 	module.exports=c;
 }
-})();}
+})(this);}
