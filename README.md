@@ -125,7 +125,7 @@ workers.batch(function(a){
 */
 ```
 
-If you want to dispence with the queueing system you can also do a dumb queue
+If you want to dispense with the queuing system you can also do a dumb queue
 
 ```javascript
 var workers = communist({
@@ -138,7 +138,7 @@ var workers = communist({
 },4,'dumb');
 ```
 
-which is exactly like the other queue but instead of carefully queueing and only giving data to workers that are ready, it sprays the workers with the data completly randomly until it's out of data, think very carefully before using
+which is exactly like the other queue but instead of carefully queuing and only giving data to workers that are ready, it sprays the workers with the data completely randomly until it's out of data, think very carefully before using
 can lead to "three stooges syndrome" where all the results come back at exactly the same time and freeze the dom.
 
 can use bulk and callback with it too but results may be different
@@ -228,8 +228,8 @@ worker.close();
 ```
 
 ###Hosting<a id='hosting'></a>
-If you need to host it on a seperate domain, or bundle it with other scripts and still want it to work on IE10, Opera, and Safari. You need to host the file "SHIM_WORKER.js" on the same domain as the html file 
-and set the path to it in a globar variable `SHIM_WORKER_PATH` before you load this script.
+If you need to host it on a separate domain, or bundle it with other scripts and still want it to work on IE10, Opera, and Safari. You need to host the file "SHIM_WORKER.js" on the same domain as the html file 
+and set the path to it in a global variable `SHIM_WORKER_PATH` before you load this script.
 
 ###Misc
 
@@ -237,11 +237,11 @@ we have a few utility functions you can use
 
 `communist.makeUrl(reletiveURL);` returns an absolute url and
 
-`communist.worker([aray of strings]);` returns worker made from those strings.
+`communist.worker([array of strings]);` returns worker made from those strings.
 
 ```communist.ajax(url[,after,notjson]);``` returns promise, after is a function to call on the data after download in the worker, notjson should be true if you don't want to run JSON.parse on it.
 
-`communist.deferred();` makes a new promise and returns it, used internally. Technically `communist` is a shortcut to [Promiscuous](https://github.com/RubenVerborgh/promiscuous/) which is used for promises, so any of promiscuouses methods can be used, aka call `communist.resolve(value)` for an already resolved promise and `communist.reject(reason)` for a rejected one. Lastly you can call `communist.all([promises])` on an array of promises, should work just like `Q.all()`.
+`communist.deferred();` makes a new promise and returns it, used internally. Technically `communist` is a shortcut to [Promiscuous](https://github.com/RubenVerborgh/promiscuous/) which is used for promises, so any of Promiscuous's methods can be used, aka call `communist.resolve(value)` for an already resolved promise and `communist.reject(reason)` for a rejected one. Lastly you can call `communist.all([promises])` on an array of promises, should work just like `Q.all()`.
 
 `communist.setImmediate();` implements [setImmediate](https://github.com/NobleJS/setImmediate), at least the parts that apply to non web workers that can create web workers.
 
