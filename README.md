@@ -47,7 +47,7 @@ If you want to do things once when the worker is created pass a function called 
 
 ```javascript
 var worker = communist(function(a,cb){
-	cb(a[0]*a[1]);
+	cb(a[0]+a[1]);
 });
 worker.data([2,5]).then(function(a){
 	console.log(a);
