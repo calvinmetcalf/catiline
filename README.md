@@ -3,7 +3,9 @@ Communist
 ![communist](http://communistjs.com/logo.png)
 
 
-A JavaScript library all about workers. Workers should make your life easier not harder and with communistjs launching a new worker is as simple as calling a function, and it works the same across all (modern) browsers. How easy? `var worker = communist(myFunc)` creates a worker, send it data with `worker.data(YOUR DATA)`. It's that easy, read bellow for the full API and examples.
+A JavaScript library all about workers. Workers should make your life easier not harder and with communistjs launching a new worker is as simple as calling a function, and it works the same across all (modern) browsers.
+
+How easy? `var worker = communist(myFunc)` creates a worker, send it data with `worker.data(YOUR DATA)`. It's that easy, read bellow for the full API and examples.
 
 Want to use it? Grab the [development version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.js) or [production version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.min.js) from the dist folder. 
 
