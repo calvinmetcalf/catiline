@@ -93,4 +93,4 @@
 
 			return handle;
 		};
-	})(c,window);
+	})(c,global);

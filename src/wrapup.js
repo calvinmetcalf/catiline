@@ -38,8 +38,17 @@ c.ajax = function(url,after,notjson){
 	}';
 	return c(func,c.makeUrl(url));
 };
-if(typeof module === "undefined"){
-	window.communist=c;
+function initBrowser(c){
+	var origCW = global.cw;
+	c.noConflict=function(){
+		global.cw = origCW;
+	};
+	global.communist = c;
+	global.cw = c;
+	
+}
+if(typeof module === "undefined" ){
+	initBrowser(c);
 } else {
 	module.exports=c;
 }
