@@ -5,5 +5,5 @@ if (typeof document === "undefined") {
 		eval(e.data);
 	};
 } else {
-(function(){
+(function(global){
 	"use strict";

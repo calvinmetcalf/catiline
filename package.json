@@ -1,17 +1,17 @@
 {
   "name": "communist",
-  "version": "1.4.5",
-  "description": "Threading with workers in  the browser.",
+  "version": "1.5.0",
+  "description": "Multi proccessing with workers in the browser.",
   "keywords": [
     "workers",
     "threads",
     "parallel"
   ],
-  "author": "Calvin Metcalf <calvin.metalf@gmail.com> (https://github.com/calvinmetcalf)",
+  "author": "Calvin Metcalf <calvin.metcalf@gmail.com> (https://github.com/calvinmetcalf)",
   "bugs": {
     "url": "https://github.com/calvinmetcalf/communist/issues"
   },
-  "repositories": [
+  "repository": [
     {
       "type": "git",
       "url": "https://github.com/calvinmetcalf/communist.git"
