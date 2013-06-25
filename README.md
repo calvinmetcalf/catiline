@@ -25,8 +25,8 @@ API
 ===
 ```javascript
 var worker = cw({
-	sum:function(a,cb){
-		cb(a[0]+a[1]);
+	sum:function(a,callback){
+		callback(a[0]+a[1]);
 	},
 	square:function(a){
 		return a*a;
@@ -50,8 +50,8 @@ If you want to do things once when the worker is created pass a function called 
 ###Want it even simpler?
 
 ```javascript
-var worker = cw(function(a,cb){
-	cb(a[0]+a[1]);
+var worker = cw(function(a,callback){
+	callback(a[0]+a[1]);
 });
 worker.data([2,5]).then(function(a){
 	console.log(a);
@@ -63,8 +63,8 @@ If you just pass a function then you can call it with data.   Data only takes th
 
 ###Even simpler?
 ```javascript
-cw(function(a,cb){
-	cb(a[0]*a[1]);
+cw(function(a,callback){
+	callback(a[0]*a[1]);
 },[2,5]).then(function(a){
 	console.log(a);
 })//prints 7
@@ -76,8 +76,8 @@ pass the data as the second argument and it crunches it returns the data and the
 
 ```javascript
 var workers = cw({
-	sum:function(a,cb){
-		cb(a[0]+a[1]);
+	sum:function(a,callback){
+		callback(a[0]+a[1]);
 	},
 	square:function(a){
 		return a*a;
@@ -101,8 +101,8 @@ if you give it a callback then it calls the callback for each of the bulk items 
 
 ```javascript
 var workers = cw({
-	sum:function(a,cb){
-		cb(a[0]+a[1])
+	sum:function(a,callback){
+		callback(a[0]+a[1])
 	},
 	square:function(a){
 		return a*a;
@@ -129,8 +129,8 @@ If you want to dispense with the queuing system you can also do a dumb queue
 
 ```javascript
 var workers = cw({
-	sum:function(a,cb){
-		cb(a[0]+a[1]);
+	sum:function(a,callback){
+		callback(a[0]+a[1]);
 	},
 	square:function(a){
 		return a*a;
@@ -145,8 +145,8 @@ can use bulk and callback with it too but results may be different
 
 ```javascript
 var workers = cw({
-	sum:function(a,cb){
-		cb(a[0]+a[1]);
+	sum:function(a,callback){
+		callback(a[0]+a[1]);
 	},
 	square:function(a){
 		return a*a;
