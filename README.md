@@ -5,7 +5,7 @@ Communist
 
 A JavaScript library all about workers. Workers should make your life easier not harder and with communistjs launching a new worker is as simple as calling a function, and it works the same across all (modern) browsers.
 
-How easy? `var worker = communist(myFunc)` creates a worker, send it data with `worker.data(YOUR DATA)`. It's that easy, read bellow for the full API and examples.
+How easy? `var worker = cw(myFunc)` creates a worker, send it data with `worker.data(YOUR DATA)`. It's that easy, read bellow for the full API and examples.
 
 Want to use it? Grab the [development version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.js) or [production version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.min.js) from the dist folder. 
 
@@ -24,9 +24,9 @@ __Important:__ you're going to want to it yourself, on the same domain as your p
 API
 ===
 ```javascript
-var worker = communist({
-	sum:function(a,cb){
-		cb(a[0]+a[1]);
+var worker = cw({
+	sum:function(a,callback){
+		callback(a[0]+a[1]);
 	},
 	square:function(a){
 		return a*a;
@@ -50,8 +50,8 @@ If you want to do things once when the worker is created pass a function called 
 ###Want it even simpler?
 
 ```javascript
-var worker = communist(function(a,cb){
-	cb(a[0]+a[1]);
+var worker = cw(function(a,callback){
+	callback(a[0]+a[1]);
 });
 worker.data([2,5]).then(function(a){
 	console.log(a);
@@ -63,8 +63,8 @@ If you just pass a function then you can call it with data.   Data only takes th
 
 ###Even simpler?
 ```javascript
-communist(function(a,cb){
-	cb(a[0]*a[1]);
+cw(function(a,callback){
+	callback(a[0]*a[1]);
 },[2,5]).then(function(a){
 	console.log(a);
 })//prints 7
@@ -75,9 +75,9 @@ pass the data as the second argument and it crunches it returns the data and the
 ###Queues
 
 ```javascript
-var workers = communist({
-	sum:function(a,cb){
-		cb(a[0]+a[1]);
+var workers = cw({
+	sum:function(a,callback){
+		callback(a[0]+a[1]);
 	},
 	square:function(a){
 		return a*a;
@@ -100,9 +100,9 @@ workers.batch.square([1,2,3,4,5,6,7,8]).then(function(a){
 if you give it a callback then it calls the callback for each of the bulk items instead of waiting for all to be done.
 
 ```javascript
-var workers = communist({
-	sum:function(a,cb){
-		cb(a[0]+a[1])
+var workers = cw({
+	sum:function(a,callback){
+		callback(a[0]+a[1])
 	},
 	square:function(a){
 		return a*a;
@@ -128,9 +128,9 @@ workers.batch(function(a){
 If you want to dispense with the queuing system you can also do a dumb queue
 
 ```javascript
-var workers = communist({
-	sum:function(a,cb){
-		cb(a[0]+a[1]);
+var workers = cw({
+	sum:function(a,callback){
+		callback(a[0]+a[1]);
 	},
 	square:function(a){
 		return a*a;
@@ -144,9 +144,9 @@ can lead to "three stooges syndrome" where all the results come back at exactly 
 can use bulk and callback with it too but results may be different
 
 ```javascript
-var workers = communist({
-	sum:function(a,cb){
-		cb(a[0]+a[1]);
+var workers = cw({
+	sum:function(a,callback){
+		callback(a[0]+a[1]);
 	},
 	square:function(a){
 		return a*a;
@@ -169,7 +169,7 @@ workers.batch(function(a){
 ###Goodies: Map/Reduce
 
 ```javascript
-var worker = communist(4);
+var worker = cw(4);
 //pass it the number of map workers
 worker.data([1,2,3]);
 //pass it data
@@ -204,7 +204,7 @@ worker.close().then(function(a){
 the reducer function is also available for you if you want.
 
 ```javascript
-var worker = communist.reducer(function, callback);
+var worker = cw.reducer(function, callback);
 //give it data with
 worker.data(3);
 //send back data and call the callback
@@ -218,7 +218,7 @@ worker.close([silent]);
 there is also a map function you can call if you want
 
 ```javascript
-var worker = communist(function,callback,onerr);
+var worker = cw(function,callback,onerr);
 //opens the worker with the function
 worker.data(stuff);
 //send it data any data that comes back callback is called on
@@ -235,15 +235,17 @@ and set the path to it in a global variable `SHIM_WORKER_PATH` before you load t
 
 we have a few utility functions you can use
 
-`communist.makeUrl(reletiveURL);` returns an absolute url and
+`cw.makeUrl(reletiveURL);` returns an absolute url and
 
-`communist.worker([array of strings]);` returns worker made from those strings.
+`cw.worker([array of strings]);` returns worker made from those strings.
 
-```communist.ajax(url[,after,notjson]);``` returns promise, after is a function to call on the data after download in the worker, notjson should be true if you don't want to run JSON.parse on it.
+```cw.ajax(url[,after,notjson]);``` returns promise, after is a function to call on the data after download in the worker, notjson should be true if you don't want to run JSON.parse on it.
 
-`communist.deferred();` makes a new promise and returns it, used internally. Technically `communist` is a shortcut to [Promiscuous](https://github.com/RubenVerborgh/promiscuous/) which is used for promises, so any of Promiscuous's methods can be used, aka call `communist.resolve(value)` for an already resolved promise and `communist.reject(reason)` for a rejected one. Lastly you can call `communist.all([promises])` on an array of promises, should work just like `Q.all()`.
+`cw.deferred();` makes a new promise and returns it, used internally. Technically `cw` is a shortcut to [Promiscuous](https://github.com/RubenVerborgh/promiscuous/) which is used for promises, so any of Promiscuous's methods can be used, aka call `cw.resolve(value)` for an already resolved promise and `cw.reject(reason)` for a rejected one. Lastly you can call `cw.all([promises])` on an array of promises, should work just like `Q.all()`.
 
-`communist.setImmediate();` implements [setImmediate](https://github.com/NobleJS/setImmediate), at least the parts that apply to non web workers that can create web workers.
+`cw.setImmediate();` implements [setImmediate](https://github.com/NobleJS/setImmediate), at least the parts that apply to non web workers that can create web workers.
+
+lastly `cw.noConflict()` sets `cw` back to what it was before loading this library and you can use the function via `communist()`
 
 This grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).
 
