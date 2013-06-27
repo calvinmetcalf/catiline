@@ -1,11 +1,6 @@
-Communist
-==========
-![communist](http://communistjs.com/logo.png)
-
-
 A JavaScript library all about workers. Workers should make your life easier not harder and with communistjs launching a new worker is as simple as calling a function, and it works the same across all (modern) browsers.
 
-How easy? `var worker = cw(myFunc)` creates a worker, send it data with `worker.data(YOUR DATA)`. It's that easy, read bellow for the full API and examples.
+How easy? `var worker = cw(myFunc)` creates a worker, send it data with `var response = worker.data(YOUR DATA);`, response is a [promsise](http://blogs.msdn.com/b/ie/archive/2011/09/11/asynchronous-programming-in-javascript-with-promises.aspx). It's that easy, read bellow for the full API and examples.
 
 Want to use it? Grab the [development version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.js) or [production version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.min.js) from the dist folder. 
 
