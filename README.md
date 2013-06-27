@@ -7,7 +7,7 @@ Want to use it? Grab the [development version](https://raw.github.com/calvinmetc
 For usage checkout the <a id='api' href='API.md'>API page</a>, or browse a few demos:
 
 - [Parsing a dictionary](http://communistjs.com/website/dict/)
-- [Fractal Map](http://communistjs.com/website/leaflet-fractal/)
+- [Fractal Map](http://communistjs.com/website/leaflet-fractal/), (April Mozilla Dev Derby [Finalist](https://hacks.mozilla.org/2013/06/announcing-the-winners-of-the-april-2013-dev-derby/))
 - [RTree Bounding Boxes](http://leaflet-extras.github.io/RTree/examples/worker.html)
 - [Census Visualization](http://data-otp.rhcloud.com/)
 - [Vector Map Tiles](http://calvinmetcalf.github.io/vector-layers/)
