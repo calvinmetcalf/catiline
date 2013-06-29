@@ -49,6 +49,27 @@ cw(function(a,callback){
 
 pass the data as the second argument and it crunches it returns the data and then closes up for you (don't use this if you are every doing more then one thing with workers).
 
+###Importing Scripts
+If you create a worker and the function imports a script like
+
+```javascript
+function(base,cb){
+	importScripts('dist/shp.js');
+	shp(base).then(cb);
+}
+```
+
+it will be rewritten as 
+
+```javascript
+importScripts('http://full/path/to/dist/shp.js');
+function(base,cb){
+	shp(base).then(cb);
+}
+```
+
+In other words it will be hoisted out of the function so it will only be called once, and it will rewrite all the URLs to be absolute. **Note:** currently it will only do this for the first `importScripts()` it finds.
+
 ###Queues
 
 ```javascript
