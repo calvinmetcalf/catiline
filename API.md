@@ -59,7 +59,7 @@ function(base,cb){
 }
 ```
 
-it will be rewritten as 
+it will be rewritten inside the worker as 
 
 ```javascript
 importScripts('http://full/path/to/dist/shp.js');
