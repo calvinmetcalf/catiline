@@ -343,6 +343,28 @@ describe('cw()', function () {
 			});
 			worker.batch('no');
 		});
+		it("cancel it not batch",function (done){
+			var worker = cw({waitForever:function(num,cb){setTimeout(function(){cb(num)},200)}},2);
+			var yes = 0;
+			var no = 0;
+			var next = function(yes,no){
+				if((yes+no)===8){
+						no.should.be.above(1);
+						worker.close().then(function(){done()},function(){done()});
+					}
+			};
+			var ar = [1,2,3,4,5,6,7,8];
+			ar.forEach(function(a){
+				worker.waitForever(a).then(function(v){
+					yes++;
+					worker.batch('no');
+					next(yes,no);
+				},function(v){
+					no++;
+					next(yes,no);
+				});
+			});
+		});
 	});
 	describe('no conflict', function () {
 		it('no conflict should work',function(){
