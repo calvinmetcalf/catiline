@@ -122,6 +122,7 @@ workers.batch(function(a){
 64
 */
 ```
+To cancel a queue calling `workers.batch('msg')` will clear the current data and reject all the promises.
 
 If you want to dispense with the queuing system you can also do a dumb queue
 
