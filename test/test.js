@@ -335,6 +335,14 @@ describe('cw()', function () {
 			var comrade = cw({initialize:function(){this.a=7},test:function(){return this.a}});
 			comrade.test().then(function(a){a.should.equal(7)}).then(wrapUp,wrapUp);
 		});
+		it("cancel it",function (done){
+			var worker = cw({waitForever:function(num,cb){setTimeout(function(){cb(num)},2000)}},3);
+			worker.batch.waitForever([1,2,3,4,5,6,7,8]).then(done,function(a){
+				a.should.equal('no');
+				worker.close().then(function(){done()},function(){done()});
+			});
+			worker.batch('no');
+		});
 	});
 	describe('no conflict', function () {
 		it('no conflict should work',function(){
