@@ -3,12 +3,20 @@ function queue(obj,n,dumb){
 	w.__batchcb__=new Communist();
 	w.__batchtcb__=new Communist();
 	w.batch = function(cb){
-		w.__batchcb__.__cb__=cb;
-		return w.__batchcb__;
+		if(typeof cb === 'function'){
+			w.__batchcb__.__cb__=cb;
+			return w.__batchcb__;
+		}else{
+			return clearQueue(cb);
+		}
 	};
 	w.batchTransfer = function(cb){
-		w.__batchtcb__.__cb__=cb;
-		return w.__batchtcb__;
+		if(typeof cb === 'function'){
+			w.__batchtcb__.__cb__=cb;
+			return w.__batchtcb__;
+		}else{
+			return clearQueue(cb);
+		}
 	};
 	var workers = new Array(n);
 	var numIdle=0;
@@ -19,6 +27,16 @@ function queue(obj,n,dumb){
 		workers[numIdle]=object(obj);
 		idle.push(numIdle);
 		numIdle++;
+	}
+	function clearQueue(mgs){
+		mgs = mgs || 'canceled';
+		queueLen = 0;
+		var oQ = que;
+		que = [];
+		oQ.forEach(function(p){
+			p[3].reject(mgs);
+		});
+		return true;
 	}
 	function keyFunc(k){
 		return function(data,transfer){
