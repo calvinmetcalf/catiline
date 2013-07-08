@@ -5,8 +5,8 @@ module.exports = function(grunt) {
 		var done = this.async();
 		var which = ['object','general','single','reducer'];
 		var dealwith = function(input,callback){
-			var parent = './src/worker.'+input+'.js';
-			var child = './src/workers/'+input+'.js';
+			var parent = './src/workers/'+input+'.js';
+			var child = './src/workers/worker.'+input+'.js';
 			var temp = './src/temp/'+input+'.js';
 			async.map([parent,child], function(path,cb){
 				fs.readFile(path,'utf8',cb);
@@ -47,7 +47,7 @@ module.exports = function(grunt) {
 					seperator:";\n",
 					footer : '})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/all.js','src/utils.js','src/temp/single.js','src/temp/general.js','src/worker.multiuse.js','src/fakeWorkers.js','src/temp/object.js','src/queue.js','src/temp/reducer.js','src/mapreduce.incremental.js','src/mapreduce.nonincremental.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/all.js','src/utils.js','src/temp/single.js','src/temp/general.js','src/workers/multiuse.js','src/fakeWorkers.js','src/temp/object.js','src/queue.js','src/temp/reducer.js','src/mapreduce.incremental.js','src/mapreduce.nonincremental.js','src/wrapup.js']}
 			}
 		},mocha_phantomjs: {
 		all: {

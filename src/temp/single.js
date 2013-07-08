@@ -6,7 +6,7 @@ function single(fun,data){
 		return multiUse(fun).data(data);
 	}
 	var promise = c.deferred();
-	var worker = makeWorker($$fObj$$);
+	var worker = makeWorker(['var _self = {};_self.fun = ',fun,';_self.cb = function (data, transfer) {	!self._noTransferable ? self.postMessage(data, transfer) : self.postMessage(data);	self.close();};_self.result = _self.fun(',JSON.stringify(data),', _self.cb);if (typeof _self.result !== "undefined") {	_self.cb(_self.result);}']);
 	worker.onmessage=function(e){
 		promise.resolve(e.data);
 	};
