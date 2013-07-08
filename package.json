@@ -16,7 +16,7 @@
     "url": "git://github.com/calvinmetcalf/communist.git"
   },
   "scripts": {
-    "test": "grunt"
+    "test": "grunt test"
   },
   "main": "dist/communist.js",
   "license": "MIT",
