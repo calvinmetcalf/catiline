@@ -3,27 +3,11 @@ function rWorker(fun,callback){
 		return fakeReducer(fun,callback);
 	}
 	var w = new Communist();
-	var func = 'function(dat,cb){ var fun = '+fun+';\n\
-		switch(dat[0]){\n\
-			case "data":\n\
-				if(!this._r){\n\
-					this._r = dat[1];\n\
-				}else{\n\
-					this._r = fun(this._r,dat[1]);\n\
-				}\n\
-				break;\n\
-			case "get":\n\
-				return cb(this._r);\n\
-			case "close":\n\
-				cb(this._r);\n\
-				this.__close__();\n\
-				break;\n\
-		}\n\
-	};';
+	var func = ['function (dat, cb) {	var fun = ',fun,';	switch (dat[0]) {	case "data":		if (!this._r) {			this._r = dat[1];		}		else {			this._r = fun(this._r, dat[1]);		}		break;	case "get":		return cb(this._r);	case "close":		cb(this._r);		this.__close__();		break;	}};'];
 	var cb =function(data){
 		callback(data);
 	};
-	var worker = mapWorker(func,cb);
+	var worker = mapWorker(func.join(''),cb);
 	w.data=function(data,transfer){
 		!c._noTransferable?worker.data(["data",data],transfer):worker.data(["data",data]);
 		return w;

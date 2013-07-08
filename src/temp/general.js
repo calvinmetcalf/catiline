@@ -3,22 +3,7 @@ function mapWorker(fun,callback,onerr){
 		return fakeMapWorker(fun,callback,onerr);
 	}
 	var w = new Communist();
-	var worker = makeWorker(['\n\
-	var _db={};\n\
-	_db.__close__=function(){\n\
-		self.close();\n\
-	};\n\
-	var _self={};\n\
-	_db.__fun__ = ',fun,';\n\
-	_self.cb=function(data,transfer){\n\
-		!self._noTransferable?self.postMessage(data,transfer):self.postMessage(data);\n\
-	};\n\
-	self.onmessage=function(e){\n\
-		_self.result = _db.__fun__(e.data,_self.cb);\n\
-			if(typeof _self.result !== "undefined"){\n\
-				_self.cb(_self.result);\n\
-		}\n\
-	}']);
+	var worker = makeWorker(['var _db = {};_db.__close__ = function () {	self.close();};var _self = {};_db.__fun__ = ',fun,';_self.cb = function (data, transfer) {	!self._noTransferable ? self.postMessage(data, transfer) : self.postMessage(data);};self.onmessage = function (e) {	_self.result = _db.__fun__(e.data, _self.cb);	if (typeof _self.result !== "undefined") {		_self.cb(_self.result);	}}']);
 	worker.onmessage = function(e){
 		callback(e.data);
 	};

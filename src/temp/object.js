@@ -40,18 +40,7 @@ function object(obj){
 	}
 	fObj=fObj+"}";
 	
-	var worker = makeWorker(['\n\
-	var _db='+fObj+';\n\
-	self.onmessage=function(e){\n\
-	var cb=function(data,transfer){\n\
-		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);\n\
-	};\n\
-		var result = _db[e.data[1]](e.data[2],cb);\n\
-			if(typeof result !== "undefined"){\n\
-				cb(result);\n\
-			}\n\
-	}\n\
-	_db.initialize()']);
+	var worker = makeWorker(['var _db=',fObj,';self.onmessage=function(e){	var cb=function(data,transfer){		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);	};	var result = _db[e.data[1]](e.data[2],cb);	if(typeof result !== "undefined"){		cb(result);	}};_db.initialize();']);
 	worker.onmessage= function(e){
 			promises[e.data[0]].resolve(e.data[1]);
 			promises[e.data[0]]=0;

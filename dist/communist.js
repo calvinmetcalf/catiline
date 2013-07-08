@@ -1,4 +1,4 @@
-/*! communist 2013-07-01*/
+/*! communist 2013-07-08*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -237,9 +237,9 @@ var Communist = function(){};
 //regex out the importScript call and move it up to the top out of the function.
 function moveImports(string){
 	var script;
-	var match = string.match(/(importScripts\(.*\);)/);
+	var match = string.match(/(importScripts\(.*?\);)/);
 	if(match){
-		script = match[0].replace(/importScripts\((.*\.js[\'\"])\);?/,
+		script = match[0].replace(/importScripts\((.*?\.js[\'\"])\);?/,
 		function(a,b){
 			if(b){
 				return "importScripts("+b.split(",").map(function(cc){
@@ -248,7 +248,7 @@ function moveImports(string){
 			} else {
 				return "";
 			}
-		})+string.replace(/(importScripts\(.*\.js[\'\"]\);?)/,"\n");
+		})+string.replace(/(importScripts\(.*?\.js[\'\"]\);?)/,"\n");
 	}else{
 		script = string;
 	}
@@ -292,15 +292,7 @@ function single(fun,data){
 		return multiUse(fun).data(data);
 	}
 	var promise = c.deferred();
-	var worker = makeWorker(['var _self={};\n_self.fun = ',fun,';\n\
-	_self.cb=function(data,transfer){\n\
-			!self._noTransferable?self.postMessage(data,transfer):self.postMessage(data);\n\
-			self.close();\n\
-		};\n\
-		_self.result = _self.fun(',JSON.stringify(data),',_self.cb);\n\
-		if(typeof _self.result !== "undefined"){\n\
-			_self.cb(_self.result);\n\
-		}']);
+	var worker = makeWorker(['var _self = {};_self.fun = ',fun,';_self.cb = function (data, transfer) {	!self._noTransferable ? self.postMessage(data, transfer) : self.postMessage(data);	self.close();};_self.result = _self.fun(',JSON.stringify(data),', _self.cb);if (typeof _self.result !== "undefined") {	_self.cb(_self.result);}']);
 	worker.onmessage=function(e){
 		promise.resolve(e.data);
 	};
@@ -316,22 +308,7 @@ function mapWorker(fun,callback,onerr){
 		return fakeMapWorker(fun,callback,onerr);
 	}
 	var w = new Communist();
-	var worker = makeWorker(['\n\
-	var _db={};\n\
-	_db.__close__=function(){\n\
-		self.close();\n\
-	};\n\
-	var _self={};\n\
-	_db.__fun__ = ',fun,';\n\
-	_self.cb=function(data,transfer){\n\
-		!self._noTransferable?self.postMessage(data,transfer):self.postMessage(data);\n\
-	};\n\
-	self.onmessage=function(e){\n\
-		_self.result = _db.__fun__(e.data,_self.cb);\n\
-			if(typeof _self.result !== "undefined"){\n\
-				_self.cb(_self.result);\n\
-		}\n\
-	}']);
+	var worker = makeWorker(['var _db = {};_db.__close__ = function () {	self.close();};var _self = {};_db.__fun__ = ',fun,';_self.cb = function (data, transfer) {	!self._noTransferable ? self.postMessage(data, transfer) : self.postMessage(data);};self.onmessage = function (e) {	_self.result = _db.__fun__(e.data, _self.cb);	if (typeof _self.result !== "undefined") {		_self.cb(_self.result);	}}']);
 	worker.onmessage = function(e){
 		callback(e.data);
 	};
@@ -475,18 +452,7 @@ function object(obj){
 	}
 	fObj=fObj+"}";
 	
-	var worker = makeWorker(['\n\
-	var _db='+fObj+';\n\
-	self.onmessage=function(e){\n\
-	var cb=function(data,transfer){\n\
-		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);\n\
-	};\n\
-		var result = _db[e.data[1]](e.data[2],cb);\n\
-			if(typeof result !== "undefined"){\n\
-				cb(result);\n\
-			}\n\
-	}\n\
-	_db.initialize()']);
+	var worker = makeWorker(['var _db=',fObj,';self.onmessage=function(e){	var cb=function(data,transfer){		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);	};	var result = _db[e.data[1]](e.data[2],cb);	if(typeof result !== "undefined"){		cb(result);	}};_db.initialize();']);
 	worker.onmessage= function(e){
 			promises[e.data[0]].resolve(e.data[1]);
 			promises[e.data[0]]=0;
@@ -639,27 +605,11 @@ function rWorker(fun,callback){
 		return fakeReducer(fun,callback);
 	}
 	var w = new Communist();
-	var func = 'function(dat,cb){ var fun = '+fun+';\n\
-		switch(dat[0]){\n\
-			case "data":\n\
-				if(!this._r){\n\
-					this._r = dat[1];\n\
-				}else{\n\
-					this._r = fun(this._r,dat[1]);\n\
-				}\n\
-				break;\n\
-			case "get":\n\
-				return cb(this._r);\n\
-			case "close":\n\
-				cb(this._r);\n\
-				this.__close__();\n\
-				break;\n\
-		}\n\
-	};';
+	var func = ['function (dat, cb) {	var fun = ',fun,';	switch (dat[0]) {	case "data":		if (!this._r) {			this._r = dat[1];		}		else {			this._r = fun(this._r, dat[1]);		}		break;	case "get":		return cb(this._r);	case "close":		cb(this._r);		this.__close__();		break;	}};'];
 	var cb =function(data){
 		callback(data);
 	};
-	var worker = mapWorker(func,cb);
+	var worker = mapWorker(func.join(''),cb);
 	w.data=function(data,transfer){
 		!c._noTransferable?worker.data(["data",data],transfer):worker.data(["data",data]);
 		return w;
