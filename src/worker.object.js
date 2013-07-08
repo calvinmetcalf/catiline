@@ -40,18 +40,7 @@ function object(obj){
 	}
 	fObj=fObj+"}";
 	
-	var worker = makeWorker(['\n\
-	var _db='+fObj+';\n\
-	self.onmessage=function(e){\n\
-	var cb=function(data,transfer){\n\
-		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);\n\
-	};\n\
-		var result = _db[e.data[1]](e.data[2],cb);\n\
-			if(typeof result !== "undefined"){\n\
-				cb(result);\n\
-			}\n\
-	}\n\
-	_db.initialize()']);
+	var worker = makeWorker($$fObj$$);
 	worker.onmessage= function(e){
 			promises[e.data[0]].resolve(e.data[1]);
 			promises[e.data[0]]=0;
