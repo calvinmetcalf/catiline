@@ -53,8 +53,8 @@ module.exports = function(grunt) {
 		all: {
 			options: {
 				urls: [
-						"http://127.0.0.1:8080/test/index.html",
-					"http://127.0.0.1:8080/test/index.min.html"
+						"http://"+process.env.IP+":8080/test/index.html",
+					"http://"+process.env.IP+":8080/test/index.min.html"
 				]
 			}
 		}
@@ -186,6 +186,6 @@ module.exports = function(grunt) {
 	grunt.registerTask('lint',['jshint:afterconcat']);
 	grunt.registerTask('test', ['connect', 'mocha_phantomjs']);
 	grunt.registerTask('default', ['template','browser','lint','sauce']);
-	grunt.registerTask('c9', ['browser','lint','test']);
+	grunt.registerTask('c9', ['template','browser','lint','test']);
 
 };
