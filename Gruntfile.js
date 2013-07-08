@@ -180,7 +180,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-saucelabs');
 	grunt.registerTask('template',templateThings);
-	grunt.registerTask('sauce',['server','saucelabs-mocha:shim','saucelabs-mocha:big','saucelabs-mocha:legacy']);
+	grunt.registerTask('sauce',['server','saucelabs-mocha:big','saucelabs-mocha:shim','saucelabs-mocha:legacy']);
 	grunt.registerTask('server',['connect']);
 	grunt.registerTask('browser',['concat:browser','uglify:browser']);
 	grunt.registerTask('lint',['jshint:afterconcat']);
