@@ -1,5 +1,29 @@
+var fs = require('fs');
+var async = require('async');
 module.exports = function(grunt) {
-
+	var templateThings = function(){
+		var done = this.async();
+		var which = ['object','general','single','reducer'];
+		var dealwith = function(input,callback){
+			var parent = './src/worker.'+input+'.js';
+			var child = './src/workers/'+input+'.js';
+			var temp = './src/temp/'+input+'.js';
+			async.map([parent,child], function(path,cb){
+				fs.readFile(path,'utf8',cb);
+			}, function(err, results){
+				var parent = results[0];
+				var child = results[1];
+				var replacedChild = "['"+child.replace(/\$\$(.+?)\$\$/,function(a,b){
+					return "',"+b+",'";
+				}).replace(/\n/gm,'')+"']";
+				var out = parent .replace(/\$\$fObj\$\$/,replacedChild);
+				fs.writeFile(temp,out,'utf8',function(){console.log('done')},callback);
+			});
+		};
+		async.map(which,dealwith,function(err){
+			done(true);
+		});
+	};
 	// Project configuration.
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
@@ -23,7 +47,7 @@ module.exports = function(grunt) {
 					seperator:";\n",
 					footer : '})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/all.js','src/utils.js','src/worker.single.js','src/worker.general.js','src/worker.multiuse.js','src/fakeWorkers.js','src/worker.object.js','src/queue.js','src/worker.reducer.js','src/mapreduce.incremental.js','src/mapreduce.nonincremental.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/all.js','src/utils.js','src/temp/single.js','src/temp/general.js','src/worker.multiuse.js','src/fakeWorkers.js','src/temp/object.js','src/queue.js','src/temp/reducer.js','src/mapreduce.incremental.js','src/mapreduce.nonincremental.js','src/wrapup.js']}
 			}
 		},mocha_phantomjs: {
 		all: {
@@ -155,13 +179,13 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-mocha-phantomjs');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-saucelabs');
-	
+	grunt.registerTask('template',templateThings);
 	grunt.registerTask('sauce',['server','saucelabs-mocha:legacy','saucelabs-mocha:shim','saucelabs-mocha:big']);
 	grunt.registerTask('server',['connect']);
 	grunt.registerTask('browser',['concat:browser','uglify:browser']);
 	grunt.registerTask('lint',['jshint:afterconcat']);
 	grunt.registerTask('test', ['connect', 'mocha_phantomjs']);
-	grunt.registerTask('default', ['browser','lint','sauce']);
+	grunt.registerTask('default', ['template','browser','lint','sauce']);
 	grunt.registerTask('c9', ['browser','lint','test']);
 
 };
