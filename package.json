@@ -1,6 +1,6 @@
 {
   "name": "communist",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Multi proccessing with workers in the browser.",
   "keywords": [
     "workers",
@@ -11,12 +11,10 @@
   "bugs": {
     "url": "https://github.com/calvinmetcalf/communist/issues"
   },
-  "repository": [
-    {
-      "type": "git",
-      "url": "https://github.com/calvinmetcalf/communist.git"
-    }
-  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/calvinmetcalf/communist.git"
+  },
   "scripts": {
     "test": "grunt"
   },
@@ -31,11 +29,8 @@
     "grunt-mocha-phantomjs": "~0.2.7",
     "grunt-contrib-connect": "~0.3.0",
     "grunt-contrib-jshint": "~0.5.4",
-    "grunt-saucelabs": "~4.0.4"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/calvinmetcalf/communist.git"
+    "grunt-saucelabs": "~4.0.4",
+    "async": "~0.2.9"
   },
   "directories": {
     "test": "test"
