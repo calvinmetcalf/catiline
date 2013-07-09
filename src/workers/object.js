@@ -24,7 +24,7 @@ function object(obj){
 		var out = function(data, transfer){
 			var i = promises.length;
 			promises[i] = c.deferred();
-			!c._noTransferable?worker.postMessage([i,key,data],transfer):worker.postMessage([i,key,data]);
+			!c._noTransferable?worker.postMessage([['promise',i],key,data],transfer):worker.postMessage([['promise',i],key,data]);
 			return promises[i].promise;
 		};
 		return out;
@@ -42,8 +42,10 @@ function object(obj){
 	
 	var worker = makeWorker($$fObj$$);
 	worker.onmessage= function(e){
-			promises[e.data[0]].resolve(e.data[1]);
-			promises[e.data[0]]=0;
+		if(e.data[0]==='promise'){
+			promises[e.data[0][1]].resolve(e.data[1]);
+			promises[e.data[0][1]]=0;
+		}
 	};
 	worker.onerror=rejectPromises;
 	w._close = function(){
