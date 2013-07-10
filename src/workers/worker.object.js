@@ -1,6 +1,7 @@
 var _db = $$fObj$$;
 var listeners = {};
 _db.on = function (eventName, func, scope) {
+	scope = scope || _db;
 	if (!(eventName in listeners)) {
 		listeners[eventName] = [];
 	}

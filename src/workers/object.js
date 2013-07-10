@@ -54,8 +54,13 @@ function object(obj){
 			}
 		});
 	};
+	
 	if(!("initialize" in obj)){
-		obj.initialize=function(){};
+		if('init' in obj){
+			obj.initialize=obj.init;
+		}else{
+			obj.initialize=function(){};
+		}
 	}
 	var fObj="{";
 	var keyFunc=function(key){
