@@ -5,6 +5,12 @@ function object(obj){
 	var listeners = {};
 	var w = new Communist();
 	w.on=function(eventName,func,scope){
+		scope = scope || w;
+		if(eventName.indexOf(' ')>0){
+			return eventName.split(' ').map(function(v){
+				return w.on(v,func,scope);
+			},this);
+		}
 		if(!(eventName in listeners)){
 			listeners[eventName]=[];
 		}
@@ -24,6 +30,11 @@ function object(obj){
 		!c._noTransferable?worker.postMessage([[eventName],data],transfer):worker.postMessage([[eventName],data]);
 	};
 	w.off = function (eventName, func) {
+		if(eventName.indexOf(' ')>0){
+			return eventName.split(' ').map(function(v){
+				return w.off(v,func);
+			});
+		}
 		if (!(eventName in listeners)) {
 			return;
 		}
