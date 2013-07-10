@@ -186,7 +186,8 @@ module.exports = function(grunt) {
 	grunt.registerTask('lint',['jshint:afterconcat']);
 	grunt.registerTask('testing', ['connect', 'mocha_phantomjs']);
 	grunt.registerTask('test', ['lint','sauce']);
-	grunt.registerTask('default', ['template','browser','test']);
-	grunt.registerTask('c9', ['template','browser','lint','testing']);
+	grunt.registerTask('build', ['template','browser']);
+	grunt.registerTask('default', ['build','test']);
+	grunt.registerTask('c9', ['build','lint','testing']);
 
 };
