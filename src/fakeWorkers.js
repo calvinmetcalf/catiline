@@ -16,8 +16,8 @@ function fakeObject(obj){
 		obj.initialize=function(){};
 	}
 	var keyFunc=function(key){
-		var result;
-		var out = function(data){
+		return function(data){
+			var result;
 			var i = promises.length;
 			promises[i] = c.deferred();
 			var callback = function(data){
@@ -33,8 +33,7 @@ function fakeObject(obj){
 			}
 			return promises[i].promise;
 		};
-		return out;
-		};
+	};
 	for(var key in obj){
 		w[key]=keyFunc(key);
 	}
