@@ -1,4 +1,4 @@
-/*! communist 2013-07-08*/
+/*! communist 2013-07-10*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -347,8 +347,8 @@ function fakeObject(obj){
 		obj.initialize=function(){};
 	}
 	var keyFunc=function(key){
-		var result;
-		var out = function(data){
+		return function(data){
+			var result;
 			var i = promises.length;
 			promises[i] = c.deferred();
 			var callback = function(data){
@@ -364,8 +364,7 @@ function fakeObject(obj){
 			}
 			return promises[i].promise;
 		};
-		return out;
-		};
+	};
 	for(var key in obj){
 		w[key]=keyFunc(key);
 	}
