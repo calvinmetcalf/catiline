@@ -410,7 +410,7 @@ function fakeObject(obj){
 					callback(result);
 				}
 			} catch (e){
-				promises[i].reject(e);
+				promises[i].reject({preventDefault:function(){},messege:e});
 			}
 			return promises[i].promise;
 		};
