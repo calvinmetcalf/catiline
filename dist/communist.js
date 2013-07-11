@@ -1,4 +1,4 @@
-/*! communist 2013-07-10*/
+/*! communist 1.7.0 2013-07-11*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -332,6 +332,8 @@ function multiUse(fun){
 function fakeObject(obj){
 	var w = new Communist();
 	var promises = [];
+	var wlisteners = {};
+	var olisteners={};
 	var rejectPromises = function(msg){
 		if(typeof msg!=="string" && msg.preventDefault){
 			msg.preventDefault();
@@ -344,7 +346,11 @@ function fakeObject(obj){
 		});
 	};
 	if(!("initialize" in obj)){
-		obj.initialize=function(){};
+		if('init' in obj){
+			obj.initialize=obj.init;
+		}else{
+			obj.initialize=function(){};
+		}
 	}
 	var keyFunc=function(key){
 		return function(data){
@@ -355,12 +361,12 @@ function fakeObject(obj){
 				promises[i].resolve(data);
 			};
 			try{
-				result = obj[key](data,callback);
+				result = obj[key].call(obj,data,callback);
 				if(typeof result !== "undefined"){
 					callback(result);
 				}
 			} catch (e){
-				promises[i].reject(e);
+				promises[i].reject({preventDefault:function(){},messege:e});
 			}
 			return promises[i].promise;
 		};
@@ -368,13 +374,117 @@ function fakeObject(obj){
 	for(var key in obj){
 		w[key]=keyFunc(key);
 	}
+	w.on=function(eventName,func,scope){
+		scope = scope || w;
+		if(eventName.indexOf(' ')>0){
+			eventName.split(' ').map(function(v){
+				return w.on(v,func,scope);
+			},this);
+			return w;
+		}
+		if(!(eventName in wlisteners)){
+			wlisteners[eventName]=[];
+		}
+		wlisteners[eventName].push(function(a){
+			func.call(scope,a);
+		});
+	};
+	w.fire=function(eventName,data){
+		if(!(eventName in olisteners)){
+			return w;
+		}
+		olisteners[eventName].forEach(function(v){
+			v(data);
+		});
+		return w;
+	};
+	w.off = function (eventName, func) {
+		if(eventName.indexOf(' ')>0){
+			eventName.split(' ').map(function(v){
+				return w.off(v,func);
+			});
+			return w;
+		}
+		if (!(eventName in wlisteners)) {
+			return w;
+		}
+		else if (!func) {
+			delete wlisteners[eventName];
+		}
+		else {
+			if (wlisteners[eventName].indexOf(func) > -1) {
+				if (wlisteners[eventName].length > 1) {
+					delete wlisteners[eventName];
+				}
+				else {
+					wlisteners[eventName].splice(wlisteners[eventName].indexOf(func), 1);
+				}
+			}
+		}
+		return w;
+	};
+	obj.on=function(eventName,func,scope){
+		scope = scope || obj;
+		if(eventName.indexOf(' ')>0){
+			eventName.split(' ').map(function(v){
+				return obj.on(v,func,scope);
+			},this);
+			return obj;
+		}
+		if(!(eventName in olisteners)){
+			olisteners[eventName]=[];
+		}
+		olisteners[eventName].push(function(a){
+			func.call(scope,a);
+		});
+		return obj;
+	};
+	obj.fire=function(eventName,data){
+		if(!(eventName in wlisteners)){
+			return obj;
+		}
+		wlisteners[eventName].forEach(function(v){
+			v(data);
+		});
+		return obj;
+	};
+	obj.off = function (eventName, func) {
+		if(eventName.indexOf(' ')>0){
+			eventName.split(' ').map(function(v){
+				return obj.off(v,func);
+			});
+			return obj;
+		}
+		if (!(eventName in olisteners)) {
+			return obj;
+		}
+		else if (!func) {
+			delete olisteners[eventName];
+		}
+		else {
+			if (olisteners[eventName].indexOf(func) > -1) {
+				if (olisteners[eventName].length > 1) {
+					delete olisteners[eventName];
+				}
+				else {
+					olisteners[eventName].splice(olisteners[eventName].indexOf(func), 1);
+				}
+			}
+		}
+		return obj;
+	};
 	w._close = function(){
+		olisteners={};
+		wlisteners={};
+		promises.forEach(function(a){
+			a.reject("closed");
+		});
 		return c.resolve();
 	};
 	if(!('close' in w)){
 		w.close=w._close;
 	}
-w.initialize();
+	w.initialize();
 	return w;
 }
 
@@ -413,7 +523,62 @@ function object(obj){
 	if(typeof Worker === 'undefined'){
 		return fakeObject(obj);
 	}
+	var listeners = {};
 	var w = new Communist();
+	w.on=function(eventName,func,scope){
+		scope = scope || w;
+		if(eventName.indexOf(' ')>0){
+			eventName.split(' ').map(function(v){
+				return w.on(v,func,scope);
+			},this);
+			return w;
+		}
+		if(!(eventName in listeners)){
+			listeners[eventName]=[];
+		}
+		listeners[eventName].push(function(a){
+			func.call(scope,a);
+		});
+		return w;
+	};
+	var _fire=function(eventName,data){
+		if(!(eventName in listeners)){
+			return w;
+		}
+		listeners[eventName].forEach(function(v){
+			v(data);
+		});
+		return w;
+	};
+	w.fire = function(eventName,data,transfer){
+		!c._noTransferable?worker.postMessage([[eventName],data],transfer):worker.postMessage([[eventName],data]);
+		return w;
+	};
+	w.off = function (eventName, func) {
+		if(eventName.indexOf(' ')>0){
+			eventName.split(' ').map(function(v){
+				return w.off(v,func);
+			});
+			return w;
+		}
+		if (!(eventName in listeners)) {
+			return w;
+		}
+		else if (!func) {
+			delete listeners[eventName];
+		}
+		else {
+			if (listeners[eventName].indexOf(func) > -1) {
+				if (listeners[eventName].length > 1) {
+					delete listeners[eventName];
+				}
+				else {
+					listeners[eventName].splice(listeners[eventName].indexOf(func), 1);
+				}
+			}
+		}
+		return w;
+	};
 	var i = 0;
 	var promises = [];
 	var rejectPromises = function(msg){
@@ -427,15 +592,20 @@ function object(obj){
 			}
 		});
 	};
+	
 	if(!("initialize" in obj)){
-		obj.initialize=function(){};
+		if('init' in obj){
+			obj.initialize=obj.init;
+		}else{
+			obj.initialize=function(){};
+		}
 	}
 	var fObj="{";
 	var keyFunc=function(key){
 		var out = function(data, transfer){
 			var i = promises.length;
 			promises[i] = c.deferred();
-			!c._noTransferable?worker.postMessage([i,key,data],transfer):worker.postMessage([i,key,data]);
+			!c._noTransferable?worker.postMessage([['com.communistjs',i],key,data],transfer):worker.postMessage([['com.communistjs',i],key,data]);
 			return promises[i].promise;
 		};
 		return out;
@@ -450,11 +620,15 @@ function object(obj){
 		w[key]=keyFunc(key);
 	}
 	fObj=fObj+"}";
-	
-	var worker = makeWorker(['var _db=',fObj,';self.onmessage=function(e){	var cb=function(data,transfer){		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);	};	var result = _db[e.data[1]](e.data[2],cb);	if(typeof result !== "undefined"){		cb(result);	}};_db.initialize();']);
+	var worker = makeWorker(['var _db = ',fObj,';var listeners = {};_db.on = function (eventName, func, scope) {	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.on(v,func,scope);		},_db);	}	scope = scope || _db;	if (!(eventName in listeners)) {		listeners[eventName] = [];	}	listeners[eventName].push(function (a) {		func.call(scope, a);	});};var _fire = function (eventName, data) {	if (!(eventName in listeners)) {		return;	}	listeners[eventName].forEach(function (v) {		v(data);	});};_db.fire = function (eventName, data, transfer) {	!self._noTransferable ? self.postMessage([		[eventName], data], transfer) : self.postMessage([		[eventName], data]);};_db.off=function(eventName,func){	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.off(v,func);		});	}	if(!(eventName in listeners)){		return;	}else if(!func){		delete listeners[eventName];	}else{		if(listeners[eventName].indexOf(func)>-1){			if(listeners[eventName].length>1){				delete listeners[eventName];			}else{				listeners[eventName].splice(listeners[eventName].indexOf(func),1);			}		}	}};self.onmessage=function(e){	_fire("messege",e.data[1]);	if(e.data[0][0]==="com.communistjs"){		return regMsg(e);	}else{		_fire(e.data[0][0],e.data[1]);	}};var regMsg = function(e){	var cb=function(data,transfer){		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);	};	var result = _db[e.data[1]](e.data[2],cb);	if(typeof result !== "undefined"){		cb(result);	}};_db.initialize();']);
 	worker.onmessage= function(e){
-			promises[e.data[0]].resolve(e.data[1]);
-			promises[e.data[0]]=0;
+		_fire('message',e.data[1]);
+		if(e.data[0][0]==='com.communistjs'){
+			promises[e.data[0][1]].resolve(e.data[1]);
+			promises[e.data[0][1]]=0;
+		}else{
+			_fire(e.data[0][0],e.data[1]);
+		}
 	};
 	worker.onerror=rejectPromises;
 	w._close = function(){
@@ -824,8 +998,11 @@ c.ajax = function(url,after,notjson){
 };
 function initBrowser(c){
 	var origCW = global.cw;
-	c.noConflict=function(){
+	c.noConflict=function(newName){
 		global.cw = origCW;
+		if(newName){
+			global[newName]=c;
+		}
 	};
 	global.communist = c;
 	global.cw = c;
@@ -836,4 +1013,5 @@ if(typeof module === "undefined" ){
 } else {
 	module.exports=c;
 }
+c.version = "1.7.0";
 })(this);}

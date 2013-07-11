@@ -24,22 +24,22 @@ function product(a){
 	return a[0]*a[1];
 }
 
-//communist.URL=true;
-describe('communist()', function () {
+//cw.URL=true;
+describe('cw()', function () {
 	describe('Basic', function () {
 		it('should work when given a function and data directly', function (done) {
-			communist(square, 9).then(function (a) {
+			cw(square, 9).then(function (a) {
 				assert.equal(a,81,'are equel');
 			}).then(done, done);
 		});
 		it('should work when given a function and data async', function (done) {
-			communist(aSquare, 9).then(function (a) {
+			cw(aSquare, 9).then(function (a) {
 				assert.equal(a,81,'are equel');
 			}).then(done, done);
 		});
-		it('should allow chaining of data functions, with callback passed to communist()', function (done) {
+		it('should allow chaining of data functions, with callback passed to cw()', function (done) {
 			var count = 0;
-			var comrade = communist(square, function (a) {
+			var comrade = cw(square, function (a) {
 				count++; assert.equal(a,81,'are equel');
 				if (count === 2) {
 					done();
@@ -47,9 +47,9 @@ describe('communist()', function () {
 			});
 			comrade.data(9).data(9);
 		});
-		it('should allow chaining of data functions, with callback passed to communist() async', function (done) {
+		it('should allow chaining of data functions, with callback passed to cw() async', function (done) {
 			var count = 0;
-			var comrade = communist(aSquare, function (a){
+			var comrade = cw(aSquare, function (a){
 				count++; assert.equal(a,81,'are equel');
 				if (count === 2) {
 					done();
@@ -61,11 +61,12 @@ describe('communist()', function () {
 	describe('errors', function () {
 		it('should gracefully handle an error', function (done) {
 			var count = 0;
-			var comrade = communist(square,function(a){
+			var comrade = cw(square,function(a){
 				assert.equal(a,100,'are equel');
 				afterEach(a);
 			},function(a){
-				assert.equal(a,"Ermahgerd",'should be an error');
+				a.preventDefault();
+				assert.include(a.messege,"Ermahgerd",'should be an error');
 				afterEach(a);
 			});
 			function afterEach(a){
@@ -81,11 +82,11 @@ describe('communist()', function () {
 				comrade.close();
 				done();
 			}
-			var comrade = communist(square);
-			comrade.data("Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){assert.include(a,"Ermahgerd",'should be an error');}).then(wrapUp, wrapUp);
+			var comrade = cw(square);
+			comrade.data("Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){assert.include(a.message,"Ermahgerd",'should be an error');}).then(wrapUp, wrapUp);
 		});
 		it('should gracefully handle an error as a oneoff', function (done) {
-			communist(square,"Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){assert.include(a,"Ermahgerd",'should be an error');}).then(done, done);
+			cw(square,"Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){assert.include(a.message,"Ermahgerd",'should be an error');}).then(done, done);
 		});
 	});
 	describe('Worker reuse', function () {
@@ -95,7 +96,7 @@ describe('communist()', function () {
 				comrade.close();
 				done();
 			}
-			var comrade = communist(square)
+			var comrade = cw(square)
 			comrade.data(9).then(function (a) { assert.equal(a,81,'are equel'); 
 			comrade.data(62).then(function (a) {assert.equal(a,3844,'are equel'); }).then(wrapUp, wrapUp);
 			});
@@ -105,34 +106,34 @@ describe('communist()', function () {
 				comrade.close();
 				done();
 			}
-			var comrade = communist(aSquare)
+			var comrade = cw(aSquare)
 			comrade.data(9).then(function (a) {  assert.equal(a,81,'are equel'); 
 			comrade.data(62).then(function (a) { assert.equal(a,3844,'are equel'); }).then(wrapUp, wrapUp);
 			});
 		});
 
-		it('should work with callback passed to communist()', function (done) {
+		it('should work with callback passed to cw()', function (done) {
 			var count = 0;
-			var comrade = communist(square, function (a) { count++; assert.equal(a,81,'are equel'); if (count === 2) { comrade.close().then(done,done); } });
+			var comrade = cw(square, function (a) { count++; assert.equal(a,81,'are equel'); if (count === 2) { comrade.close();done(); } });
 			comrade.data(9);
 			comrade.data(9);
 		});
-			it('should work with callback passed to communist() async', function (done) {
+			it('should work with callback passed to cw() async', function (done) {
 			var count = 0;
-			var comrade = communist(aSquare, function (a) { count++;assert.equal(a,81,'are equel'); if (count === 2) {comrade.close().then(done,done); } });
+			var comrade = cw(aSquare, function (a) { count++;assert.equal(a,81,'are equel'); if (count === 2) {comrade.close();done(); } });
 			comrade.data(9);
 			comrade.data(9);
 		});
 	});
 	describe('MapReduce', function () {
 		it('should work', function (done) {
-			var comrade = communist(1, true);
+			var comrade = cw(1, true);
 			comrade.data([1,2,3]);
 			comrade.map(square);
 			comrade.reduce(sum).then(function (a) { assert.equal(a,14); }).then(done, done);
 		});
 		it('should work with chaining syntax', function (done) {
-		    communist(1, true)
+		    cw(1, true)
 		        .data([1,2,3])
 		        .map(aSquare)
 		        .reduce(sum)
@@ -141,14 +142,14 @@ describe('communist()', function () {
 	});
 	describe('MapReduce incremental', function () {
 		it('should work', function (done) {
-			var comrade = communist(1);
+			var comrade = cw(1);
 			comrade.data([1,2,3]);
 			comrade.map(square);
 			comrade.reduce(sum);
 			comrade.close().then(function (a) { assert.equal(a,14); }).then(done, done);
 		});
 		it('should work if we add more data', function (done) {
-			var comrade = communist(1);
+			var comrade = cw(1);
 			comrade.data([1,2,3]);
 			comrade.map(square);
 			comrade.reduce(sum);
@@ -157,14 +158,14 @@ describe('communist()', function () {
 			comrade.close().then(function (a) { assert.equal(a,91); }).then(done, done);
 		});
 		it('should work with chaining syntax', function (done) {
-		    communist(1)
+		    cw(1)
 		        .data([1,2,3])
 		        .map(square)
 		        .reduce(sum)
 		        .close().then(function (a) { assert.equal(a,14); }).then(done, done);
 		});
 		it('should work with chaining syntax and more data', function (done) {
-		    communist(1)
+		    cw(1)
 		        .data([1,2,3])
 		        .map(square)
 		        .data([4,5,6])
@@ -172,7 +173,7 @@ describe('communist()', function () {
 		        .close().then(function (a) { assert.equal(a,91); }).then(done, done);
 		});
 		it('should work with chaining syntax, more data, and more workers', function (done) {
-		    communist(3)
+		    cw(3)
 		        .data([1,2,3])
 		        .map(square)
 		        .data([4,5,6])
@@ -183,7 +184,7 @@ describe('communist()', function () {
 
 	
 	describe('Objects', function () {
-		var comrade = communist({product:product,aSquare:aSquare,square:square});
+		var comrade = cw({product:product,aSquare:aSquare,square:square});
 		it("should be able create an object worker",function (done){
 			comrade.aSquare(3).then(function(a){
 				assert.equal(a,9,'are equal');
@@ -208,12 +209,12 @@ describe('communist()', function () {
 			function wrapUp(){
 				comrade.close().then(done,done);
 			}
-			var comrade = communist({initialize:function(){this.a=7},test:function(){return this.a}});
+			var comrade = cw({initialize:function(){this.a=7},test:function(){return this.a}});
 			comrade.test().then(function(a){assert.equal(a,7,'are equal');}).then(wrapUp,wrapUp);
 		});
 	});
 	describe('Queues', function () {
-		var comrade = communist({product:product,aSquare:aSquare,square:square},2);
+		var comrade = cw({product:product,aSquare:aSquare,square:square},2);
 		it("should be able create an object worker",function (done){
 			comrade.aSquare(3).then(function(a){
 				assert.equal(a,9,'are equal');
@@ -270,8 +271,18 @@ describe('communist()', function () {
 			function wrapUp(){
 				comrade.close().then(done,done);
 			}
-			var comrade = communist({initialize:function(){this.a=7},test:function(){return this.a}});
+			var comrade = cw({initialize:function(){this.a=7},test:function(){return this.a}});
 			comrade.test().then(function(a){assert.equal(a,7,'equel')}).then(wrapUp,wrapUp);
+		});
+	});
+	describe('no conflict', function () {
+		it('no conflict should work',function(){
+			cw.noConflict();
+			assert.equal(cw,"cw");
+		});
+		it('should be able to put it back',function(){
+			communist.noConflict('cw');
+			assert.equal(cw,communist);
 		});
 	});
 	describe('Dumb Queues', function () {
@@ -335,5 +346,54 @@ describe('communist()', function () {
 			var comrade = communist({initialize:function(){this.a=7},test:function(){return this.a}},'dumb');
 			comrade.test().then(function(a){assert.equal(a,7,'equel')}).then(wrapUp,wrapUp);
 		});
+	});
+	describe('Basic Pub-Sub', function () {
+		var comrade = communist({
+			init:function(){
+				function double (a){
+					this.off('double');
+					this.fire('doubled',a<<1);
+				}
+				this.on('multi',function(){
+					this.fire('d1');
+					this.fire('d2');
+				});
+				this.on('quad',function(b){
+					this.fire('q',b<<2);
+				});
+				this.on('double',double);
+			}
+		});
+		it('should work',function(done){
+			comrade.on('doubled',function(a){
+				assert.equal(a, 42);
+				done();
+			});
+			comrade.fire('double',21);
+		});
+		it('should work double',function(done){
+			var count = 0;
+			comrade.on('d1 d2',function(){
+				count++;
+				if(count === 2){
+					comrade.off('d1 d2');
+				}
+				if(count > 1){
+					done();
+					comrade.fire('multi');
+				}
+			});
+			comrade.fire('multi');
+		});
+		it('and put it out',function(done){
+			comrade.on('q',function(a){
+				assert.equal(a,8);
+				done();
+				comrade.close();
+			});
+			comrade.fire('double',21);
+			comrade.fire('quad',2);
+		});
+		
 	});
 });

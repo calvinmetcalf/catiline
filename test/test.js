@@ -371,6 +371,10 @@ describe('cw()', function () {
 			cw.noConflict();
 			cw.should.equal("cw");
 		});
+		it('should be able to put it back',function(){
+			communist.noConflict('cw');
+			cw.should.equal(communist);
+		});
 	});
 	describe('dumb Queues', function () {
 		var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
@@ -398,8 +402,6 @@ describe('cw()', function () {
 			function wrapUp(){
 				comrade.close().then(function(){done()},function(){done()});
 			}
-			var num=4;
-			var tot=0;
 			var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
 			comrade.batch
 				.square([2,4,6,8])
@@ -407,13 +409,11 @@ describe('cw()', function () {
 					a.reduce(function(b,c){return b+c;}).should.equal(120);
 				}
 			).then(wrapUp,wrapUp);
-		})
+		});
 	it("should work if batch has an error",function (done){
 		function wrapUp(){
 				comrade.close().then(function(){done()},function(){done()});
 			}
-			var num=4;
-			var tot=0;
 			var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
 			comrade.batch
 				.square([2,4,6,8,'explode'])
@@ -449,5 +449,54 @@ describe('cw()', function () {
 			var comrade=communist({initialize:function(){this.a=7},test:function(){return this.a}});
 			comrade.test().then(function(a){a.should.equal(7)},"dumb").then(wrapUp,wrapUp);
 		});
+	});
+	describe('Basic Pub-Sub', function () {
+		var comrade = cw({
+			init:function(){
+				function double (a){
+					this.fire('doubled',a<<1);
+					this.off('double');
+				}
+				this.on('multi',function(){
+					this.fire('d1');
+					this.fire('d2');
+				});
+				this.on('quad',function(b){
+					this.fire('q',b<<2);
+				});
+				this.on('double',double);
+			}
+		});
+		it('should work',function(done){
+			comrade.on('doubled',function(a){
+				a.should.eq(42);
+				done();
+			});
+			comrade.fire('double',21);
+		});
+		it('should work double',function(done){
+			var count = 0;
+			comrade.on('d1 d2',function(){
+				count++;
+				if(count === 2){
+					comrade.off('d1 d2');
+				}
+				if(count > 1){
+					done();
+					comrade.fire('multi');
+				}
+			});
+			comrade.fire('multi');
+		});
+		it('and put it out',function(done){
+			comrade.on('q',function(a){
+				a.should.eq(8);
+				comrade.close();
+				done();
+			});
+			comrade.fire('double',21);
+			comrade.fire('quad',2);
+		});
+		
 	});
 });

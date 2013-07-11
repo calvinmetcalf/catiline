@@ -40,8 +40,11 @@ c.ajax = function(url,after,notjson){
 };
 function initBrowser(c){
 	var origCW = global.cw;
-	c.noConflict=function(){
+	c.noConflict=function(newName){
 		global.cw = origCW;
+		if(newName){
+			global[newName]=c;
+		}
 	};
 	global.communist = c;
 	global.cw = c;

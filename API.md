@@ -21,10 +21,10 @@ worker.close()//closes the worker, can be overwritten, worker._close() can't be.
 Give it an object of functions, and you can call them by name, your functions can either return a value or call a callback function which is passed as the second argument.
 Call the function with the data as the first argument and a transfer list for the second.
 It takes two arguments, data and an optional list of any arrayBuffers to transfer ownership of.
-If you want to do things once when the worker is created pass a function called `initialize` this gets called once with no arguments.  All workers are called in the same context so
+If you want to do things once when the worker is created pass a function called `initialize` or `init` this gets called once with no arguments.  All workers are called in the same context so
 `this` can be used to store things, functions can also use `this` to call each other. 
 
-###Want it even simpler?
+If you only have one function you’re going to be using, you can omit the object and give it a single function.  This is a shortcut from `cw(yourfunc)`to`cw({data:yourfunc})`.
 
 ```javascript
 var worker = cw(function(a,callback){
@@ -36,7 +36,35 @@ worker.data([2,5]).then(function(a){
 worker.close();//close it up
 ```
 
-If you just pass a function then you can call it with data.   Data only takes the same 2 arguments as the callback data to transfer and the optional transfer list. These functions are always called with the same 2 arguments, data and callback.
+For slightly more complex communication patterns you can fire events between the the two contexts with 'on', 'fire', and 'off' events.
+
+```javascript
+var worker = cw(function(text){
+	var target = 4;
+	var words = text.split(' ');
+	words.forEach(function(word){
+		if(word.length === target){
+			this.fire('match',word);
+		};
+	},this);		
+});
+
+worker.on('match',function(a){
+	console.log(a);
+});
+
+worker.data('Give it an object of functions, and you can call them by name, your functions can either return a value or call a callback function which is passed as the second argument.')
+/*prints
+Give
+call
+them
+your
+call
+*/
+```
+
+The event system was inspired by [Leaflet's](http://leafletjs.com/reference.html#events) but with a similar set of methods. Multiple space separated words can
+but sent to the 'on' and 'off' methods and `off` accepts a function if you only want to delete one of many functions, `on` takes a scope argument in its 3rd spot.
 
 ###Even simpler?
 ```javascript
@@ -47,7 +75,8 @@ cw(function(a,callback){
 })//prints 7
 ```
 
-pass the data as the second argument and it crunches it returns the data and then closes up for you (don't use this if you are every doing more then one thing with workers).
+pass the data as the second argument and it crunches it returns the data and then closes up for you
+(don't use this if you are every doing more then one thing with workers).
 
 ###Importing Scripts
 If you create a worker and the function imports a script like
@@ -68,7 +97,8 @@ function(base,cb){
 }
 ```
 
-In other words it will be hoisted out of the function so it will only be called once, and it will rewrite all the URLs to be absolute. **Note:** currently it will only do this for the first `importScripts()` it finds.
+In other words it will be hoisted out of the function so it will only be called once, and it will rewrite all the URLs to be absolute.
+**Note:** currently it will only do this for the first `importScripts()` it finds, and does not work in IE9.
 
 ###Queues
 

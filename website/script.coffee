@@ -41,4 +41,4 @@ class Routes extends Backbone.Router
 			view.cur = 'README'
 		view.render()
 router = new Routes()
-console.log Backbone.history.start()
+Backbone.history.start()
