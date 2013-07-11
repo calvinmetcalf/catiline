@@ -1,18 +1,14 @@
 marked.setOptions 
 	color: true
-readmeSetUp=->
-	$('#api').on 'click',(e)->
-		
-		false
 
 class View extends Backbone.View
 	el:$ '#cont'
 	cur:'README'
 	events:
-		"click #api":'aClick'
+		"click .navLink":'aClick'
 	aClick:(e)->
 		e.preventDefault()
-		router.navigate 'API', {trigger:true}
+		router.navigate e.target.id, {trigger:true}
 		false
 	render:->
 		@$el.html "<p class='text-center'><i class='icon-spinner icon-spin icon-4x'></i>loading...</p>"
@@ -35,8 +31,8 @@ class Routes extends Backbone.Router
 		":page":'nav'
 		"":'nav'
 	nav:(page)->
-		if page is 'API'
-			view.cur = 'API'
+		if page
+			view.cur = page
 		else
 			view.cur = 'README'
 		view.render()
