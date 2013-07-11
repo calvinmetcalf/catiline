@@ -1,6 +1,7 @@
 function fakeObject(obj){
 	var w = new Communist();
 	var promises = [];
+	var listeners = {};
 	var rejectPromises = function(msg){
 		if(typeof msg!=="string" && msg.preventDefault){
 			msg.preventDefault();
@@ -13,8 +14,57 @@ function fakeObject(obj){
 		});
 	};
 	if(!("initialize" in obj)){
-		obj.initialize=function(){};
+		if('init' in obj){
+			obj.initialize=obj.init;
+		}else{
+			obj.initialize=function(){};
+		}
 	}
+	w.on=function(eventName,func,scope){
+		scope = scope || w;
+		if(eventName.indexOf(' ')>0){
+			return eventName.split(' ').map(function(v){
+				return w.on(v,func,scope);
+			},this);
+		}
+		if(!(eventName in listeners)){
+			listeners[eventName]=[];
+		}
+		listeners[eventName].push(function(a){
+			func.call(scope,a);
+		});
+	};
+	w.fire=function(eventName,data){
+		if(!(eventName in listeners)){
+			return;
+		}
+		listeners[eventName].forEach(function(v){
+			v(data);
+		});
+	};
+	w.off = function (eventName, func) {
+		if(eventName.indexOf(' ')>0){
+			return eventName.split(' ').map(function(v){
+				return w.off(v,func);
+			});
+		}
+		if (!(eventName in listeners)) {
+			return;
+		}
+		else if (!func) {
+			delete listeners[eventName];
+		}
+		else {
+			if (listeners[eventName].indexOf(func) > -1) {
+				if (listeners[eventName].length > 1) {
+					delete listeners[eventName];
+				}
+				else {
+					listeners[eventName].splice(listeners[eventName].indexOf(func), 1);
+				}
+			}
+		}
+	};
 	var keyFunc=function(key){
 		return function(data){
 			var result;
@@ -24,7 +74,7 @@ function fakeObject(obj){
 				promises[i].resolve(data);
 			};
 			try{
-				result = obj[key](data,callback);
+				result = obj[key].call(w,data,callback);
 				if(typeof result !== "undefined"){
 					callback(result);
 				}
