@@ -99,7 +99,6 @@ function object(obj){
 		w[key]=keyFunc(key);
 	}
 	fObj=fObj+"}";
-	
 	var worker = makeWorker($$fObj$$);
 	worker.onmessage= function(e){
 		_fire('message',e.data[1]);
