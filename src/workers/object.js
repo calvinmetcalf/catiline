@@ -102,6 +102,7 @@ function object(obj){
 	
 	var worker = makeWorker($$fObj$$);
 	worker.onmessage= function(e){
+		_fire('message',e.data[1]);
 		if(e.data[0][0]==='com.communistjs'){
 			promises[e.data[0][1]].resolve(e.data[1]);
 			promises[e.data[0][1]]=0;

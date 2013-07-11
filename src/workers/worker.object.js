@@ -48,6 +48,7 @@ _db.off=function(eventName,func){
 	}
 };
 self.onmessage=function(e){
+	_fire("messege",e.data[1]);
 	if(e.data[0][0]==="com.communistjs"){
 		return regMsg(e);
 	}else{
