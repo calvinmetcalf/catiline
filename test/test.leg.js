@@ -351,8 +351,8 @@ describe('cw()', function () {
 		var comrade = communist({
 			init:function(){
 				function double (a){
-					this.fire('doubled',a<<1);
 					this.off('double');
+					this.fire('doubled',a<<1);
 				}
 				this.on('multi',function(){
 					this.fire('d1');
@@ -388,8 +388,8 @@ describe('cw()', function () {
 		it('and put it out',function(done){
 			comrade.on('q',function(a){
 				assert.equal(a,8);
-				comrade.close();
 				done();
+				comrade.close();
 			});
 			comrade.fire('double',21);
 			comrade.fire('quad',2);
