@@ -336,4 +336,53 @@ describe('communist()', function () {
 			comrade.test().then(function(a){assert.equal(a,7,'equel')}).then(wrapUp,wrapUp);
 		});
 	});
+	describe('Basic Pub-Sub', function () {
+		var comrade = communist({
+			init:function(){
+				function double (a){
+					this.fire('doubled',a<<1);
+					this.off('double');
+				}
+				this.on('multi',function(){
+					this.fire('d1');
+					this.fire('d2');
+				});
+				this.on('quad',function(b){
+					this.fire('q',b<<2);
+				});
+				this.on('double',double);
+			}
+		});
+		it('should work',function(done){
+			comrade.on('doubled',function(a){
+				assert.equal(a, 42);
+				done();
+			});
+			comrade.fire('double',21);
+		});
+		it('should work double',function(done){
+			var count = 0;
+			comrade.on('d1 d2',function(){
+				count++;
+				if(count === 2){
+					comrade.off('d1 d2');
+				}
+				if(count > 1){
+					done();
+					comrade.fire('multi');
+				}
+			});
+			comrade.fire('multi');
+		});
+		it('and put it out',function(done){
+			comrade.on('q',function(a){
+				assert.equal(a,8);
+				done();
+				comrade.close();
+			});
+			comrade.fire('double',21);
+			comrade.fire('quad',2);
+		});
+		
+	});
 });
