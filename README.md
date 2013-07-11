@@ -4,7 +4,7 @@ How easy? `var worker = cw(myFunc)` creates a worker, send it data with `var res
 
 Want to use it? Grab the [development version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.js) or [production version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.min.js) from the dist folder. 
 
-For usage checkout the <a id='api' href='API.md'>API page</a>, read a [blog posts](http://cwmma.tumblr.com/post/54338607071/making-web-workers-with-communistjs) or browse a few demos:
+For usage checkout the <a class='navLink' id='API' href='API.md'>API page</a>, read a [blog posts](http://cwmma.tumblr.com/post/54338607071/making-web-workers-with-communistjs), see the <a class='navLink' id='CHANGELOG' href='CHANGELOG.md'>changelog</a> or browse a few demos:
 
 - [Parsing a dictionary](http://communistjs.com/website/dict/)
 - [Fractal Map](http://communistjs.com/website/leaflet-fractal/), (April Mozilla Dev Derby [Finalist](https://hacks.mozilla.org/2013/06/announcing-the-winners-of-the-april-2013-dev-derby/))
