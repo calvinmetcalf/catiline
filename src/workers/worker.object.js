@@ -1,8 +1,8 @@
 var _db = $$fObj$$;
 var listeners = {};
 _db.on = function (eventName, func, scope) {
-	if(eventName.indexOf(' ')>0){
-		return eventName.split(' ').map(function(v){
+	if(eventName.indexOf(" ")>0){
+		return eventName.split(" ").map(function(v){
 			return _db.on(v,func,scope);
 		},_db);
 	}
@@ -28,8 +28,8 @@ _db.fire = function (eventName, data, transfer) {
 		[eventName], data]);
 };
 _db.off=function(eventName,func){
-	if(eventName.indexOf(' ')>0){
-		return eventName.split(' ').map(function(v){
+	if(eventName.indexOf(" ")>0){
+		return eventName.split(" ").map(function(v){
 			return _db.off(v,func);
 		});
 	}
