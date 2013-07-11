@@ -163,6 +163,9 @@ module.exports = function(grunt) {
 						browserName: 'internet explorer',
 						platform: 'WIN7',
 						version: '9'
+					},{
+						browserName: 'chrome',
+						platform: 'linux'
 					}
 				],
 			urls:[
