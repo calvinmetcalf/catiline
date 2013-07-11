@@ -457,6 +457,10 @@ describe('cw()', function () {
 					this.fire('doubled',a<<1);
 					this.off('double');
 				}
+				this.on('multi',function(){
+					this.fire('d1');
+					this.fire('d2');
+				});
 				this.on('quad',function(b){
 					this.fire('q',b<<2);
 				});
@@ -469,6 +473,20 @@ describe('cw()', function () {
 				done();
 			});
 			comrade.fire('double',21);
+		});
+		it('should work double',function(done){
+			var count = 0;
+			comrade.on('d1 d2',function(){
+				count++;
+				if(count === 2){
+					comrade.off('d1 d2');
+				}
+				if(count > 1){
+					done();
+					comrade.fire('multi');
+				}
+			});
+			comrade.fire('multi');
 		});
 		it('and put it out',function(done){
 			comrade.on('q',function(a){
