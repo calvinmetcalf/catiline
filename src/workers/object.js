@@ -7,9 +7,10 @@ function object(obj){
 	w.on=function(eventName,func,scope){
 		scope = scope || w;
 		if(eventName.indexOf(' ')>0){
-			return eventName.split(' ').map(function(v){
+			eventName.split(' ').map(function(v){
 				return w.on(v,func,scope);
 			},this);
+			return w;
 		}
 		if(!(eventName in listeners)){
 			listeners[eventName]=[];
@@ -17,26 +18,30 @@ function object(obj){
 		listeners[eventName].push(function(a){
 			func.call(scope,a);
 		});
+		return w;
 	};
 	var _fire=function(eventName,data){
 		if(!(eventName in listeners)){
-			return;
+			return w;
 		}
 		listeners[eventName].forEach(function(v){
 			v(data);
 		});
+		return w;
 	};
 	w.fire = function(eventName,data,transfer){
 		!c._noTransferable?worker.postMessage([[eventName],data],transfer):worker.postMessage([[eventName],data]);
+		return w;
 	};
 	w.off = function (eventName, func) {
 		if(eventName.indexOf(' ')>0){
-			return eventName.split(' ').map(function(v){
+			eventName.split(' ').map(function(v){
 				return w.off(v,func);
 			});
+			return w;
 		}
 		if (!(eventName in listeners)) {
-			return;
+			return w;
 		}
 		else if (!func) {
 			delete listeners[eventName];
@@ -51,6 +56,7 @@ function object(obj){
 				}
 			}
 		}
+		return w;
 	};
 	var i = 0;
 	var promises = [];
