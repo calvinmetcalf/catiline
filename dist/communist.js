@@ -332,7 +332,8 @@ function multiUse(fun){
 function fakeObject(obj){
 	var w = new Communist();
 	var promises = [];
-	var listeners = {};
+	var wlisteners = {};
+	var olisteners={};
 	var rejectPromises = function(msg){
 		if(typeof msg!=="string" && msg.preventDefault){
 			msg.preventDefault();
@@ -351,51 +352,6 @@ function fakeObject(obj){
 			obj.initialize=function(){};
 		}
 	}
-	w.on=function(eventName,func,scope){
-		scope = scope || w;
-		if(eventName.indexOf(' ')>0){
-			return eventName.split(' ').map(function(v){
-				return w.on(v,func,scope);
-			},this);
-		}
-		if(!(eventName in listeners)){
-			listeners[eventName]=[];
-		}
-		listeners[eventName].push(function(a){
-			func.call(scope,a);
-		});
-	};
-	w.fire=function(eventName,data){
-		if(!(eventName in listeners)){
-			return;
-		}
-		listeners[eventName].forEach(function(v){
-			v(data);
-		});
-	};
-	w.off = function (eventName, func) {
-		if(eventName.indexOf(' ')>0){
-			return eventName.split(' ').map(function(v){
-				return w.off(v,func);
-			});
-		}
-		if (!(eventName in listeners)) {
-			return;
-		}
-		else if (!func) {
-			delete listeners[eventName];
-		}
-		else {
-			if (listeners[eventName].indexOf(func) > -1) {
-				if (listeners[eventName].length > 1) {
-					delete listeners[eventName];
-				}
-				else {
-					listeners[eventName].splice(listeners[eventName].indexOf(func), 1);
-				}
-			}
-		}
-	};
 	var keyFunc=function(key){
 		return function(data){
 			var result;
@@ -405,7 +361,7 @@ function fakeObject(obj){
 				promises[i].resolve(data);
 			};
 			try{
-				result = obj[key].call(w,data,callback);
+				result = obj[key].call(obj,data,callback);
 				if(typeof result !== "undefined"){
 					callback(result);
 				}
@@ -418,13 +374,117 @@ function fakeObject(obj){
 	for(var key in obj){
 		w[key]=keyFunc(key);
 	}
+	w.on=function(eventName,func,scope){
+		scope = scope || w;
+		if(eventName.indexOf(' ')>0){
+			eventName.split(' ').map(function(v){
+				return w.on(v,func,scope);
+			},this);
+			return w;
+		}
+		if(!(eventName in wlisteners)){
+			wlisteners[eventName]=[];
+		}
+		wlisteners[eventName].push(function(a){
+			func.call(scope,a);
+		});
+	};
+	w.fire=function(eventName,data){
+		if(!(eventName in olisteners)){
+			return w;
+		}
+		olisteners[eventName].forEach(function(v){
+			v(data);
+		});
+		return w;
+	};
+	w.off = function (eventName, func) {
+		if(eventName.indexOf(' ')>0){
+			eventName.split(' ').map(function(v){
+				return w.off(v,func);
+			});
+			return w;
+		}
+		if (!(eventName in wlisteners)) {
+			return w;
+		}
+		else if (!func) {
+			delete wlisteners[eventName];
+		}
+		else {
+			if (wlisteners[eventName].indexOf(func) > -1) {
+				if (wlisteners[eventName].length > 1) {
+					delete wlisteners[eventName];
+				}
+				else {
+					wlisteners[eventName].splice(wlisteners[eventName].indexOf(func), 1);
+				}
+			}
+		}
+		return w;
+	};
+	obj.on=function(eventName,func,scope){
+		scope = scope || obj;
+		if(eventName.indexOf(' ')>0){
+			eventName.split(' ').map(function(v){
+				return obj.on(v,func,scope);
+			},this);
+			return obj;
+		}
+		if(!(eventName in olisteners)){
+			olisteners[eventName]=[];
+		}
+		olisteners[eventName].push(function(a){
+			func.call(scope,a);
+		});
+		return obj;
+	};
+	obj.fire=function(eventName,data){
+		if(!(eventName in wlisteners)){
+			return obj;
+		}
+		wlisteners[eventName].forEach(function(v){
+			v(data);
+		});
+		return obj;
+	};
+	obj.off = function (eventName, func) {
+		if(eventName.indexOf(' ')>0){
+			eventName.split(' ').map(function(v){
+				return obj.off(v,func);
+			});
+			return obj;
+		}
+		if (!(eventName in olisteners)) {
+			return obj;
+		}
+		else if (!func) {
+			delete olisteners[eventName];
+		}
+		else {
+			if (olisteners[eventName].indexOf(func) > -1) {
+				if (olisteners[eventName].length > 1) {
+					delete olisteners[eventName];
+				}
+				else {
+					olisteners[eventName].splice(olisteners[eventName].indexOf(func), 1);
+				}
+			}
+		}
+		return obj;
+	};
 	w._close = function(){
+		olisteners={};
+		wlisteners={};
+		promises.forEach(function(a){
+			a.reject("closed");
+		});
 		return c.resolve();
 	};
 	if(!('close' in w)){
 		w.close=w._close;
 	}
-w.initialize();
+	w.initialize();
 	return w;
 }
 
@@ -468,9 +528,10 @@ function object(obj){
 	w.on=function(eventName,func,scope){
 		scope = scope || w;
 		if(eventName.indexOf(' ')>0){
-			return eventName.split(' ').map(function(v){
+			eventName.split(' ').map(function(v){
 				return w.on(v,func,scope);
 			},this);
+			return w;
 		}
 		if(!(eventName in listeners)){
 			listeners[eventName]=[];
@@ -478,26 +539,30 @@ function object(obj){
 		listeners[eventName].push(function(a){
 			func.call(scope,a);
 		});
+		return w;
 	};
 	var _fire=function(eventName,data){
 		if(!(eventName in listeners)){
-			return;
+			return w;
 		}
 		listeners[eventName].forEach(function(v){
 			v(data);
 		});
+		return w;
 	};
 	w.fire = function(eventName,data,transfer){
 		!c._noTransferable?worker.postMessage([[eventName],data],transfer):worker.postMessage([[eventName],data]);
+		return w;
 	};
 	w.off = function (eventName, func) {
 		if(eventName.indexOf(' ')>0){
-			return eventName.split(' ').map(function(v){
+			eventName.split(' ').map(function(v){
 				return w.off(v,func);
 			});
+			return w;
 		}
 		if (!(eventName in listeners)) {
-			return;
+			return w;
 		}
 		else if (!func) {
 			delete listeners[eventName];
@@ -512,6 +577,7 @@ function object(obj){
 				}
 			}
 		}
+		return w;
 	};
 	var i = 0;
 	var promises = [];
