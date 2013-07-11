@@ -388,8 +388,8 @@ describe('cw()', function () {
 		it('and put it out',function(done){
 			comrade.on('q',function(a){
 				assert.equal(a,8);
-				done();
 				comrade.close();
+				done();
 			});
 			comrade.fire('double',21);
 			comrade.fire('quad',2);
