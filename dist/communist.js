@@ -300,7 +300,7 @@ function makeWorker(strings){
 //we can bake the data into the worker when we make it.
 
 function single(fun,data){
-	if(typeof Worker === 'undefined'){
+	if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
 		return multiUse(fun).data(data);
 	}
 	var promise = c.deferred();
@@ -426,7 +426,6 @@ function fakeObject(inObj){
 	var forImport = regexed[0];
 	if(forImport.length === 0){
 		loaded = true;
-		console.log(regexed[1]);
 		(function(){
 			eval('obj = '+regexed[1].replace(re,'$1$3'));
 		})();
@@ -866,7 +865,7 @@ function queue(obj,n,dumb){
 }
 
 function rWorker(fun,callback){
-	if(typeof Worker === 'undefined'){
+	if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
 		return fakeReducer(fun,callback);
 	}
 	var w = new Communist();
