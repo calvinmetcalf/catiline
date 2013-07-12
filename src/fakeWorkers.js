@@ -42,6 +42,7 @@ function fakeObject(inObj){
 			return promises[i].promise;
 		};
 	};
+	var i = 0;
 	var fObj="{";
 	for(var key in inObj){
 		if(i!==0){
