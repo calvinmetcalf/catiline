@@ -1,4 +1,5 @@
-function fakeObject(obj){
+function fakeObject(inObj){
+	/*jslint evil: true */
 	var w = new Communist();
 	var promises = [];
 	var wlisteners = {};
@@ -14,11 +15,12 @@ function fakeObject(obj){
 			}
 		});
 	};
-	if(!("initialize" in obj)){
-		if('init' in obj){
-			obj.initialize=obj.init;
+	var obj;
+	if(!("initialize" in inObj)){
+		if('init' in inObj){
+			inObj.initialize=inObj.init;
 		}else{
-			obj.initialize=function(){};
+			inObj.initialize=function(){};
 		}
 	}
 	var keyFunc=function(key){
@@ -40,9 +42,21 @@ function fakeObject(obj){
 			return promises[i].promise;
 		};
 	};
-	for(var key in obj){
+	var fObj="{";
+	for(var key in inObj){
+		if(i!==0){
+			fObj=fObj+",";
+		}else{
+			i++;
+		}
+		fObj=fObj+key+":"+inObj[key].toString();
 		w[key]=keyFunc(key);
 	}
+	fObj=fObj+"}";
+	fObj = fObj;
+	var regexed = regexImports(fObj);
+	obj = eval(regexed[1]);
+	
 	w.on=function(eventName,func,scope){
 		scope = scope || w;
 		if(eventName.indexOf(' ')>0){
