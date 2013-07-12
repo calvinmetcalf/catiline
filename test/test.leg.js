@@ -23,7 +23,7 @@ function sum(a, b) {
 function product(a){
 	return a[0]*a[1];
 }
-
+var fakeLegacy = true;
 //cw.URL=true;
 describe('cw()', function () {
 	describe('Basic', function () {

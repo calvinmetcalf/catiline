@@ -8,7 +8,7 @@ if (typeof document === "undefined") {
 	};
 } else {
 (function(global){
-	"use strict";
+	//"use strict";
 /*!From setImmediate Copyright (c) 2012 Barnesandnoble.com,llc, Donavon West, and Domenic Denicola @license MIT https://github.com/NobleJS/setImmediate */
 (function(attachTo,global) {
 	var tasks = (function () {
@@ -345,8 +345,23 @@ function fakeObject(inObj){
 	/*jslint evil: true */
 	var w = new Communist();
 	var promises = [];
+	var loaded = false;
 	var wlisteners = {};
 	var olisteners={};
+	var loading;
+	function ajax(url){
+		var promise = c.deferred();
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET',url);
+		xhr.onload = function() {
+			promise.resolve(xhr.responseText);
+		};
+		xhr.onerror=function(){
+			promise.reject('failed to download');
+		};
+		xhr.send();
+		return promise.promise;
+	}
 	var rejectPromises = function(msg){
 		if(typeof msg!=="string" && msg.preventDefault){
 			msg.preventDefault();
@@ -367,11 +382,11 @@ function fakeObject(inObj){
 		}
 	}
 	var keyFunc=function(key){
-		return function(data){
-			var result;
-			var i = promises.length;
+		var actualFunc = function(data){
+			var result,i,callback;
+			i = promises.length;
 			promises[i] = c.deferred();
-			var callback = function(data){
+			callback = function(data){
 				promises[i].resolve(data);
 			};
 			try{
@@ -383,6 +398,15 @@ function fakeObject(inObj){
 				promises[i].reject({preventDefault:function(){},messege:e});
 			}
 			return promises[i].promise;
+		};
+		return function(data){
+			if(loaded){
+				return actualFunc(data);
+			}else{
+				return loading.then(function(){
+					return actualFunc(data);
+				});
+			}
 		};
 	};
 	var i = 0;
@@ -399,8 +423,21 @@ function fakeObject(inObj){
 	fObj=fObj+"}";
 	fObj = fObj;
 	var regexed = regexImports(fObj);
-	obj = eval(regexed[1]);
-	
+	var forImport = regexed[0];
+	if(forImport.length === 0){
+		loaded = true;
+		(function(){
+			console.log(regexed);
+			obj = eval(regexed[1]);
+		})();
+	}else{
+		loading = c.all(forImport.map(function(v){
+			return ajax(v);
+		})).then(function(array){
+			obj=eval(array.join("\n")+";\n"+regexed[1]);
+			return true;
+		});
+	}
 	w.on=function(eventName,func,scope){
 		scope = scope || w;
 		if(eventName.indexOf(' ')>0){
@@ -547,7 +584,7 @@ function fakeReducer(fun,callback){
 }
 
 function object(obj){
-	if(typeof Worker === 'undefined'){
+	if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
 		return fakeObject(obj);
 	}
 	var listeners = {};
