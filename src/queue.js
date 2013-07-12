@@ -46,6 +46,10 @@ function queue(obj,n,dumb){
 		});
 		return w;
 	};
+	w.fire = function(eventName,data){
+		workers[~~(Math.random()*n)].fire(eventName,data);
+		return w;
+	};
 	w.batch.fire = batchFire;
 	w.batchTransfer = batchFire;
 	function clearQueue(mgs){
