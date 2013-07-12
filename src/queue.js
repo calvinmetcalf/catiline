@@ -28,6 +28,16 @@ function queue(obj,n,dumb){
 		idle.push(numIdle);
 		numIdle++;
 	}
+	w.on=function(eventName,func,context){
+		workers.forEach(function(worker){
+			worker.on(eventName,func,context);
+		});
+	};
+	w.off=function(eventName,func,context){
+		workers.forEach(function(worker){
+			worker.off(eventName,func,context);
+		});
+	};
 	function clearQueue(mgs){
 		mgs = mgs || 'canceled';
 		queueLen = 0;
