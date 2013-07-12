@@ -83,7 +83,6 @@ function fakeObject(inObj){
 	var forImport = regexed[0];
 	if(forImport.length === 0){
 		loaded = true;
-		console.log(regexed[1]);
 		(function(){
 			eval('obj = '+regexed[1].replace(re,'$1$3'));
 		})();
