@@ -1,4 +1,4 @@
-/*! communist 1.7.0 2013-07-11*/
+/*! communist 1.7.1 2013-07-12*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -236,23 +236,32 @@ c.all=function(array){
 var Communist = function(){};
 //regex out the importScript call and move it up to the top out of the function.
 function moveImports(string){
-	var script;
-	var match = string.match(/(importScripts\(.*?\);)/);
-	if(match){
-		script = match[0].replace(/importScripts\((.*?\.js[\'\"])\);?/,
-		function(a,b){
-			if(b){
-				return "importScripts("+b.split(",").map(function(cc){
-					return cc.slice(0,1)+c.makeUrl(cc.slice(1,-1))+cc.slice(-1);
-				})+");\n";
-			} else {
-				return "";
+	var script,
+	newScript,
+	rest=string,
+	match = true,
+	loopFunc = function(a,b){
+		if(b){
+			return "importScripts("+b.split(",").map(function(cc){
+				return cc.slice(0,1)+c.makeUrl(cc.slice(1,-1))+cc.slice(-1);
+			})+");\n";
+		} else {
+			return "";
+		}
+	};
+	while(match){
+		match = rest.match(/(importScripts\(.*?\);)/);
+		rest = rest.replace(/(importScripts\((?:.*?\.js[\'\"])?\);?)/,"\n");
+		if(match){
+			newScript = match[0].replace(/importScripts\((.*?\.js[\'\"])\);?/,loopFunc);
+			if(script){
+				script += newScript;
+			}else{
+				script = newScript;
 			}
-		})+string.replace(/(importScripts\(.*?\.js[\'\"]\);?)/,"\n");
-	}else{
-		script = string;
+		}
 	}
-	return script;
+	return script?script+rest:rest;
 }
 
 function getPath(){
@@ -1013,5 +1022,5 @@ if(typeof module === "undefined" ){
 } else {
 	module.exports=c;
 }
-c.version = "1.7.0";
+c.version = "1.7.1";
 })(this);}
