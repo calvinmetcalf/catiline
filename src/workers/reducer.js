@@ -1,5 +1,5 @@
 function rWorker(fun,callback){
-	if(typeof Worker === 'undefined'){
+	if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
 		return fakeReducer(fun,callback);
 	}
 	var w = new Communist();

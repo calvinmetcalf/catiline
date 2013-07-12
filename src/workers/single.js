@@ -2,7 +2,7 @@
 //we can bake the data into the worker when we make it.
 
 function single(fun,data){
-	if(typeof Worker === 'undefined'){
+	if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
 		return multiUse(fun).data(data);
 	}
 	var promise = c.deferred();
