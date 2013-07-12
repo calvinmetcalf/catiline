@@ -78,23 +78,26 @@ function fakeObject(inObj){
 		w[key]=keyFunc(key);
 	}
 	fObj=fObj+"}";
-	fObj = fObj;
+	var re = /(\S+?:function\s*?)(\S+?)(\s*?\()/g;
 	var regexed = regexImports(fObj);
 	var forImport = regexed[0];
 	if(forImport.length === 0){
 		loaded = true;
+		console.log(regexed[1]);
 		(function(){
-			console.log(regexed);
-			obj = eval(regexed[1]);
+			eval('obj = '+regexed[1].replace(re,'$1$3'));
 		})();
+		addEvents(w,obj);
 	}else{
 		loading = c.all(forImport.map(function(v){
 			return ajax(v);
 		})).then(function(array){
-			obj=eval(array.join("\n")+";\n"+regexed[1]);
+			eval(array.join("\n")+";\nobj = "+regexed[1].replace(re,'$1$3'));
+			addEvents(w,obj);
 			return true;
 		});
 	}
+	function addEvents(w,obj){
 	w.on=function(eventName,func,scope){
 		scope = scope || w;
 		if(eventName.indexOf(' ')>0){
@@ -194,6 +197,7 @@ function fakeObject(inObj){
 		}
 		return obj;
 	};
+	}
 	w._close = function(){
 		olisteners={};
 		wlisteners={};
