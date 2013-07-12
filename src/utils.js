@@ -2,32 +2,29 @@
 var Communist = function(){};
 //regex out the importScript call and move it up to the top out of the function.
 function moveImports(string){
-	var script,
-	newScript,
-	rest=string,
+	var rest=string,
 	match = true,
+	matches = {},
 	loopFunc = function(a,b){
 		if(b){
-			return "importScripts("+b.split(",").map(function(cc){
-				return cc.slice(0,1)+c.makeUrl(cc.slice(1,-1))+cc.slice(-1);
+			"importScripts("+b.split(",").forEach(function(cc){
+				matches[c.makeUrl(cc.slice(1,-1))]=true;
 			})+");\n";
-		} else {
-			return "";
 		}
 	};
 	while(match){
 		match = rest.match(/(importScripts\(.*?\);)/);
 		rest = rest.replace(/(importScripts\((?:.*?\.js[\'\"])?\);?)/,"\n");
 		if(match){
-			newScript = match[0].replace(/importScripts\((.*?\.js[\'\"])\);?/,loopFunc);
-			if(script){
-				script += newScript;
-			}else{
-				script = newScript;
-			}
+			match[0].replace(/importScripts\((.*?\.js[\'\"])\);?/g,loopFunc);
 		}
 	}
-	return script?script+rest:rest;
+	matches = Object.keys(matches);
+	if(matches.length>0){
+		return 'importScripts("'+matches.join('","')+'");\n'+rest;
+	}else{
+		return rest;
+	}
 }
 
 function getPath(){
