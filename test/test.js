@@ -184,23 +184,6 @@ describe('cw()', function () {
 		        .close().then(function (a) { a.should.equal(91); }).then(done, done);
 		});
 	});
-	describe('Ajax', function () {
-		it('should work loading ' + cw.makeUrl('test.json'), function (done) {
-			cw.ajax("test.json").then(function(a){ a.should.deep.equal({"a":1,"b":2}); }).then(done, done);
-		});
-		it('should work with after set', function (done) {
-			cw.ajax("test.json",function(a){a.c=3;return a;}).then(function(a){ a.should.deep.equal({"a":1,"b":2,"c":3}); }).then(done, done);
-		});
-		it('should work with after set to async', function (done) {
-			cw.ajax("test.json",function(a,cb){a.c=3;cb(a);}).then(function(a){ a.should.deep.equal({"a":1,"b":2,"c":3}); }).then(done, done);
-		});
-		it('should work with text', function (done) {
-			cw.ajax("test.json",function(a){return a.split("");},true).then(function(a){ a.should.deep.equal(["{", '"', "a", '"', ":", "1", ",", '"', "b", '"', ":", "2", "}"]); }).then(done, done);
-		});
-		it('should work with an array buffer', function (done) {
-			cw.ajax("test.json",function(a,cb){var b = new Uint32Array(a.split("").map(function(v){return v.charCodeAt()})).buffer; cb(b,[b])},true).then(function(a){ a.byteLength.should.deep.equal(52); }).then(done, done);
-		});
-	});
 	describe('Import Scripts', function () {
 		it("should be able to import scripts",function (done){
 			cw(function(a){importScripts('fakeLib.js');return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
