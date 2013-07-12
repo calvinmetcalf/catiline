@@ -32,12 +32,22 @@ function queue(obj,n,dumb){
 		workers.forEach(function(worker){
 			worker.on(eventName,func,context);
 		});
+		return w;
 	};
 	w.off=function(eventName,func,context){
 		workers.forEach(function(worker){
 			worker.off(eventName,func,context);
 		});
+		return w;
 	};
+	var batchFire = function(eventName,data){
+		workers.forEach(function(worker){
+			worker.fire(eventName,data);
+		});
+		return w;
+	};
+	w.batch.fire = batchFire;
+	w.batchTransfer = batchFire;
 	function clearQueue(mgs){
 		mgs = mgs || 'canceled';
 		queueLen = 0;
@@ -46,7 +56,7 @@ function queue(obj,n,dumb){
 		oQ.forEach(function(p){
 			p[3].reject(mgs);
 		});
-		return true;
+		return w;
 	}
 	function keyFunc(k){
 		return function(data,transfer){
