@@ -2,23 +2,36 @@
 var Communist = function(){};
 //regex out the importScript call and move it up to the top out of the function.
 function moveImports(string){
-	var script;
-	var match = string.match(/(importScripts\(.*?\);)/);
-	if(match){
-		script = match[0].replace(/importScripts\((.*?\.js[\'\"])\);?/,
-		function(a,b){
-			if(b){
-				return "importScripts("+b.split(",").map(function(cc){
-					return cc.slice(0,1)+c.makeUrl(cc.slice(1,-1))+cc.slice(-1);
-				})+");\n";
-			} else {
-				return "";
+	var script,
+	newScript,
+	rest=string,
+	match = true;
+	while(match){
+		match = rest.match(/(importScripts\(.*?\);)/);
+		rest = rest.replace(/(importScripts\(.*?\.js[\'\"]\);?)/,"\n");
+		if(match){
+			newScript = match[0].replace(/importScripts\((.*?\.js[\'\"])\);?/,
+			function(a,b){
+				if(b){
+					return "importScripts("+b.split(",").map(function(cc){
+						return cc.slice(0,1)+c.makeUrl(cc.slice(1,-1))+cc.slice(-1);
+					})+");\n";
+				} else {
+					return "";
+				}
+			});
+			if(script){
+				script += newScript;
+			}else{
+				script = newScript;
 			}
-		})+string.replace(/(importScripts\(.*?\.js[\'\"]\);?)/,"\n");
-	}else{
-		script = string;
+		}else{
+			if(script){
+				script = script + rest;
+			}
+		}
 	}
-	return script;
+	return script?script:rest;
 }
 
 function getPath(){
