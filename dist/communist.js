@@ -1,4 +1,4 @@
-/*! communist 1.7.0 2013-07-11*/
+/*! communist 1.7.1 2013-07-12*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -235,26 +235,38 @@ c.all=function(array){
 //this is mainly so the name shows up when you look at the object in the console
 var Communist = function(){};
 //regex out the importScript call and move it up to the top out of the function.
-function moveImports(string){
-	var script;
-	var match = string.match(/(importScripts\(.*?\);)/);
-	if(match){
-		script = match[0].replace(/importScripts\((.*?\.js[\'\"])\);?/,
-		function(a,b){
-			if(b){
-				return "importScripts("+b.split(",").map(function(cc){
-					return cc.slice(0,1)+c.makeUrl(cc.slice(1,-1))+cc.slice(-1);
-				})+");\n";
-			} else {
-				return "";
-			}
-		})+string.replace(/(importScripts\(.*?\.js[\'\"]\);?)/,"\n");
-	}else{
-		script = string;
+function regexImports(string){
+	var rest=string,
+	match = true,
+	matches = {},
+	loopFunc = function(a,b){
+		if(b){
+			"importScripts("+b.split(",").forEach(function(cc){
+				matches[c.makeUrl(cc.slice(1,-1))]=true;
+			})+");\n";
+		}
+	};
+	while(match){
+		match = rest.match(/(importScripts\(.*?\);)/);
+		rest = rest.replace(/(importScripts\((?:.*?\.js[\'\"])?\);?)/,"\n");
+		if(match){
+			match[0].replace(/importScripts\((.*?\.js[\'\"])\);?/g,loopFunc);
+		}
 	}
-	return script;
+	matches = Object.keys(matches);
+	return [matches,rest];
 }
 
+function moveImports(string){
+	var str = regexImports(string);
+	var matches = str[0];
+	var rest = str[1];
+	if(matches.length>0){
+		return 'importScripts("'+matches.join('","')+'");\n'+rest;
+	}else{
+		return rest;
+	}
+}
 function getPath(){
 	if(typeof SHIM_WORKER_PATH !== "undefined"){
 		return SHIM_WORKER_PATH;
@@ -288,7 +300,7 @@ function makeWorker(strings){
 //we can bake the data into the worker when we make it.
 
 function single(fun,data){
-	if(typeof Worker === 'undefined'){
+	if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
 		return multiUse(fun).data(data);
 	}
 	var promise = c.deferred();
@@ -329,11 +341,27 @@ function mapWorker(fun,callback,onerr){
 function multiUse(fun){
 	return object({data:fun});
 }
-function fakeObject(obj){
+function fakeObject(inObj){
+	/*jslint evil: true */
 	var w = new Communist();
 	var promises = [];
+	var loaded = false;
 	var wlisteners = {};
 	var olisteners={};
+	var loading;
+	function ajax(url){
+		var promise = c.deferred();
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET',url);
+		xhr.onload = function() {
+			promise.resolve(xhr.responseText);
+		};
+		xhr.onerror=function(){
+			promise.reject('failed to download');
+		};
+		xhr.send();
+		return promise.promise;
+	}
 	var rejectPromises = function(msg){
 		if(typeof msg!=="string" && msg.preventDefault){
 			msg.preventDefault();
@@ -345,19 +373,20 @@ function fakeObject(obj){
 			}
 		});
 	};
-	if(!("initialize" in obj)){
-		if('init' in obj){
-			obj.initialize=obj.init;
+	var obj;
+	if(!("initialize" in inObj)){
+		if('init' in inObj){
+			inObj.initialize=inObj.init;
 		}else{
-			obj.initialize=function(){};
+			inObj.initialize=function(){};
 		}
 	}
 	var keyFunc=function(key){
-		return function(data){
-			var result;
-			var i = promises.length;
+		var actualFunc = function(data){
+			var result,i,callback;
+			i = promises.length;
 			promises[i] = c.deferred();
-			var callback = function(data){
+			callback = function(data){
 				promises[i].resolve(data);
 			};
 			try{
@@ -370,10 +399,47 @@ function fakeObject(obj){
 			}
 			return promises[i].promise;
 		};
+		return function(data){
+			if(loaded){
+				return actualFunc(data);
+			}else{
+				return loading.then(function(){
+					return actualFunc(data);
+				});
+			}
+		};
 	};
-	for(var key in obj){
+	var i = 0;
+	var fObj="{";
+	for(var key in inObj){
+		if(i!==0){
+			fObj=fObj+",";
+		}else{
+			i++;
+		}
+		fObj=fObj+key+":"+inObj[key].toString();
 		w[key]=keyFunc(key);
 	}
+	fObj=fObj+"}";
+	var re = /(\S+?:function\s*?)(\S+?)(\s*?\()/g;
+	var regexed = regexImports(fObj);
+	var forImport = regexed[0];
+	if(forImport.length === 0){
+		loaded = true;
+		(function(){
+			eval('obj = '+regexed[1].replace(re,'$1$3'));
+		})();
+		addEvents(w,obj);
+	}else{
+		loading = c.all(forImport.map(function(v){
+			return ajax(v);
+		})).then(function(array){
+			eval(array.join("\n")+";\nobj = "+regexed[1].replace(re,'$1$3'));
+			addEvents(w,obj);
+			return true;
+		});
+	}
+	function addEvents(w,obj){
 	w.on=function(eventName,func,scope){
 		scope = scope || w;
 		if(eventName.indexOf(' ')>0){
@@ -473,6 +539,7 @@ function fakeObject(obj){
 		}
 		return obj;
 	};
+	}
 	w._close = function(){
 		olisteners={};
 		wlisteners={};
@@ -520,7 +587,7 @@ function fakeReducer(fun,callback){
 }
 
 function object(obj){
-	if(typeof Worker === 'undefined'){
+	if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
 		return fakeObject(obj);
 	}
 	var listeners = {};
@@ -673,6 +740,30 @@ function queue(obj,n,dumb){
 		idle.push(numIdle);
 		numIdle++;
 	}
+	w.on=function(eventName,func,context){
+		workers.forEach(function(worker){
+			worker.on(eventName,func,context);
+		});
+		return w;
+	};
+	w.off=function(eventName,func,context){
+		workers.forEach(function(worker){
+			worker.off(eventName,func,context);
+		});
+		return w;
+	};
+	var batchFire = function(eventName,data){
+		workers.forEach(function(worker){
+			worker.fire(eventName,data);
+		});
+		return w;
+	};
+	w.fire = function(eventName,data){
+		workers[~~(Math.random()*n)].fire(eventName,data);
+		return w;
+	};
+	w.batch.fire = batchFire;
+	w.batchTransfer = batchFire;
 	function clearQueue(mgs){
 		mgs = mgs || 'canceled';
 		queueLen = 0;
@@ -681,7 +772,7 @@ function queue(obj,n,dumb){
 		oQ.forEach(function(p){
 			p[3].reject(mgs);
 		});
-		return true;
+		return w;
 	}
 	function keyFunc(k){
 		return function(data,transfer){
@@ -774,7 +865,7 @@ function queue(obj,n,dumb){
 }
 
 function rWorker(fun,callback){
-	if(typeof Worker === 'undefined'){
+	if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
 		return fakeReducer(fun,callback);
 	}
 	var w = new Communist();
@@ -1013,5 +1104,5 @@ if(typeof module === "undefined" ){
 } else {
 	module.exports=c;
 }
-c.version = "1.7.0";
+c.version = "1.7.1";
 })(this);}

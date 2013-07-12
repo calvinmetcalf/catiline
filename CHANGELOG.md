@@ -1,6 +1,17 @@
 Changelog
 ===
 
+##1.7.1
+
+- Improvements to pub-sub when using a worker queue
+- The `communist.ajax` method is being depreciated it's still around for now but 
+I took out the tests and docs, all the breaking changes are being saved up.
+- `importScripts` behaves much more like you expect it, importing the same script
+multiple times only gets downloaded once and all `importScripts` calls you make
+are counted.
+- Fake workers (aka in IE9) can now import scripts
+- you can use a global flag of `fakeLegacy` to force a browser that suppports workers to pretend it dosn't.
+
 ##1.7.0
 
 - PUB/SUB! function inside the worker now have access to `this.fire`, `this,on`, and `this.off` functions and there are equivilent `cw.fire`, `cw.on`, and `cw.off` functions on cw objects.

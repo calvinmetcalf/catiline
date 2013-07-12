@@ -1,5 +1,5 @@
 function object(obj){
-	if(typeof Worker === 'undefined'){
+	if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
 		return fakeObject(obj);
 	}
 	var listeners = {};

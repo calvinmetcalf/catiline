@@ -98,7 +98,6 @@ function(base,cb){
 ```
 
 In other words it will be hoisted out of the function so it will only be called once, and it will rewrite all the URLs to be absolute.
-**Note:** currently it will only do this for the first `importScripts()` it finds, and does not work in IE9.
 
 ###Queues
 
@@ -263,8 +262,6 @@ we have a few utility functions you can use
 `cw.makeUrl(reletiveURL);` returns an absolute url and
 
 `cw.worker([array of strings]);` returns worker made from those strings.
-
-```cw.ajax(url[,after,notjson]);``` returns promise, after is a function to call on the data after download in the worker, notjson should be true if you don't want to run JSON.parse on it.
 
 `cw.deferred();` makes a new promise and returns it, used internally. Technically `cw` is a shortcut to [Promiscuous](https://github.com/RubenVerborgh/promiscuous/) which is used for promises, so any of Promiscuous's methods can be used, aka call `cw.resolve(value)` for an already resolved promise and `cw.reject(reason)` for a rejected one. Lastly you can call `cw.all([promises])` on an array of promises, should work just like `Q.all()`.
 
