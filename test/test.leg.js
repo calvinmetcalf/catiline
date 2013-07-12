@@ -394,6 +394,10 @@ describe('cw()', function () {
 			comrade.fire('double',21);
 			comrade.fire('quad',2);
 		});
-		
+	});
+	describe('Import Scripts', function () {
+		it("don't explode if a script is imported",function (done){
+			cw(function(a){importScripts('fakeLib.js');return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
+		});
 	});
 });
