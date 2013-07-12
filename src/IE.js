@@ -6,4 +6,4 @@ if (typeof document === "undefined") {
 	};
 } else {
 (function(global){
-	//"use strict";
+	"use strict";
