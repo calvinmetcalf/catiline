@@ -212,10 +212,13 @@ describe('cw()', function () {
 			cw(function(a){importScripts('../test/fakeLib.js');return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
 		});
 		it("should be able to import 2 scripts",function (done){
+			cw(function(a){importScripts("fakeLib.js",'../test/fakerLib.js');return a;}, 9).then(function () {},function(a){a.indexOf("tried to import twice").should.be.at.least(0)}).then(done, done);
+		});
+		it("should be able to import 2 scripts that are teh same",function (done){
 			cw(function(a){importScripts("fakeLib.js",'../test/fakeLib.js');return a;}, 9).then(function () {},function(a){a.indexOf("tried to import twice").should.be.at.least(0)}).then(done, done);
 		});
 		it("should be able to import 2 scripts in two import scripts",function (done){
-			cw(function(a){importScripts("fakeLib.js");importScripts('../test/fakeLib.js');return a;}, 9).then(function () {},function(a){a.indexOf("tried to import twice").should.be.at.least(0)}).then(done, done);
+			cw(function(a){importScripts("fakeLib.js");importScripts('../test/fakerLib.js');return a;}, 9).then(function () {},function(a){a.indexOf("tried to import twice").should.be.at.least(0)}).then(done, done);
 		});
 		it("should be able to import no scripts",function (done){
 			cw(function(a){importScripts();return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
