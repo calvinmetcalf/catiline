@@ -5,33 +5,29 @@ function moveImports(string){
 	var script,
 	newScript,
 	rest=string,
-	match = true;
+	match = true,
+	loopFunc = function(a,b){
+		if(b){
+			return "importScripts("+b.split(",").map(function(cc){
+				return cc.slice(0,1)+c.makeUrl(cc.slice(1,-1))+cc.slice(-1);
+			})+");\n";
+		} else {
+			return "";
+		}
+	};
 	while(match){
 		match = rest.match(/(importScripts\(.*?\);)/);
-		rest = rest.replace(/(importScripts\(.*?\.js[\'\"]\);?)/,"\n");
+		rest = rest.replace(/(importScripts\((?:.*?\.js[\'\"])?\);?)/,"\n");
 		if(match){
-			newScript = match[0].replace(/importScripts\((.*?\.js[\'\"])\);?/,
-			function(a,b){
-				if(b){
-					return "importScripts("+b.split(",").map(function(cc){
-						return cc.slice(0,1)+c.makeUrl(cc.slice(1,-1))+cc.slice(-1);
-					})+");\n";
-				} else {
-					return "";
-				}
-			});
+			newScript = match[0].replace(/importScripts\((.*?\.js[\'\"])\);?/,loopFunc);
 			if(script){
 				script += newScript;
 			}else{
 				script = newScript;
 			}
-		}else{
-			if(script){
-				script = script + rest;
-			}
 		}
 	}
-	return script?script:rest;
+	return script?script+rest:rest;
 }
 
 function getPath(){
