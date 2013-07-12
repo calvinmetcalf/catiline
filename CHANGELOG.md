@@ -9,7 +9,8 @@ I took out the tests and docs, all the breaking changes are being saved up.
 - `importScripts` behaves much more like you expect it, importing the same script
 multiple times only gets downloaded once and all `importScripts` calls you make
 are counted.
-- Fake workers (aka in IE9) no longer throw an error if you import a script.
+- Fake workers (aka in IE9) can now import scripts
+- you can use a global flag of `fakeLegacy` to force a browser that suppports workers to pretend it dosn't.
 
 ##1.7.0
 
