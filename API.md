@@ -98,7 +98,6 @@ function(base,cb){
 ```
 
 In other words it will be hoisted out of the function so it will only be called once, and it will rewrite all the URLs to be absolute.
-**Note:** currently it will only do this for the first `importScripts()` it finds, and does not work in IE9.
 
 ###Queues
 
