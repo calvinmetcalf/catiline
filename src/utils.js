@@ -26,7 +26,7 @@ function regexImports(string){
 function moveImports(string){
 	var str = regexImports(string);
 	var matches = str[0];
-	var rest = str[0];
+	var rest = str[1];
 	if(matches.length>0){
 		return 'importScripts("'+matches.join('","')+'");\n'+rest;
 	}else{
