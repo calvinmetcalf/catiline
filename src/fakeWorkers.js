@@ -1,8 +1,24 @@
-function fakeObject(obj){
+function fakeObject(inObj){
+	/*jslint evil: true */
 	var w = new Communist();
 	var promises = [];
+	var loaded = false;
 	var wlisteners = {};
 	var olisteners={};
+	var loading;
+	function ajax(url){
+		var promise = c.deferred();
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET',url);
+		xhr.onload = function() {
+			promise.resolve(xhr.responseText);
+		};
+		xhr.onerror=function(){
+			promise.reject('failed to download');
+		};
+		xhr.send();
+		return promise.promise;
+	}
 	var rejectPromises = function(msg){
 		if(typeof msg!=="string" && msg.preventDefault){
 			msg.preventDefault();
@@ -14,19 +30,20 @@ function fakeObject(obj){
 			}
 		});
 	};
-	if(!("initialize" in obj)){
-		if('init' in obj){
-			obj.initialize=obj.init;
+	var obj;
+	if(!("initialize" in inObj)){
+		if('init' in inObj){
+			inObj.initialize=inObj.init;
 		}else{
-			obj.initialize=function(){};
+			inObj.initialize=function(){};
 		}
 	}
 	var keyFunc=function(key){
-		return function(data){
-			var result;
-			var i = promises.length;
+		var actualFunc = function(data){
+			var result,i,callback;
+			i = promises.length;
 			promises[i] = c.deferred();
-			var callback = function(data){
+			callback = function(data){
 				promises[i].resolve(data);
 			};
 			try{
@@ -39,10 +56,47 @@ function fakeObject(obj){
 			}
 			return promises[i].promise;
 		};
+		return function(data){
+			if(loaded){
+				return actualFunc(data);
+			}else{
+				return loading.then(function(){
+					return actualFunc(data);
+				});
+			}
+		};
 	};
-	for(var key in obj){
+	var i = 0;
+	var fObj="{";
+	for(var key in inObj){
+		if(i!==0){
+			fObj=fObj+",";
+		}else{
+			i++;
+		}
+		fObj=fObj+key+":"+inObj[key].toString();
 		w[key]=keyFunc(key);
 	}
+	fObj=fObj+"}";
+	var re = /(\S+?:function\s*?)(\S+?)(\s*?\()/g;
+	var regexed = regexImports(fObj);
+	var forImport = regexed[0];
+	if(forImport.length === 0){
+		loaded = true;
+		(function(){
+			eval('obj = '+regexed[1].replace(re,'$1$3'));
+		})();
+		addEvents(w,obj);
+	}else{
+		loading = c.all(forImport.map(function(v){
+			return ajax(v);
+		})).then(function(array){
+			eval(array.join("\n")+";\nobj = "+regexed[1].replace(re,'$1$3'));
+			addEvents(w,obj);
+			return true;
+		});
+	}
+	function addEvents(w,obj){
 	w.on=function(eventName,func,scope){
 		scope = scope || w;
 		if(eventName.indexOf(' ')>0){
@@ -142,6 +196,7 @@ function fakeObject(obj){
 		}
 		return obj;
 	};
+	}
 	w._close = function(){
 		olisteners={};
 		wlisteners={};

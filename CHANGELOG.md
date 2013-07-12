@@ -4,8 +4,12 @@ Changelog
 ##1.7.1
 
 - Improvements to pub-sub when using a worker queue
-- The `communist.ajax` method is being depreciated it's still around for now but I took out the tests and docs, all the breaking changes are being saved up.
-- using `importScripts` inside your worker scripts is now easier as each script can individually call the function and any given script is only imported once. In other words copy and paste your functions without worry.
+- The `communist.ajax` method is being depreciated it's still around for now but 
+I took out the tests and docs, all the breaking changes are being saved up.
+- `importScripts` behaves much more like you expect it, importing the same script
+multiple times only gets downloaded once and all `importScripts` calls you make
+are counted.
+- Fake workers (aka in IE9) no longer throw an error if you import a script.
 
 ##1.7.0
 
