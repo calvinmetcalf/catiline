@@ -395,9 +395,54 @@ describe('cw()', function () {
 			comrade.fire('quad',2);
 		});
 	});
+
 	describe('Import Scripts', function () {
-		it("don't explode if a script is imported",function (done){
+		it("should be able to import scripts",function (done){
 			cw(function(a){importScripts('fakeLib.js');return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
+		});
+		it("should be able to import scripts with double quotes",function (done){
+			cw(function(a){importScripts("fakeLib.js");return a;}, 9).then(function (a) { assert.equal(a,9); }).then(function(){done()}, function(){done()});
+		});
+		it("should be able to import reletive urls",function (done){
+			cw(function(a){importScripts('../test/fakeLib.js');return a;}, 9).then(function (a) { assert.equal(a,9); }).then(function(){done()}, function(){done()});
+		});
+		it("should be able to import 2 scripts",function (done){
+			cw(function(a){importScripts("fakeLib.js",'../test/fakerLib.js');return a;}, 9).then(function () {},function(a){assert.include(a,"tried to import twice");}).then(function(){done()}, function(){done()});
+		});
+		it("should be able to import 2 scripts that are teh same",function (done){
+			cw(function(a){importScripts("fakeLib.js",'../test/fakeLib.js');return a;}, 9).then(function () {},function(a){assert.include(a,"tried to import twice");}).then(function(){done()}, function(){done()});
+		});
+		it("should be able to import 2 scripts in two import scripts",function (done){
+			cw(function(a){importScripts("fakeLib.js");importScripts('../test/fakerLib.js');return a;}, 9).then(function () {},function(a){assert.include(a,"tried to import twice");}).then(function(){done()}, function(){done()});
+		});
+		it("should be able to import no scripts",function (done){
+			cw(function(a){importScripts();return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
+		});
+		it("should be able to import scripts in a sticks around",function (done){
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
+			var comrade = cw(function(a){importScripts('fakeLib.js');return a;});
+			comrade.data(9).then(function (a) { assert.equal(a,9); }).then(wrapUp, wrapUp);
+		});
+		it("should be able to import scripts in a sticks around and call it twice",function (done){
+			function wrapUp(){
+				comrade.close();
+				done();
+			}
+			var comrade = cw(function(a){importScripts('fakeLib.js');return a;});
+			comrade.data(9).then(function (a) { assert.equal(a,9); 
+			comrade.data(7).then(function(aa){assert.equal(aa,7);}).then(wrapUp,wrapUp);
+			});
+		});
+        it("should be able to import scripts in an object function",function (done){
+        	function wrapUp(){
+				comrade.close();
+				done();
+			}
+    		var comrade = cw({data:function(a){importScripts('fakeLib.js');return a;}});
+			comrade.data(9).then(function (a) { assert.equal(a,9); }).then(wrapUp, wrapUp);
 		});
 	});
 });
