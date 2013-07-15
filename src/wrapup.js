@@ -50,7 +50,7 @@ function initBrowser(c){
 	global.cw = c;
 	
 }
-if(typeof module === "undefined" ){
+if(typeof module === "undefined" || typeof module.exports === "undefined" ){
 	initBrowser(c);
 } else {
 	module.exports=c;
