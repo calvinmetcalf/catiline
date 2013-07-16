@@ -1,4 +1,4 @@
-/*! communist 1.7.1 2013-07-12*/
+/*! communist 1.7.2 2013-07-16*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -1099,10 +1099,10 @@ function initBrowser(c){
 	global.cw = c;
 	
 }
-if(typeof module === "undefined" ){
+if(typeof module === "undefined" || !('exports' in module)){
 	initBrowser(c);
 } else {
 	module.exports=c;
 }
-c.version = "1.7.1";
+c.version = "1.7.2";
 })(this);}
