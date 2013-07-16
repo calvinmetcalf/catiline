@@ -1,6 +1,19 @@
 Changelog
 ===
 
+##1.7.2
+
+- patch from [Fresheyeball](https://github.com/Fresheyeball) to get it working 
+on more commonjs enviroments
+- all the worker creation functions now have publicly accessable methods
+- `communist.worker` is now accessable at `communist.makeWorker` with `communist.worker` going to be reasasined in 2.0.0
+- the internals are now massivly simplified.
+- bump the version of firefox we test to 22
+- remove opera from the tests until I can figure out why I can't even do a manual test on Opera in sauce labs.
+- remove src/workers folder as we now only have 1 seperate worker script.
+- fix type with events in batchTransfer queues.
+- Had to put up a monkey patch onto communist.ajax as I accidentally broke it, seriously It's going to be gone soon stop using it.
+
 ##1.7.1
 
 - Improvements to pub-sub when using a worker queue

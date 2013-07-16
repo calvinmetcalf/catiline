@@ -1,4 +1,4 @@
-/*! communist 1.7.1 2013-07-12*/
+/*! communist 1.7.2 2013-07-16*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -304,37 +304,62 @@ function single(fun,data){
 		return multiUse(fun).data(data);
 	}
 	var promise = c.deferred();
-	var worker = makeWorker(['var _self = {};_self.fun = ',fun,';_self.cb = function (data, transfer) {	!self._noTransferable ? self.postMessage(data, transfer) : self.postMessage(data);	self.close();};_self.result = _self.fun(',JSON.stringify(data),', _self.cb);if (typeof _self.result !== "undefined") {	_self.cb(_self.result);}']);
-	worker.onmessage=function(e){
-		promise.resolve(e.data);
+	var obj = {
+		fun:fun,
+		data:JSON.stringify(data),
+		init:function(){
+			var that = this;
+			var data = JSON.parse(this.data);
+			var cb = function(data,trans){
+				that.fire('done',data,trans);
+			};
+			var resp = that.fun(data,cb);
+			if(typeof resp !== 'undefined'){
+				cb(resp);
+			}
+		}
 	};
-	worker.onerror=function(e){
+	var worker = object(obj);
+	worker.on('done',function(e){
+		promise.resolve(e);
+		worker.close();
+	});
+	worker.on('error',function(e){
 		e.preventDefault();
 		promise.reject(e.message);
-	};
+		worker.close();
+	});
 	return promise.promise;
 }
 
 function mapWorker(fun,callback,onerr){
-	if(typeof Worker === 'undefined'){
-		return fakeMapWorker(fun,callback,onerr);
-	}
+	onerr = onerr || function(){callback();};
 	var w = new Communist();
-	var worker = makeWorker(['var _db = {};_db.__close__ = function () {	self.close();};var _self = {};_db.__fun__ = ',fun,';_self.cb = function (data, transfer) {	!self._noTransferable ? self.postMessage(data, transfer) : self.postMessage(data);};self.onmessage = function (e) {	_self.result = _db.__fun__(e.data, _self.cb);	if (typeof _self.result !== "undefined") {		_self.cb(_self.result);	}}']);
-	worker.onmessage = function(e){
-		callback(e.data);
+	var obj = {__func__:fun};
+	obj.data = function(data){
+		var that = this;
+		var cb = function(data,transform){
+			that.fire('data',data,transform);
+		};
+		var resp = that.__func__(data,cb);
+		if(typeof resp !== "undefined"){
+			cb(resp);
+		}
 	};
-	if(onerr){
-		worker.onerror=onerr;
-	}else{
-		worker.onerror=function(){callback();};
-	}
+	obj.init = function(){
+		this.on('data',function(data){
+			this.data(data);
+		});
+	};
+	var worker = object(obj);
 	w.data=function(data,transfer){
-		!c._noTransferable?worker.postMessage(data,transfer):worker.postMessage(data);
+		worker.fire('data',data,transfer);
 		return w;
 	};
+	worker.on('data',callback);
+	worker.on('error',onerr);
 	w.close=function(){
-		return worker.terminate();
+		return worker.close();
 	};
 	return w;
 }
@@ -349,6 +374,7 @@ function fakeObject(inObj){
 	var wlisteners = {};
 	var olisteners={};
 	var loading;
+	var called=false;
 	function ajax(url){
 		var promise = c.deferred();
 		var xhr = new XMLHttpRequest();
@@ -385,6 +411,9 @@ function fakeObject(inObj){
 		var actualFunc = function(data){
 			var result,i,callback;
 			i = promises.length;
+			if(!called){
+				called = true;
+			}
 			promises[i] = c.deferred();
 			callback = function(data){
 				promises[i].resolve(data);
@@ -395,6 +424,7 @@ function fakeObject(inObj){
 					callback(result);
 				}
 			} catch (e){
+				obj.fire('error',{preventDefault:function(){},messege:e});
 				promises[i].reject({preventDefault:function(){},messege:e});
 			}
 			return promises[i].promise;
@@ -456,11 +486,12 @@ function fakeObject(inObj){
 		});
 	};
 	w.fire=function(eventName,data){
-		if(!(eventName in olisteners)){
-			return w;
-		}
-		olisteners[eventName].forEach(function(v){
-			v(data);
+		c.setImmediate(function () {
+			if(eventName in olisteners && Array.isArray(olisteners[eventName])){
+				olisteners[eventName].forEach(function(v){
+					v(data);
+				});
+			}
 		});
 		return w;
 	};
@@ -501,7 +532,11 @@ function fakeObject(inObj){
 			olisteners[eventName]=[];
 		}
 		olisteners[eventName].push(function(a){
-			func.call(scope,a);
+			try{
+				func.call(scope,a);
+			}catch(e){
+				obj.fire('error',{preventDefault:function(){},messege:e});
+			}
 		});
 		return obj;
 	};
@@ -551,20 +586,12 @@ function fakeObject(inObj){
 	if(!('close' in w)){
 		w.close=w._close;
 	}
-	w.initialize();
+	if(!called){
+		w.initialize('init');
+	}
 	return w;
 }
 
-function fakeMapWorker(fun,callback,onerr){
-	var w = new Communist();
-	var worker = fakeObject({data:fun});
-	w.data=function(data){
-		worker.data(data).then(callback,onerr);
-		return w;
-	};
-	w.close=worker.close;
-	return w;
-}
 
 function fakeReducer(fun,callback){
 	var w = new Communist();
@@ -649,7 +676,7 @@ function object(obj){
 	var i = 0;
 	var promises = [];
 	var rejectPromises = function(msg){
-		if(typeof msg!=="string" && msg.preventDefault){
+		if(typeof msg!=="string" && 'preventDefault' in msg){
 			msg.preventDefault();
 			msg=msg.message;
 		}
@@ -687,7 +714,7 @@ function object(obj){
 		w[key]=keyFunc(key);
 	}
 	fObj=fObj+"}";
-	var worker = makeWorker(['var _db = ',fObj,';var listeners = {};_db.on = function (eventName, func, scope) {	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.on(v,func,scope);		},_db);	}	scope = scope || _db;	if (!(eventName in listeners)) {		listeners[eventName] = [];	}	listeners[eventName].push(function (a) {		func.call(scope, a);	});};var _fire = function (eventName, data) {	if (!(eventName in listeners)) {		return;	}	listeners[eventName].forEach(function (v) {		v(data);	});};_db.fire = function (eventName, data, transfer) {	!self._noTransferable ? self.postMessage([		[eventName], data], transfer) : self.postMessage([		[eventName], data]);};_db.off=function(eventName,func){	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.off(v,func);		});	}	if(!(eventName in listeners)){		return;	}else if(!func){		delete listeners[eventName];	}else{		if(listeners[eventName].indexOf(func)>-1){			if(listeners[eventName].length>1){				delete listeners[eventName];			}else{				listeners[eventName].splice(listeners[eventName].indexOf(func),1);			}		}	}};self.onmessage=function(e){	_fire("messege",e.data[1]);	if(e.data[0][0]==="com.communistjs"){		return regMsg(e);	}else{		_fire(e.data[0][0],e.data[1]);	}};var regMsg = function(e){	var cb=function(data,transfer){		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);	};	var result = _db[e.data[1]](e.data[2],cb);	if(typeof result !== "undefined"){		cb(result);	}};_db.initialize();']);
+	var worker = makeWorker(['var _db = ',fObj,';var listeners = {};_db.on = function (eventName, func, scope) {	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.on(v,func,scope);		},_db);	}	scope = scope || _db;	if (!(eventName in listeners)) {		listeners[eventName] = [];	}	listeners[eventName].push(function (a) {		func.call(scope, a);	});};var _fire = function (eventName, data) {	if (!(eventName in listeners)) {		return;	}	listeners[eventName].forEach(function (v) {		v(data);	});};_db.fire = function (eventName, data, transfer) {	!self._noTransferable ? self.postMessage([		[eventName], data], transfer) : self.postMessage([		[eventName], data]);};_db.off=function(eventName,func){	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.off(v,func);		});	}	if(!(eventName in listeners)){		return;	}else if(!func){		delete listeners[eventName];	}else{		if(listeners[eventName].indexOf(func)>-1){			if(listeners[eventName].length>1){				delete listeners[eventName];			}else{				listeners[eventName].splice(listeners[eventName].indexOf(func),1);			}		}	}};var console={};function makeConsole(method){	return function(){		var len = arguments.length;		var out =[];		var i = 0;		while (i<len){			out.push(arguments[i]);			i++;		}		_db.fire("console",[method,out]);	};}["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){	console[v]=makeConsole(v);});self.onmessage=function(e){	_fire("messege",e.data[1]);	if(e.data[0][0]==="com.communistjs"){		return regMsg(e);	}else{		_fire(e.data[0][0],e.data[1]);	}};var regMsg = function(e){	var cb=function(data,transfer){		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);	};	var result = _db[e.data[1]](e.data[2],cb);	if(typeof result !== "undefined"){		cb(result);	}};_db.initialize();']);
 	worker.onmessage= function(e){
 		_fire('message',e.data[1]);
 		if(e.data[0][0]==='com.communistjs'){
@@ -697,7 +724,13 @@ function object(obj){
 			_fire(e.data[0][0],e.data[1]);
 		}
 	};
-	worker.onerror=rejectPromises;
+	worker.onerror=function(e){
+		rejectPromises(e);
+		_fire('error',e);
+	};
+	w.on('console',function(msg){
+		console[msg[0]].apply(console,msg[1]);
+	});
 	w._close = function(){
 		worker.terminate();
 		rejectPromises("closed");
@@ -763,7 +796,7 @@ function queue(obj,n,dumb){
 		return w;
 	};
 	w.batch.fire = batchFire;
-	w.batchTransfer = batchFire;
+	w.batchTransfer.fire = batchFire;
 	function clearQueue(mgs){
 		mgs = mgs || 'canceled';
 		queueLen = 0;
@@ -869,29 +902,30 @@ function rWorker(fun,callback){
 		return fakeReducer(fun,callback);
 	}
 	var w = new Communist();
-	var func = ['function (dat, cb) {	var fun = ',fun,';	switch (dat[0]) {	case "data":		if (!this._r) {			this._r = dat[1];		}		else {			this._r = fun(this._r, dat[1]);		}		break;	case "get":		return cb(this._r);	case "close":		cb(this._r);		this.__close__();		break;	}};'];
-	var cb =function(data){
-		callback(data);
-	};
-	var worker = mapWorker(func.join(''),cb);
-	w.data=function(data,transfer){
-		!c._noTransferable?worker.data(["data",data],transfer):worker.data(["data",data]);
-		return w;
-	};
-	w.fetch=function(){
-		worker.data(["get"]);
-		return w;
-	};
-	w.close=function(silent){
-		if(silent){
-			callback=function(){};
+	var obj = {
+		fun:fun,
+		data:function(dat){
+			if (!this._r) {
+				this._r = dat;
+			}
+			else {
+				this._r = this.fun(this._r, dat);
+			}
+		},
+		fetch:function(){
+			return this._r;
+		},
+		close:function(silent,cb){
+			if(!silent){
+				cb(this._r);
+			}
+			self.terminate;
 		}
-		worker.data(["close"]);
-		return;
 	};
-	return w;
+	var worker = object(obj);
+	worker.on('message',callback);
+	return worker;
 }
-
 function incrementalMapReduce(threads){
 	var w = new Communist();
 	var len = 0;
@@ -921,7 +955,7 @@ function incrementalMapReduce(threads){
 		var i = 0;
 		function makeMapWorker(){
 				var dd;
-				var mw = mapWorker(fun, function(d){
+				function thenFunc(d){
 					if(typeof d !== undefined){
 						reducer.data(d);
 					}
@@ -929,9 +963,9 @@ function incrementalMapReduce(threads){
 						len--;
 						dd = data.pop();
 						if(t){
-							mw.data(dd,[dd]);
+							mw2.data(dd,[dd]);
 						}else{
-						mw.data(dd);
+							mw2.data(dd);
 						}
 					}else{
 						idle++;
@@ -945,8 +979,17 @@ function incrementalMapReduce(threads){
 							}
 						}
 					}
-				});
-			workers.push(mw);
+				}
+				var mw1 = multiUse(fun);
+				var mw2 = {
+					data:function(data){
+						mw1.data(data).then(thenFunc);
+					},
+					close:function(){
+						mw1.close();
+					}
+				};
+			workers.push(mw2);
 			}
 		while(i<threads){
 			makeMapWorker();
@@ -1049,43 +1092,66 @@ function nonIncrementalMapReduce(threads){
 }
 function c(a,b,d){
 	if(typeof a !== "number" && typeof b === "function"){
-		return mapWorker(a,b,d);
+		return c.mapper(a,b,d);
 	}else if(typeof a === "object" && !Array.isArray(a)){
 		if(typeof b === "number"){
-			return queue(a,b,d);
+			return c.queue(a,b,d);
 		}else{
-			return object(a);
+			return c.communist(a);
 		}
 	}else if(typeof a !== "number"){
-		return b ? single(a,b):multiUse(a);
+		return b ? c.singleUse(a,b):c.communist(a);
 	}else if(typeof a === "number"){
-		return !b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
+		return c.mapReduce(a,b);
 	}
 }
 c.reducer = rWorker;
+c.mapper = mapWorker;
 c.worker = makeWorker;
+c.makeWorker = makeWorker;
 c.makeUrl = function (fileName) {
 	var link = document.createElement("link");
 	link.href = fileName;
 	return link.href;
 };
+c.singleUse = single;
+c.communist = function(input){
+	if(typeof input === 'function'){
+		return object({data:input});
+	}else{
+		return object(input);
+	}
+};
+c.mapReduce=function(num,nonIncremental){
+	if(nonIncremental){
+		return nonIncrementalMapReduce(num);
+	}else{
+		return incrementalMapReduce(num);
+	}
+};
+c.queue = queue;
 c.ajax = function(url,after,notjson){
-	var txt=!notjson?'JSON.parse(request.responseText)':"request.responseText";
-	var resp = after?"("+after.toString()+")("+txt+",_cb)":txt;
-	var func = 'function (url, _cb) {\n\
-		var request = new XMLHttpRequest();\n\
-		request.open("GET", url);\n\
-			request.onreadystatechange = function() {\n\
-				var _resp;\n\
-				if (request.readyState === 4 && request.status === 200) {\n'+
-					'_resp = '+resp+';\n\
-					if(typeof _resp!=="undefined"){_cb(_resp);}\n\
-					}\n\
-			};\n\
-			request.onerror=function(e){throw(e);}\n\
-		request.send();\n\
-	}';
-	return c(func,c.makeUrl(url));
+	var obj={ajax:function (url, _cb) {
+		var that = this;
+		var request = new XMLHttpRequest();
+		request.open("GET", url);
+			request.onreadystatechange = function() {
+				var _resp;
+				if (request.readyState === 4 && request.status === 200) {
+					_resp = that.after(!that.notjson?JSON.parse(request.responseText):request.responseText);
+					if(typeof _resp!=="undefined"){
+						_cb(_resp);
+						}
+					}
+			};
+			request.onerror=function(e){
+				throw(e);
+			};
+		request.send();
+	}};
+	obj.after = after||function(a){return a;};
+	obj.notjson = notjson||false;
+	return c(obj).ajax(c.makeUrl(url));
 };
 function initBrowser(c){
 	var origCW = global.cw;
@@ -1099,10 +1165,10 @@ function initBrowser(c){
 	global.cw = c;
 	
 }
-if(typeof module === "undefined" ){
+if(typeof module === "undefined" || !('exports' in module)){
 	initBrowser(c);
 } else {
 	module.exports=c;
 }
-c.version = "1.7.1";
+c.version = "1.7.2";
 })(this);}

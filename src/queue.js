@@ -51,7 +51,7 @@ function queue(obj,n,dumb){
 		return w;
 	};
 	w.batch.fire = batchFire;
-	w.batchTransfer = batchFire;
+	w.batchTransfer.fire = batchFire;
 	function clearQueue(mgs){
 		mgs = mgs || 'canceled';
 		queueLen = 0;

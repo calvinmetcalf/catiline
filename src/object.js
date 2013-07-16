@@ -61,7 +61,7 @@ function object(obj){
 	var i = 0;
 	var promises = [];
 	var rejectPromises = function(msg){
-		if(typeof msg!=="string" && msg.preventDefault){
+		if(typeof msg!=="string" && 'preventDefault' in msg){
 			msg.preventDefault();
 			msg=msg.message;
 		}
@@ -109,7 +109,13 @@ function object(obj){
 			_fire(e.data[0][0],e.data[1]);
 		}
 	};
-	worker.onerror=rejectPromises;
+	worker.onerror=function(e){
+		rejectPromises(e);
+		_fire('error',e);
+	};
+	w.on('console',function(msg){
+		console[msg[0]].apply(console,msg[1]);
+	});
 	w._close = function(){
 		worker.terminate();
 		rejectPromises("closed");

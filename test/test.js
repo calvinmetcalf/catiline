@@ -90,7 +90,7 @@ describe('cw()', function () {
 			comrade.data("Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){a.indexOf("Ermahgerd").should.be.at.least(0);}).then(wrapUp, wrapUp);
 		});
 		it('should gracefully handle an error as a oneoff', function (done) {
-			cw(square,"Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){a.indexOf("Ermahgerd").should.be.at.least(0);}).then(done, done);
+			cw(square,"Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){a.should.be.a('string');}).then(done, done);
 		});
 	});
 	describe('Worker reuse', function () {

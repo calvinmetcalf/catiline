@@ -66,7 +66,7 @@ describe('cw()', function () {
 				afterEach(a);
 			},function(a){
 				a.preventDefault();
-				assert.include(a.messege,"Ermahgerd",'should be an error');
+				assert.include(a.messege,"blah",'should be an error');
 				afterEach(a);
 			});
 			function afterEach(a){
@@ -75,7 +75,7 @@ describe('cw()', function () {
 					done();
 				}
 			}
-			comrade.data(10).data("Ermahgerd").data(10);
+			comrade.data(10).data("blah blah").data(10);
 		});
 		it('should gracefully handle an error in a sticksaround', function (done) {
 			function wrapUp(){

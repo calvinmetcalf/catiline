@@ -47,6 +47,22 @@ _db.off=function(eventName,func){
 		}
 	}
 };
+var console={};
+function makeConsole(method){
+	return function(){
+		var len = arguments.length;
+		var out =[];
+		var i = 0;
+		while (i<len){
+			out.push(arguments[i]);
+			i++;
+		}
+		_db.fire("console",[method,out]);
+	};
+}
+["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){
+	console[v]=makeConsole(v);
+});
 self.onmessage=function(e){
 	_fire("messege",e.data[1]);
 	if(e.data[0][0]==="com.communistjs"){
