@@ -14,7 +14,6 @@ function single(fun,data){
 			var data = JSON.parse(this.data);
 			var cb = function(data,trans){
 				that.fire('done',data,trans);
-				self.terminate();
 			};
 			var resp = that.fun(data,cb);
 			if(typeof resp !== 'undefined'){
@@ -25,10 +24,12 @@ function single(fun,data){
 	var worker = object(obj);
 	worker.on('done',function(e){
 		promise.resolve(e);
+		worker.close();
 	});
 	worker.on('error',function(e){
 		e.preventDefault();
 		promise.reject(e.message);
+		worker.close();
 	});
 	return promise.promise;
 }
