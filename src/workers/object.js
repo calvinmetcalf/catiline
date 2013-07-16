@@ -110,7 +110,6 @@ function object(obj){
 		}
 	};
 	worker.onerror=function(e){
-		
 		rejectPromises(e);
 		_fire('error',e);
 	};
