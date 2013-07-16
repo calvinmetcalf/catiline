@@ -50,9 +50,6 @@ function fakeObject(inObj){
 			callback = function(data){
 				promises[i].resolve(data);
 			};
-			c.resolve(function(){
-				
-			});
 			try{
 				result = obj[key].call(obj,data,callback);
 				if(typeof result !== "undefined"){
