@@ -20,7 +20,7 @@ function mapWorker(fun,callback,onerr){
 			this.data(data);
 		});
 	};
-	var worker = c.communist(obj);
+	var worker = object(obj);
 	var startIt = function(){
 		worker.start().then(function(){},function(e){
 			onerr(e);
