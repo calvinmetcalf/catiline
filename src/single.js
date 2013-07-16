@@ -27,7 +27,8 @@ function single(fun,data){
 		promise.resolve(e);
 	});
 	worker.on('error',function(e){
-		promise.reject(e);
+		e.preventDefault();
+		promise.reject(e.message);
 	});
 	return promise.promise;
 }
