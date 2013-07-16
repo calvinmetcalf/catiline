@@ -113,6 +113,9 @@ function object(obj){
 		rejectPromises(e);
 		_fire('error',e);
 	};
+	w.on('console',function(msg){
+		console[msg[0]].apply(console,msg[1]);
+	});
 	w._close = function(){
 		worker.terminate();
 		rejectPromises("closed");
