@@ -71,7 +71,6 @@ describe('cw()', function () {
 			});
 			function afterEach(a){
 				count++;
-				console.log(count);
 				if(count === 3){
 					done();
 				}
