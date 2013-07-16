@@ -1,7 +1,4 @@
 function mapWorker(fun,callback,onerr){
-	if(typeof Worker === 'undefined'){
-		return fakeMapWorker(fun,callback,onerr);
-	}
 	onerr = onerr || function(){callback();};
 	var w = new Communist();
 	var obj = {__func__:fun};
@@ -22,6 +19,7 @@ function mapWorker(fun,callback,onerr){
 	};
 	var worker = object(obj);
 	w.data=function(data,transfer){
+		console.log(data);
 		worker.fire('data',data,transfer);
 		return w;
 	};
