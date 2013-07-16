@@ -20,6 +20,8 @@ c.makeUrl = function (fileName) {
 	link.href = fileName;
 	return link.href;
 };
+c.singleUse = single;
+
 c.ajax = function(url,after,notjson){
 	var txt=!notjson?'JSON.parse(request.responseText)':"request.responseText";
 	var resp = after?"("+after.toString()+")("+txt+",_cb)":txt;
