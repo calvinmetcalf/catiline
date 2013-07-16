@@ -1,25 +1,43 @@
 function c(a,b,d){
 	if(typeof a !== "number" && typeof b === "function"){
-		return mapWorker(a,b,d);
+		return c.mapper(a,b,d);
 	}else if(typeof a === "object" && !Array.isArray(a)){
 		if(typeof b === "number"){
-			return queue(a,b,d);
+			return c.queue(a,b,d);
 		}else{
-			return object(a);
+			return c.communist(a);
 		}
 	}else if(typeof a !== "number"){
-		return b ? single(a,b):multiUse(a);
+		return b ? c.singleUse(a,b):c.communist(a);
 	}else if(typeof a === "number"){
-		return !b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
+		return c.mapReduce(a,b);
 	}
 }
 c.reducer = rWorker;
+c.mapper = mapWorker;
 c.worker = makeWorker;
+c.makeWorker = makeWorker;
 c.makeUrl = function (fileName) {
 	var link = document.createElement("link");
 	link.href = fileName;
 	return link.href;
 };
+c.singleUse = single;
+c.communist = function(input){
+	if(typeof input === 'function'){
+		return object({data:input});
+	}else{
+		return object(input);
+	}
+};
+c.mapReduce=function(num,nonIncremental){
+	if(nonIncremental){
+		return nonIncrementalMapReduce(num);
+	}else{
+		return incrementalMapReduce(num);
+	}
+};
+c.queue = queue;
 c.ajax = function(url,after,notjson){
 	var txt=!notjson?'JSON.parse(request.responseText)':"request.responseText";
 	var resp = after?"("+after.toString()+")("+txt+",_cb)":txt;
