@@ -796,7 +796,7 @@ function queue(obj,n,dumb){
 		return w;
 	};
 	w.batch.fire = batchFire;
-	w.batchTransfer = batchFire;
+	w.batchTransfer.fire = batchFire;
 	function clearQueue(mgs){
 		mgs = mgs || 'canceled';
 		queueLen = 0;
@@ -1131,22 +1131,27 @@ c.mapReduce=function(num,nonIncremental){
 };
 c.queue = queue;
 c.ajax = function(url,after,notjson){
-	var txt=!notjson?'JSON.parse(request.responseText)':"request.responseText";
-	var resp = after?"("+after.toString()+")("+txt+",_cb)":txt;
-	var func = 'function (url, _cb) {\n\
-		var request = new XMLHttpRequest();\n\
-		request.open("GET", url);\n\
-			request.onreadystatechange = function() {\n\
-				var _resp;\n\
-				if (request.readyState === 4 && request.status === 200) {\n'+
-					'_resp = '+resp+';\n\
-					if(typeof _resp!=="undefined"){_cb(_resp);}\n\
-					}\n\
-			};\n\
-			request.onerror=function(e){throw(e);}\n\
-		request.send();\n\
-	}';
-	return c(func,c.makeUrl(url));
+	var obj={ajax:function (url, _cb) {
+		var that = this;
+		var request = new XMLHttpRequest();
+		request.open("GET", url);
+			request.onreadystatechange = function() {
+				var _resp;
+				if (request.readyState === 4 && request.status === 200) {
+					_resp = that.after(!that.notjson?JSON.parse(request.responseText):request.responseText);
+					if(typeof _resp!=="undefined"){
+						_cb(_resp);
+						}
+					}
+			};
+			request.onerror=function(e){
+				throw(e);
+			};
+		request.send();
+	}};
+	obj.after = after||function(a){return a;};
+	obj.notjson = notjson||false;
+	return c(obj).ajax(c.makeUrl(url));
 };
 function initBrowser(c){
 	var origCW = global.cw;
