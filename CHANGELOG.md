@@ -11,6 +11,7 @@ on more commonjs enviroments
 - bump the version of firefox we test to 22
 - remove opera from the tests until I can figure out why I can't even do a manual test on Opera in sauce labs.
 - remove src/workers folder as we now only have 1 seperate worker script.
+- fix type with events in batchTransfer queues.
 
 ##1.7.1
 

@@ -1,6 +1,12 @@
 marked.setOptions 
 	color: true
-
+ajax = (url, cb)->
+	xhr = new XMLHttpRequest()
+	xhr.open('GET',url)
+	xhr.onload = ()->
+		cb xhr.responseText
+	xhr.send()
+worker = cw {ajax:ajax}
 class View extends Backbone.View
 	el:$ '#cont'
 	cur:'README'
@@ -13,9 +19,7 @@ class View extends Backbone.View
 	render:->
 		@$el.html "<p class='text-center'><i class='icon-spinner icon-spin icon-4x'></i>loading...</p>"
 		unless typeof window.Worker is 'undefined'
-			communist.ajax("#{@cur}.md",(d)->
-				d
-			,true).then (md)=>
+			worker.ajax(cw.makeUrl("#{@cur}.md")).then (md)=>
 				@$el.html(marked(md))
 		else
 			$('#cont').html """
