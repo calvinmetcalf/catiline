@@ -319,22 +319,33 @@ function mapWorker(fun,callback,onerr){
 	if(typeof Worker === 'undefined'){
 		return fakeMapWorker(fun,callback,onerr);
 	}
+	onerr = onerr || function(){callback();};
 	var w = new Communist();
-	var worker = makeWorker(['var _db = {};_db.__close__ = function () {	self.close();};var _self = {};_db.__fun__ = ',fun,';_self.cb = function (data, transfer) {	!self._noTransferable ? self.postMessage(data, transfer) : self.postMessage(data);};self.onmessage = function (e) {	_self.result = _db.__fun__(e.data, _self.cb);	if (typeof _self.result !== "undefined") {		_self.cb(_self.result);	}}']);
-	worker.onmessage = function(e){
-		callback(e.data);
+	var obj = {__func__:fun};
+	obj.data = function(data){
+		var that = this;
+		var cb = function(data,transform){
+			that.fire('data',data,transform);
+		};
+		var resp = that.__func__(data,cb);
+		if(typeof resp !== "undefined"){
+			cb(resp);
+		}
 	};
-	if(onerr){
-		worker.onerror=onerr;
-	}else{
-		worker.onerror=function(){callback();};
-	}
+	obj.init = function(){
+		this.on('data',function(data){
+			this.data(data);
+		});
+	};
+	var worker = object(obj);
 	w.data=function(data,transfer){
-		!c._noTransferable?worker.postMessage(data,transfer):worker.postMessage(data);
+		worker.fire('data',data,transfer);
 		return w;
 	};
+	worker.on('data',callback);
+	worker.on('error',onerr);
 	w.close=function(){
-		return worker.terminate();
+		return worker.close();
 	};
 	return w;
 }
@@ -649,7 +660,7 @@ function object(obj){
 	var i = 0;
 	var promises = [];
 	var rejectPromises = function(msg){
-		if(typeof msg!=="string" && msg.preventDefault){
+		if(typeof msg!=="string" && 'preventDefault' in msg){
 			msg.preventDefault();
 			msg=msg.message;
 		}
@@ -697,7 +708,11 @@ function object(obj){
 			_fire(e.data[0][0],e.data[1]);
 		}
 	};
-	worker.onerror=rejectPromises;
+	worker.onerror=function(e){
+		
+		rejectPromises(e);
+		_fire('error',e);
+	};
 	w._close = function(){
 		worker.terminate();
 		rejectPromises("closed");
@@ -869,29 +884,30 @@ function rWorker(fun,callback){
 		return fakeReducer(fun,callback);
 	}
 	var w = new Communist();
-	var func = ['function (dat, cb) {	var fun = ',fun,';	switch (dat[0]) {	case "data":		if (!this._r) {			this._r = dat[1];		}		else {			this._r = fun(this._r, dat[1]);		}		break;	case "get":		return cb(this._r);	case "close":		cb(this._r);		this.__close__();		break;	}};'];
-	var cb =function(data){
-		callback(data);
-	};
-	var worker = mapWorker(func.join(''),cb);
-	w.data=function(data,transfer){
-		!c._noTransferable?worker.data(["data",data],transfer):worker.data(["data",data]);
-		return w;
-	};
-	w.fetch=function(){
-		worker.data(["get"]);
-		return w;
-	};
-	w.close=function(silent){
-		if(silent){
-			callback=function(){};
+	var obj = {
+		fun:fun,
+		data:function(dat){
+			if (!this._r) {
+				this._r = dat;
+			}
+			else {
+				this._r = this.fun(this._r, dat);
+			}
+		},
+		fetch:function(){
+			return this._r;
+		},
+		close:function(silent,cb){
+			if(!silent){
+				cb(this._r);
+			}
+			self.terminate;
 		}
-		worker.data(["close"]);
-		return;
 	};
-	return w;
+	var worker = object(obj);
+	worker.on('message',callback);
+	return worker;
 }
-
 function incrementalMapReduce(threads){
 	var w = new Communist();
 	var len = 0;
@@ -921,7 +937,7 @@ function incrementalMapReduce(threads){
 		var i = 0;
 		function makeMapWorker(){
 				var dd;
-				var mw = mapWorker(fun, function(d){
+				function thenFunc(d){
 					if(typeof d !== undefined){
 						reducer.data(d);
 					}
@@ -929,9 +945,9 @@ function incrementalMapReduce(threads){
 						len--;
 						dd = data.pop();
 						if(t){
-							mw.data(dd,[dd]);
+							mw2.data(dd,[dd]);
 						}else{
-						mw.data(dd);
+							mw2.data(dd);
 						}
 					}else{
 						idle++;
@@ -945,8 +961,17 @@ function incrementalMapReduce(threads){
 							}
 						}
 					}
-				});
-			workers.push(mw);
+				}
+				var mw1 = multiUse(fun);
+				var mw2 = {
+					data:function(data){
+						mw1.data(data).then(thenFunc);
+					},
+					close:function(){
+						mw1.close();
+					}
+				};
+			workers.push(mw2);
 			}
 		while(i<threads){
 			makeMapWorker();
@@ -1049,26 +1074,44 @@ function nonIncrementalMapReduce(threads){
 }
 function c(a,b,d){
 	if(typeof a !== "number" && typeof b === "function"){
-		return mapWorker(a,b,d);
+		return c.mapper(a,b,d);
 	}else if(typeof a === "object" && !Array.isArray(a)){
 		if(typeof b === "number"){
-			return queue(a,b,d);
+			return c.queue(a,b,d);
 		}else{
-			return object(a);
+			return c.communist(a);
 		}
 	}else if(typeof a !== "number"){
-		return b ? single(a,b):multiUse(a);
+		return b ? c.singleUse(a,b):c.communist(a);
 	}else if(typeof a === "number"){
-		return !b ? incrementalMapReduce(a):nonIncrementalMapReduce(a);
+		return c.mapReduce(a,b);
 	}
 }
 c.reducer = rWorker;
+c.mapper = mapWorker;
 c.worker = makeWorker;
+c.makeWorker = makeWorker;
 c.makeUrl = function (fileName) {
 	var link = document.createElement("link");
 	link.href = fileName;
 	return link.href;
 };
+c.singleUse = single;
+c.communist = function(input){
+	if(typeof input === 'function'){
+		return object({data:input});
+	}else{
+		return object(input);
+	}
+};
+c.mapReduce=function(num,nonIncremental){
+	if(nonIncremental){
+		return nonIncrementalMapReduce(num);
+	}else{
+		return incrementalMapReduce(num);
+	}
+};
+c.queue = queue;
 c.ajax = function(url,after,notjson){
 	var txt=!notjson?'JSON.parse(request.responseText)':"request.responseText";
 	var resp = after?"("+after.toString()+")("+txt+",_cb)":txt;
