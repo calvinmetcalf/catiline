@@ -304,21 +304,35 @@ function single(fun,data){
 		return multiUse(fun).data(data);
 	}
 	var promise = c.deferred();
-	var worker = makeWorker(['var _self = {};_self.fun = ',fun,';_self.cb = function (data, transfer) {	!self._noTransferable ? self.postMessage(data, transfer) : self.postMessage(data);	self.close();};_self.result = _self.fun(',JSON.stringify(data),', _self.cb);if (typeof _self.result !== "undefined") {	_self.cb(_self.result);}']);
-	worker.onmessage=function(e){
-		promise.resolve(e.data);
+	var obj = {
+		fun:fun,
+		data:JSON.stringify(data),
+		init:function(){
+			var that = this;
+			var data = JSON.parse(this.data);
+			var cb = function(data,trans){
+				that.fire('done',data,trans);
+			};
+			var resp = that.fun(data,cb);
+			if(typeof resp !== 'undefined'){
+				cb(resp);
+			}
+		}
 	};
-	worker.onerror=function(e){
+	var worker = object(obj);
+	worker.on('done',function(e){
+		promise.resolve(e);
+		worker.close();
+	});
+	worker.on('error',function(e){
 		e.preventDefault();
 		promise.reject(e.message);
-	};
+		worker.close();
+	});
 	return promise.promise;
 }
 
 function mapWorker(fun,callback,onerr){
-	if(typeof Worker === 'undefined'){
-		return fakeMapWorker(fun,callback,onerr);
-	}
 	onerr = onerr || function(){callback();};
 	var w = new Communist();
 	var obj = {__func__:fun};
@@ -360,6 +374,7 @@ function fakeObject(inObj){
 	var wlisteners = {};
 	var olisteners={};
 	var loading;
+	var called=false;
 	function ajax(url){
 		var promise = c.deferred();
 		var xhr = new XMLHttpRequest();
@@ -396,6 +411,9 @@ function fakeObject(inObj){
 		var actualFunc = function(data){
 			var result,i,callback;
 			i = promises.length;
+			if(!called){
+				called = true;
+			}
 			promises[i] = c.deferred();
 			callback = function(data){
 				promises[i].resolve(data);
@@ -406,6 +424,7 @@ function fakeObject(inObj){
 					callback(result);
 				}
 			} catch (e){
+				obj.fire('error',{preventDefault:function(){},messege:e});
 				promises[i].reject({preventDefault:function(){},messege:e});
 			}
 			return promises[i].promise;
@@ -467,11 +486,12 @@ function fakeObject(inObj){
 		});
 	};
 	w.fire=function(eventName,data){
-		if(!(eventName in olisteners)){
-			return w;
-		}
-		olisteners[eventName].forEach(function(v){
-			v(data);
+		c.setImmediate(function () {
+			if(eventName in olisteners && Array.isArray(olisteners[eventName])){
+				olisteners[eventName].forEach(function(v){
+					v(data);
+				});
+			}
 		});
 		return w;
 	};
@@ -512,7 +532,11 @@ function fakeObject(inObj){
 			olisteners[eventName]=[];
 		}
 		olisteners[eventName].push(function(a){
-			func.call(scope,a);
+			try{
+				func.call(scope,a);
+			}catch(e){
+				obj.fire('error',{preventDefault:function(){},messege:e});
+			}
 		});
 		return obj;
 	};
@@ -562,20 +586,12 @@ function fakeObject(inObj){
 	if(!('close' in w)){
 		w.close=w._close;
 	}
-	w.initialize();
+	if(!called){
+		w.initialize('init');
+	}
 	return w;
 }
 
-function fakeMapWorker(fun,callback,onerr){
-	var w = new Communist();
-	var worker = fakeObject({data:fun});
-	w.data=function(data){
-		worker.data(data).then(callback,onerr);
-		return w;
-	};
-	w.close=worker.close;
-	return w;
-}
 
 function fakeReducer(fun,callback){
 	var w = new Communist();
@@ -709,7 +725,6 @@ function object(obj){
 		}
 	};
 	worker.onerror=function(e){
-		
 		rejectPromises(e);
 		_fire('error',e);
 	};
