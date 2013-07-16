@@ -10,6 +10,7 @@ on more commonjs enviroments
 - the internals are now massivly simplified.
 - bump the version of firefox we test to 22
 - remove opera from the tests until I can figure out why I can't even do a manual test on Opera in sauce labs.
+- __CONSOLE.LOG!__, more precisely `console.log`, `console.warn` etc. are now usable in the worker.
 
 ##1.7.1
 
