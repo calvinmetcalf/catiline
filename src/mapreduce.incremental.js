@@ -27,7 +27,7 @@ function incrementalMapReduce(threads){
 		var i = 0;
 		function makeMapWorker(){
 				var dd;
-				var mw = mapWorker(fun, function(d){
+				function thenFunc(d){
 					if(typeof d !== undefined){
 						reducer.data(d);
 					}
@@ -35,9 +35,9 @@ function incrementalMapReduce(threads){
 						len--;
 						dd = data.pop();
 						if(t){
-							mw.data(dd,[dd]);
+							mw2.data(dd,[dd]);
 						}else{
-						mw.data(dd);
+							mw2.data(dd);
 						}
 					}else{
 						idle++;
@@ -51,8 +51,17 @@ function incrementalMapReduce(threads){
 							}
 						}
 					}
-				});
-			workers.push(mw);
+				}
+				var mw1 = multiUse(fun);
+				var mw2 = {
+					data:function(data){
+						mw1.data(data).then(thenFunc);
+					},
+					close:function(){
+						mw1.close();
+					}
+				};
+			workers.push(mw2);
 			}
 		while(i<threads){
 			makeMapWorker();
