@@ -12,6 +12,7 @@ on more commonjs enviroments
 - remove opera from the tests until I can figure out why I can't even do a manual test on Opera in sauce labs.
 - remove src/workers folder as we now only have 1 seperate worker script.
 - fix type with events in batchTransfer queues.
+- Had to put up a monkey patch onto communist.ajax as I accidentally broke it, seriously It's going to be gone soon stop using it.
 
 ##1.7.1
 
