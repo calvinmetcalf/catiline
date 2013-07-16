@@ -10,7 +10,7 @@ module.exports = function(grunt) {
 			opt = 'utf8';
 		}
 		var done = this.async();
-		var which = ['object','single'];
+		var which = ['object'];
 		var dealwith = function(input,callback){
 			var parent = './src/workers/'+input+'.js';
 			var child = './src/workers/worker.'+input+'.js';
@@ -54,7 +54,7 @@ module.exports = function(grunt) {
 					seperator:";\n",
 					footer : 'c.version = "<%= pkg.version %>";\n})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/all.js','src/utils.js','src/temp/single.js','src/general.js','src/workers/multiuse.js','src/fakeWorkers.js','src/temp/object.js','src/queue.js','src/temp/reducer.js','src/mapreduce.incremental.js','src/mapreduce.nonincremental.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/all.js','src/utils.js','src/single.js','src/general.js','src/workers/multiuse.js','src/fakeWorkers.js','src/temp/object.js','src/queue.js','src/temp/reducer.js','src/mapreduce.incremental.js','src/mapreduce.nonincremental.js','src/wrapup.js']}
 			}
 		},mocha_phantomjs: {
 		all: {
