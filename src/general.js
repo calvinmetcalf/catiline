@@ -19,7 +19,6 @@ function mapWorker(fun,callback,onerr){
 	};
 	var worker = object(obj);
 	w.data=function(data,transfer){
-		console.log(data);
 		worker.fire('data',data,transfer);
 		return w;
 	};
