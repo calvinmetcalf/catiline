@@ -1,6 +1,14 @@
 Changelog
 ===
 
+##1.7.2
+
+- patch from [Fresheyeball](https://github.com/Fresheyeball) to get it working 
+on more commonjs enviroments
+- all the worker creation functions now have publicly accessable methods
+- `communist.worker` is now accessable at `communist.makeWorker` with `communist.worker` going to be reasasined in 2.0.0
+- the internals are now massivly simplified.
+
 ##1.7.1
 
 - Improvements to pub-sub when using a worker queue
