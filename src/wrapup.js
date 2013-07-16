@@ -15,6 +15,7 @@ function c(a,b,d){
 }
 c.reducer = rWorker;
 c.worker = makeWorker;
+c.makeWorker = makeWorker;
 c.makeUrl = function (fileName) {
 	var link = document.createElement("link");
 	link.href = fileName;
