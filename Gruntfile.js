@@ -2,6 +2,13 @@ var fs = require('fs');
 var async = require('async');
 module.exports = function(grunt) {
 	var templateThings = function(){
+		var ver = process.versions.node.split('.')[1];
+		var opt;
+		if(ver === '10'){
+			opt = {encoding :'utf8'};
+		}else{
+			opt = 'utf8';
+		}
 		var done = this.async();
 		var which = ['object','single'];
 		var dealwith = function(input,callback){
@@ -9,7 +16,7 @@ module.exports = function(grunt) {
 			var child = './src/workers/worker.'+input+'.js';
 			var temp = './src/temp/'+input+'.js';
 			async.map([parent,child], function(path,cb){
-				fs.readFile(path,'utf8',cb);
+				fs.readFile(path,opt,cb);
 			}, function(err, results){
 				var parent = results[0];
 				var child = results[1];
@@ -17,7 +24,7 @@ module.exports = function(grunt) {
 					return "',"+b+",'";
 				}).replace(/\n/gm,'')+"']";
 				var out = parent .replace(/\$\$fObj\$\$/,replacedChild);
-				fs.writeFile(temp,out,'utf8',function(){console.log('done')},callback);
+				fs.writeFile(temp,out,opt,function(){console.log('done')},callback);
 			});
 		};
 		async.map(which,dealwith,function(err){
