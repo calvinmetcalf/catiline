@@ -8,6 +8,8 @@ on more commonjs enviroments
 - all the worker creation functions now have publicly accessable methods
 - `communist.worker` is now accessable at `communist.makeWorker` with `communist.worker` going to be reasasined in 2.0.0
 - the internals are now massivly simplified.
+- bump the version of firefox we test to 22
+- remove opera from the tests until I can figure out why I can't even do a manual test on Opera in sauce labs.
 
 ##1.7.1
 
