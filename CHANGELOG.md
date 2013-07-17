@@ -7,6 +7,7 @@ Changelog
 - all is now part of promiscious
 - since we only have one worker type we can simplify the build script
 - tighter jshint options
+- having a space in the `importScripts()` will no longer cause an infinite loop thanks to [shole](https://github.com/shole)
 
 ##1.7.2
 
