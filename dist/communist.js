@@ -241,15 +241,15 @@ function regexImports(string){
 	loopFunc = function(a,b){
 		if(b){
 			"importScripts("+b.split(",").forEach(function(cc){
-				matches[c.makeUrl(cc.slice(1,-1))]=true;
+				matches[c.makeUrl(cc.match(/\s*[\'\"](\S*)[\'\"]\s*/)[1])]=true; // trim whitespace, add to matches
 			})+");\n";
 		}
 	};
 	while(match){
-		match = rest.match(/(importScripts\(.*?\);)/);
-		rest = rest.replace(/(importScripts\((?:.*?\.js[\'\"])?\);?)/,"\n");
+		match = rest.match(/(importScripts\(.*?\);?)/);
+		rest = rest.replace(/(importScripts\(\s*(?:[\'\"].*?[\'\"])?\s*\);?)/,"\n");
 		if(match){
-			match[0].replace(/importScripts\((.*?\.js[\'\"])\);?/g,loopFunc);
+			match[0].replace(/importScripts\(\s*([\'\"].*?[\'\"])?\s*\);?/g,loopFunc);
 		}
 	}
 	matches = Object.keys(matches);
