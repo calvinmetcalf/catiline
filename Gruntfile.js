@@ -1,34 +1,12 @@
-var fs = require('fs');
-var async = require('async');
 module.exports = function(grunt) {
 	var templateThings = function(){
-		var ver = process.versions.node.split('.')[1];
-		var opt;
-		if(ver === '10'){
-			opt = {encoding :'utf8'};
-		}else{
-			opt = 'utf8';
-		}
-		var done = this.async();
-		var dealwith = function(input,callback){
-			var parent = './src/'+input+'.js';
-			var child = './src/worker.'+input+'.js';
-			var temp = './src/temp.'+input+'.js';
-			async.map([parent,child], function(path,cb){
-				fs.readFile(path,opt,cb);
-			}, function(err, results){
-				var parent = results[0];
-				var child = results[1];
-				var replacedChild = "['"+child.replace(/\$\$(.+?)\$\$/,function(a,b){
-					return "',"+b+",'";
-				}).replace(/\n/gm,'')+"']";
-				var out = parent .replace(/\$\$fObj\$\$/,replacedChild);
-				fs.writeFile(temp,out,opt,function(){console.log('done')},callback);
-			});
-		};
-		dealwith('object',function(err){
-			done(true);
-		});
+			var parent =  grunt.file.read('./src/object.js');
+			var child = grunt.file.read('./src/worker.object.js');
+			var replacedChild = "['"+child.replace(/\$\$(.+?)\$\$/,function(a,b){
+				return "',"+b+",'";
+			}).replace(/\n/gm,'')+"']";
+			var out = parent.replace(/\$\$fObj\$\$/,replacedChild);
+			grunt.file.write('./src/temp.object.js',out);
 	};
 	// Project configuration.
 	grunt.initConfig({
