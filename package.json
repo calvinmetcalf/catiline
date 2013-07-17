@@ -1,6 +1,6 @@
 {
   "name": "communist",
-  "version": "1.7.3",
+  "version": "1.7.4",
   "description": "Multi proccessing with workers in the browser.",
   "keywords": [
     "workers",
