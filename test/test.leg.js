@@ -1,6 +1,6 @@
 mocha.setup({
     ui: "bdd",
-    globals: ["console"],
+    globals: ["console","imported","seleniumAlert", "alert", "confirm", "prompt", "open", "seleniumMarker1374082680359"],
     timeout: 300000
 });
 
