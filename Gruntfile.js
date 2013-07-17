@@ -99,6 +99,10 @@ module.exports = function(grunt) {
 						platform: 'linux',
 						version: '22'
 					},{
+						browserName: 'opera',
+						platform: 'linux',
+						version: '12'
+					},{
 						browserName: "chrome",
 						platform: "OS X 10.8"
 					},{
@@ -143,6 +147,10 @@ module.exports = function(grunt) {
 						browserName: 'safari',
 						platform: 'win7',
 						version: '5'
+					},{
+						browserName: 'opera',
+						platform: 'xp',
+						version: '12'
 					}
 				],
 			urls:[
