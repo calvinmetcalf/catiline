@@ -1,6 +1,11 @@
 Changelog
 ===
 
+##1.7.4
+
+- run the legacy browser test (though not in a legacy browser) locally
+- fixes related to reducer.
+
 ##1.7.3
 
 - multiuse is no longer a separate function but just what happens when the object worker is called with a function
