@@ -416,7 +416,7 @@ describe('cw()', function () {
 			self.imported=false;
 			cw(function(a){importScripts("fakeLib.js",'../test/fakerLib.js');return a;}, 9).then(function () {},function(a){assert.include(a,"tried to import twice");}).then(function(){done()}, function(){done()});
 		});
-		it("should be able to import 2 scripts that are teh same",function (done){
+		it("should be able to import 2 scripts that are the same",function (done){
 			self.imported=false;
 			cw(function(a){importScripts("fakeLib.js",'../test/fakeLib.js');return a;}, 9).then(function () {},function(a){assert.include(a,"tried to import twice");}).then(function(){done()}, function(){done()});
 		});
