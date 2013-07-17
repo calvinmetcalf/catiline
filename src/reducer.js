@@ -1,11 +1,7 @@
-function rWorker(fun,callback){
-	if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
-		return fakeReducer(fun,callback);
-	}
-	var w = new Communist();
+function rWorker(fun, callback) {
 	var obj = {
-		fun:fun,
-		data:function(dat){
+		fun: fun,
+		data: function (dat) {
 			if (!this._r) {
 				this._r = dat;
 			}
@@ -13,17 +9,17 @@ function rWorker(fun,callback){
 				this._r = this.fun(this._r, dat);
 			}
 		},
-		fetch:function(){
-			return this._r;
+		fetch: function () {
+			this.fire('msg',this._r);
 		},
-		close:function(silent,cb){
-			if(!silent){
-				cb(this._r);
+		close: function (silent) {
+			if (!silent) {
+				this.fire('msg',this._r);
 			}
 			self.terminate;
 		}
 	};
 	var worker = object(obj);
-	worker.on('message',callback);
+	worker.on('msg', callback);
 	return worker;
 }
