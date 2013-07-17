@@ -100,8 +100,8 @@ module.exports = function(grunt) {
 						version: '22'
 					},{
 						browserName: 'opera',
-						platform: 'linux',
-						version: '12'
+						platform: 'xp',
+						version: '11'
 					},{
 						browserName: "chrome",
 						platform: "OS X 10.8"
