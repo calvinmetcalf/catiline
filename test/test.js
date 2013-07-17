@@ -188,6 +188,9 @@ describe('cw()', function () {
 		it("should be able to import scripts",function (done){
 			cw(function(a){importScripts('fakeLib.js');return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
 		});
+		it("should be able to import scripts with a space in it",function (done){
+			cw(function(a){importScripts( 'fakeLib.js' );return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
+		});
 		it("should be able to import scripts with double quotes",function (done){
 			cw(function(a){importScripts("fakeLib.js");return a;}, 9).then(function (a) { a.should.equal(9); }).then(done, done);
 		});

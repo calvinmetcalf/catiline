@@ -1,4 +1,9 @@
 function object(obj){
+	if(typeof obj === 'function'){
+		obj = {
+			data:obj
+		};
+	}
 	if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
 		return fakeObject(obj);
 	}

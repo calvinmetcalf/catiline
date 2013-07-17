@@ -52,7 +52,7 @@ function incrementalMapReduce(threads){
 						}
 					}
 				}
-				var mw1 = multiUse(fun);
+				var mw1 = object(fun);
 				var mw2 = {
 					data:function(data){
 						mw1.data(data).then(thenFunc);
