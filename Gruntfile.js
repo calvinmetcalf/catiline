@@ -10,7 +10,6 @@ module.exports = function(grunt) {
 			opt = 'utf8';
 		}
 		var done = this.async();
-		var which = ['object'];
 		var dealwith = function(input,callback){
 			var parent = './src/'+input+'.js';
 			var child = './src/worker.'+input+'.js';
@@ -27,7 +26,7 @@ module.exports = function(grunt) {
 				fs.writeFile(temp,out,opt,function(){console.log('done')},callback);
 			});
 		};
-		async.map(which,dealwith,function(err){
+		dealwith('object',function(err){
 			done(true);
 		});
 	};
