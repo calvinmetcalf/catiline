@@ -402,7 +402,7 @@ describe('cw()', function () {
 			cw(function(a){importScripts('fakeLib.js');return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
 		});
 		it("should be able to import scripts with a space in it",function (done){
-			cw(function(a){importScripts( 'fakeLib.js' );return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
+			cw(function(a){importScripts( 'fakeLib.js' );return a;}, 9).then(function (a) { assert.equal(a,9); }).then(function(){done()}, function(){done()});
 		});
 		it("should be able to import scripts with double quotes",function (done){
 			self.imported=false;
