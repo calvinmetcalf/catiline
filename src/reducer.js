@@ -10,16 +10,16 @@ function rWorker(fun, callback) {
 			}
 		},
 		fetch: function () {
-			return this._r;
+			this.fire('msg',this._r);
 		},
-		close: function (silent, cb) {
+		close: function (silent) {
 			if (!silent) {
-				cb(this._r);
+				this.fire('msg',this._r);
 			}
 			self.terminate;
 		}
 	};
 	var worker = object(obj);
-	worker.on('message', callback);
+	worker.on('msg', callback);
 	return worker;
 }
