@@ -53,7 +53,7 @@ module.exports = function(grunt) {
 					seperator:";\n",
 					footer : 'c.version = "<%= pkg.version %>";\n})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/all.js','src/utils.js','src/single.js','src/general.js','src/fakeWorkers.js','src/temp.object.js','src/queue.js','src/reducer.js','src/mapreduce.incremental.js','src/mapreduce.nonincremental.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/single.js','src/general.js','src/fakeWorkers.js','src/temp.object.js','src/queue.js','src/reducer.js','src/mapreduce.incremental.js','src/mapreduce.nonincremental.js','src/wrapup.js']}
 			}
 		},mocha_phantomjs: {
 		all: {
