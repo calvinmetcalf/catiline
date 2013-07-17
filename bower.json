@@ -1,6 +1,6 @@
 {
   "name": "communist",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "main": "dist/communist.js",
   "ignore": [
     "**/.*",

@@ -23,13 +23,7 @@ c.makeUrl = function (fileName) {
 	return link.href;
 };
 c.singleUse = single;
-c.communist = function(input){
-	if(typeof input === 'function'){
-		return object({data:input});
-	}else{
-		return object(input);
-	}
-};
+c.communist = object;
 c.mapReduce=function(num,nonIncremental){
 	if(nonIncremental){
 		return nonIncrementalMapReduce(num);

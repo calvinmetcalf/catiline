@@ -1,6 +1,6 @@
 mocha.setup({
     ui: "bdd",
-    globals: ["console"],
+    globals: ["console","imported","seleniumAlert", "alert", "confirm", "prompt", "open", "seleniumMarker1374082680359"],
     timeout: 300000
 });
 
@@ -401,6 +401,9 @@ describe('cw()', function () {
 			self.imported=false;
 			cw(function(a){importScripts('fakeLib.js');return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
 		});
+		it("should be able to import scripts with a space in it",function (done){
+			cw(function(a){importScripts( 'fakeLib.js' );return a;}, 9).then(function (a) { assert.equal(a,9); }).then(function(){done()}, function(){done()});
+		});
 		it("should be able to import scripts with double quotes",function (done){
 			self.imported=false;
 			cw(function(a){importScripts("fakeLib.js");return a;}, 9).then(function (a) { assert.equal(a,9); }).then(function(){done()}, function(){done()});
@@ -413,7 +416,7 @@ describe('cw()', function () {
 			self.imported=false;
 			cw(function(a){importScripts("fakeLib.js",'../test/fakerLib.js');return a;}, 9).then(function () {},function(a){assert.include(a,"tried to import twice");}).then(function(){done()}, function(){done()});
 		});
-		it("should be able to import 2 scripts that are teh same",function (done){
+		it("should be able to import 2 scripts that are the same",function (done){
 			self.imported=false;
 			cw(function(a){importScripts("fakeLib.js",'../test/fakeLib.js');return a;}, 9).then(function () {},function(a){assert.include(a,"tried to import twice");}).then(function(){done()}, function(){done()});
 		});
