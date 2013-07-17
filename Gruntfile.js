@@ -76,7 +76,7 @@ module.exports = function(grunt) {
 		},
 	jshint: {
 		options:{
-			multistr:true,
+			latedef:"nofunc",
 			expr:true,
 			trailing:true,
 			eqeqeq:true,
