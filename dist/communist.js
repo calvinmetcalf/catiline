@@ -300,7 +300,7 @@ function makeWorker(strings){
 
 function single(fun,data){
 	if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
-		return multiUse(fun).data(data);
+		return object(fun).data(data);
 	}
 	var promise = c.deferred();
 	var obj = {
