@@ -1,4 +1,4 @@
-/*! communist 1.7.2 2013-07-16*/
+/*! communist 1.7.3 2013-07-17*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -208,29 +208,28 @@ if (typeof document === "undefined") {
 	};
 	// Returns a deferred
 	exports.deferred= createDeferred;
-})(c);
-
-c.all=function(array){
-	var promise = c.deferred();
-	var len = array.length;
-	var resolved=0;
-	var out = new Array(len);
-	var onSuccess=function(n){
-		return function(v){
-			out[n]=v;
-			resolved++;
-			if(resolved===len){
-				promise.resolve(out);
-			}
+	exports.all=function(array){
+		var promise = exports.deferred();
+		var len = array.length;
+		var resolved=0;
+		var out = [];
+		var onSuccess=function(n){
+			return function(v){
+				out[n]=v;
+				resolved++;
+				if(resolved===len){
+					promise.resolve(out);
+				}
+			};
 		};
-	};
 		array.forEach(function(v,i){
 			v.then(onSuccess(i),function(a){
 				promise.reject(a);
 			});
 		});
-	return promise.promise;
-};
+		return promise.promise;
+	};
+})(c);
 
 //this is mainly so the name shows up when you look at the object in the console
 var Communist = function(){};
@@ -362,9 +361,6 @@ function mapWorker(fun,callback,onerr){
 		return worker.close();
 	};
 	return w;
-}
-function multiUse(fun){
-	return object({data:fun});
 }
 function fakeObject(inObj){
 	/*jslint evil: true */
@@ -614,6 +610,11 @@ function fakeReducer(fun,callback){
 }
 
 function object(obj){
+	if(typeof obj === 'function'){
+		obj = {
+			data:obj
+		};
+	}
 	if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
 		return fakeObject(obj);
 	}
@@ -980,7 +981,7 @@ function incrementalMapReduce(threads){
 						}
 					}
 				}
-				var mw1 = multiUse(fun);
+				var mw1 = object(fun);
 				var mw2 = {
 					data:function(data){
 						mw1.data(data).then(thenFunc);
@@ -1115,13 +1116,7 @@ c.makeUrl = function (fileName) {
 	return link.href;
 };
 c.singleUse = single;
-c.communist = function(input){
-	if(typeof input === 'function'){
-		return object({data:input});
-	}else{
-		return object(input);
-	}
-};
+c.communist = object;
 c.mapReduce=function(num,nonIncremental){
 	if(nonIncremental){
 		return nonIncrementalMapReduce(num);
@@ -1170,5 +1165,5 @@ if(typeof module === "undefined" || !('exports' in module)){
 } else {
 	module.exports=c;
 }
-c.version = "1.7.2";
+c.version = "1.7.3";
 })(this);}
