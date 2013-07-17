@@ -138,6 +138,10 @@ module.exports = function(grunt) {
 					},{
 						browserName: 'chrome',
 						platform: 'linux'
+					},{
+						browserName: 'opera',
+						platform: 'xp',
+						version:'11'
 					}
 				],
 			urls:[
