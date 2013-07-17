@@ -33,16 +33,17 @@ module.exports = function(grunt) {
 				},
 				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/single.js','src/general.js','src/fakeWorkers.js','src/temp.object.js','src/queue.js','src/reducer.js','src/mapreduce.incremental.js','src/mapreduce.nonincremental.js','src/wrapup.js']}
 			}
-		},mocha_phantomjs: {
-		all: {
-			options: {
-				urls: [
+		},
+		mocha_phantomjs: {
+			all: {
+				options: {
+					urls: [
 						"http://"+process.env.IP+":8080/test/index.html",
-					"http://"+process.env.IP+":8080/test/index.min.html"
-				]
+						"http://"+process.env.IP+":8080/test/index.min.html"
+					]
+				}
 			}
-		}
-	},
+		},
 		connect: {
 			server: {
 				options: {
