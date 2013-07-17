@@ -39,7 +39,8 @@ module.exports = function(grunt) {
 				options: {
 					urls: [
 						"http://"+process.env.IP+":8080/test/index.html",
-						"http://"+process.env.IP+":8080/test/index.min.html"
+						"http://"+process.env.IP+":8080/test/index.min.html",
+						"http://"+process.env.IP+":8080/test/index.leg.html"
 					]
 				}
 			}
