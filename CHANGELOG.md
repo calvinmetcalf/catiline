@@ -6,6 +6,7 @@ Changelog
 - multiuse is no longer a separate function but just what happens when the object worker is called with a function
 - all is now part of promiscious
 - since we only have one worker type we can simplify the build script
+- tighter jshint options
 
 ##1.7.2
 
