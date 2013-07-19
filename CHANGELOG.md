@@ -1,6 +1,15 @@
 Changelog
 ===
 
+##2.0.0
+
+- Ajax and map reduce are now seprate plugins
+- fake workers and workers now all use the same test script
+- more consistency with error handling in fakeWorkers
+- `cw(function,data)` is removed in favor of `cw.single(function,data)`
+- `cw.communist `->`cw.worker`
+- more verbose variablenames
+
 ##1.7.4
 
 - run the legacy browser test (though not in a legacy browser) locally
