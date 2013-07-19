@@ -1,4 +1,4 @@
-function object(obj){
+communist.worker = function (obj){
 	if(typeof obj === 'function'){
 		obj = {
 			data:obj
@@ -35,7 +35,7 @@ function object(obj){
 		return w;
 	};
 	w.fire = function(eventName,data,transfer){
-		!c._noTransferable?worker.postMessage([[eventName],data],transfer):worker.postMessage([[eventName],data]);
+		!communist._noTransferable?worker.postMessage([[eventName],data],transfer):worker.postMessage([[eventName],data]);
 		return w;
 	};
 	w.off = function (eventName, func) {
@@ -88,8 +88,8 @@ function object(obj){
 	var keyFunc=function(key){
 		var out = function(data, transfer){
 			var i = promises.length;
-			promises[i] = c.deferred();
-			!c._noTransferable?worker.postMessage([['com.communistjs',i],key,data],transfer):worker.postMessage([['com.communistjs',i],key,data]);
+			promises[i] = communist.deferred();
+			!communist._noTransferable?worker.postMessage([['com.communistjs',i],key,data],transfer):worker.postMessage([['com.communistjs',i],key,data]);
 			return promises[i].promise;
 		};
 		return out;
@@ -104,7 +104,7 @@ function object(obj){
 		w[key]=keyFunc(key);
 	}
 	fObj=fObj+"}";
-	var worker = makeWorker($$fObj$$);
+	var worker = communist.makeWorker($$fObj$$);
 	worker.onmessage= function(e){
 		_fire('message',e.data[1]);
 		if(e.data[0][0]==='com.communistjs'){
@@ -124,11 +124,11 @@ function object(obj){
 	w._close = function(){
 		worker.terminate();
 		rejectPromises("closed");
-		return c.resolve();
+		return communist.resolve();
 	};
 	if(!('close' in w)){
 		w.close=w._close;
 	}
 
 	return w;
-}
+};

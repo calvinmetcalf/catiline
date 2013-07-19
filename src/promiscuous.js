@@ -122,4 +122,4 @@
 		});
 		return promise.promise;
 	};
-})(c);
+})(communist);

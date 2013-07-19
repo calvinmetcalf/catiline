@@ -8,7 +8,7 @@ function fakeObject(inObj){
 	var loading;
 	var called=false;
 	function ajax(url){
-		var promise = c.deferred();
+		var promise = communist.deferred();
 		var xhr = new XMLHttpRequest();
 		xhr.open('GET',url);
 		xhr.onload = function() {
@@ -46,7 +46,7 @@ function fakeObject(inObj){
 			if(!called){
 				called = true;
 			}
-			promises[i] = c.deferred();
+			promises[i] = communist.deferred();
 			callback = function(data){
 				promises[i].resolve(data);
 			};
@@ -56,8 +56,8 @@ function fakeObject(inObj){
 					callback(result);
 				}
 			} catch (e){
-				obj.fire('error',{preventDefault:function(){},messege:e});
-				promises[i].reject({preventDefault:function(){},messege:e});
+				obj.fire('error',e);
+				promises[i].reject(e);
 			}
 			return promises[i].promise;
 		};
@@ -83,7 +83,7 @@ function fakeObject(inObj){
 		w[key]=keyFunc(key);
 	}
 	fObj=fObj+"}";
-	var re = /(\S+?:function\s*?)(\S+?)(\s*?\()/g;
+	var re = /(\S+?:function\s*?)([a-zA-Z0-9$_]+?)(\s*?\()/g;
 	var regexed = regexImports(fObj);
 	var forImport = regexed[0];
 	if(forImport.length === 0){
@@ -93,7 +93,7 @@ function fakeObject(inObj){
 		})();
 		addEvents(w,obj);
 	}else{
-		loading = c.all(forImport.map(function(v){
+		loading = communist.all(forImport.map(function(v){
 			return ajax(v);
 		})).then(function(array){
 			eval(array.join("\n")+";\nobj = "+regexed[1].replace(re,'$1$3'));
@@ -118,7 +118,7 @@ function fakeObject(inObj){
 		});
 	};
 	w.fire=function(eventName,data){
-		c.setImmediate(function () {
+		communist.setImmediate(function () {
 			if(eventName in olisteners && Array.isArray(olisteners[eventName])){
 				olisteners[eventName].forEach(function(v){
 					v(data);
@@ -213,7 +213,7 @@ function fakeObject(inObj){
 		promises.forEach(function(a){
 			a.reject("closed");
 		});
-		return c.resolve();
+		return communist.resolve();
 	};
 	if(!('close' in w)){
 		w.close=w._close;

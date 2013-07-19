@@ -1,11 +1,11 @@
 //special case of worker only being called once, instead of sending the data
 //we can bake the data into the worker when we make it.
 
-function single(fun,data){
+communist.single = function (fun,data){
 	if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
-		return object(fun).data(data);
+		return communist.worker(fun).data(data);
 	}
-	var promise = c.deferred();
+	var promise = communist.deferred();
 	var obj = {
 		fun:fun,
 		data:JSON.stringify(data),
@@ -21,7 +21,7 @@ function single(fun,data){
 			}
 		}
 	};
-	var worker = object(obj);
+	var worker = communist.worker(obj);
 	worker.on('done',function(e){
 		promise.resolve(e);
 		worker.close();
@@ -32,4 +32,4 @@ function single(fun,data){
 		worker.close();
 	});
 	return promise.promise;
-}
+};
