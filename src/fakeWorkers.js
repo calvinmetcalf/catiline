@@ -51,7 +51,7 @@ function fakeObject(inObj){
 				promises[i].resolve(data);
 			};
 			try{
-				result = obj[key].call(obj,data,callback);
+				result = obj[key].call(obj,data,callback,obj);
 				if(typeof result !== "undefined"){
 					callback(result);
 				}
@@ -165,7 +165,7 @@ function fakeObject(inObj){
 		}
 		olisteners[eventName].push(function(a){
 			try{
-				func.call(scope,a);
+				func.call(scope,a,obj);
 			}catch(e){
 				obj.fire('error',{preventDefault:function(){},messege:e});
 			}
