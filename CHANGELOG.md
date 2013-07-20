@@ -8,7 +8,9 @@ Changelog
 - more consistency with error handling in fakeWorkers
 - `cw(function,data)` is removed in favor of `cw.single(function,data)`
 - `cw.communist `->`cw.worker`
-- more verbose variablenames
+- more verbose variable names
+- events now take a scope as a second argument and direct functions take it as a third
+
 
 ##1.7.4
 

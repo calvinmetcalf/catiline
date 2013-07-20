@@ -1,3 +1,4 @@
+"use strict";
 var _db = $$fObj$$;
 var listeners = {};
 _db.on = function (eventName, func, scope) {
