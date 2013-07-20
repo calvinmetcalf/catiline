@@ -10,6 +10,7 @@ Changelog
 - `cw.communist `->`cw.worker`
 - more verbose variable names
 - events now take a scope as a second argument and direct functions take it as a third
+- `console.log` is available inside a worker
 
 
 ##1.7.4
