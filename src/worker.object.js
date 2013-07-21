@@ -81,4 +81,4 @@ var regMsg = function(e){
 		cb(result);
 	}
 };
-_db.initialize();
+_db.initialize(_db);

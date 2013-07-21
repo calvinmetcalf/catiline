@@ -219,7 +219,7 @@ function fakeObject(inObj){
 		w.close=w._close;
 	}
 	if(!called){
-		w.initialize('init');
+		w.initialize(obj);
 	}
 	return w;
 }
