@@ -269,4 +269,3 @@ we have a few utility functions you can use
 
 lastly `cw.noConflict()` sets `cw` back to what it was before loading this library and you can use the function via `communist()`
 
-This grew out of my work with [earlier versions](https://github.com/calvinmetcalf/communist/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) of  this library and [Parallel.js](https://github.com/adambom/parallel.js).
