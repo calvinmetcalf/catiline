@@ -66,18 +66,6 @@ call
 The event system was inspired by [Leaflet's](http://leafletjs.com/reference.html#events) but with a similar set of methods. Multiple space separated words can
 but sent to the 'on' and 'off' methods and `off` accepts a function if you only want to delete one of many functions, `on` takes a scope argument in its 3rd spot.
 
-###Even simpler?
-```javascript
-cw.single(function(a,callback){
-	callback(a[0]*a[1]);
-},[2,5]).then(function(a){
-	console.log(a);
-})//prints 7
-```
-
-pass the function and data to the `cw.single` method and it crunches it returns the data and then closes up for you
-(don't use this if you are every doing more then one thing with workers).
-
 ###Importing Scripts
 If you create a worker and the function imports a script like
 
