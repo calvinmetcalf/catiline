@@ -25,6 +25,8 @@ about communist, or you can browse some demos:
 
 Updates and changes are all in the <a class='navLink' id='CHANGELOG' href='CHANGELOG.md'>changelog</a>.
 
+There is also a <a class='navLink' id='PLUGINS' href='PLUGINS.md'>plugin list</a>.
+
 __Important:__ the file communist.js or communist.min.js should be a stand alone file hosted on the same domain as your web page, if you can't or need to bundle communist but you need it to work on IE10, Opera, and Safari. You have to host the file "SHIM_WORKER.js" on the same domain as the html file 
 and set the path to it in a global variable `SHIM_WORKER_PATH` before you load communist.
 
