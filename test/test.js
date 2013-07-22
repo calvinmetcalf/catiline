@@ -28,14 +28,22 @@ var buf;
 if(typeof Uint8Array !== 'undefined'){
 	buf=(new Uint8Array([1,2,3,4,5,6,7,8])).buffer;
 }
+var single = function(func, data){
+	var promise = cw.deferred();
+	var worker = cw(func);
+	return worker.data(data).then(function(a){
+		worker.close();
+		return a;
+	});
+}
 //cw.URL=true;
 describe('cw()', function () {
 	describe('Basic', function () {
 		it('should work when given a function and data directly', function (done) {
-			cw.single(square, 9).then(function (a) { assert.equal(a,81); }).then(done, done);
+			single(square, 9).then(function (a) { assert.equal(a,81); }).then(done, done);
 		});
 		it('should work when given a function and data async', function (done) {
-			cw.single(aSquare, 9).then(function (a) { assert.equal(a,81); }).then(done, done);
+			single(aSquare, 9).then(function (a) { assert.equal(a,81); }).then(done, done);
 		});
 		
 		it('should be able to handle an array buffer', function(done){
@@ -74,7 +82,7 @@ describe('cw()', function () {
 			comrade.data("Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){assert.include(a,"Ermahgerd");}).then(wrapUp, wrapUp);
 		});
 		it('should gracefully handle an error as a oneoff', function (done) {
-			cw.single(square,"Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){assert.isString(a);}).then(done, done);
+			single(square,"Ermahgerd").then(function(a){a.should.be.an('undefined');},function(a){assert.isString(a);}).then(done, done);
 		});
 	});
 	describe('Worker reuse', function () {
@@ -103,35 +111,35 @@ describe('cw()', function () {
 	describe('Import Scripts', function () {
 		it("should be able to import scripts",function (done){
 			self.imported=false;
-			cw.single(function(a){importScripts('fakeLib.js');return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
+			single(function(a){importScripts('fakeLib.js');return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
 		});
 		it("should be able to import scripts with a space in it",function (done){
 			self.imported=false;
-			cw.single(function(a){importScripts( 'fakeLib.js' );return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
+			single(function(a){importScripts( 'fakeLib.js' );return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
 		});
 		it("should be able to import scripts with double quotes",function (done){
 			self.imported=false;
-			cw.single(function(a){importScripts("fakeLib.js");return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
+			single(function(a){importScripts("fakeLib.js");return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
 		});
 		it("should be able to import reletive urls",function (done){
 			self.imported=false;
-			cw.single(function(a){importScripts('../test/fakeLib.js');return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
+			single(function(a){importScripts('../test/fakeLib.js');return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
 		});
 		it("should be able to import 2 scripts",function (done){
 			self.imported=false;
-			cw.single(function(a){importScripts("fakeLib.js",'../test/fakerLib.js');return a;}, 9).then(function () {},function(a){assert.include(a,"tried to import twice")}).then(done, done);
+			single(function(a){importScripts("fakeLib.js",'../test/fakerLib.js');return a;}, 9).then(function () {},function(a){assert.include(a,"tried to import twice")}).then(done, done);
 		});
 		it("should be able to import 2 scripts that are the same",function (done){
 			self.imported=false;
-			cw.single(function(a){importScripts("fakeLib.js",'../test/fakeLib.js');return a;}, 9).then(function () {},function(a){assert.include(a,"tried to import twice")}).then(done, done);
+			single(function(a){importScripts("fakeLib.js",'../test/fakeLib.js');return a;}, 9).then(function () {},function(a){assert.include(a,"tried to import twice")}).then(done, done);
 		});
 		it("should be able to import 2 scripts in two import scripts",function (done){
 			self.imported=false;
-			cw.single(function(a){importScripts("fakeLib.js");importScripts('../test/fakerLib.js');return a;}, 9).then(function () {},function(a){assert.include(a,"tried to import twice")}).then(done, done);
+			single(function(a){importScripts("fakeLib.js");importScripts('../test/fakerLib.js');return a;}, 9).then(function () {},function(a){assert.include(a,"tried to import twice")}).then(done, done);
 		});
 		it("should be able to import no scripts",function (done){
 			self.imported=false;
-			cw.single(function(a){importScripts();return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
+			single(function(a){importScripts();return a;}, 9).then(function (a) { assert.equal(a,9); }).then(done, done);
 		});
 		it("should be able to import scripts in a sticks around",function (done){
 			self.imported=false;
