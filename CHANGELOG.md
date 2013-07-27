@@ -11,7 +11,7 @@ Changelog
 - more verbose variable names
 - events now take a scope as a second argument and direct functions take it as a third
 - `console.log` is available inside a worker
-- cw.single is now it's own plugin
+- cw.single is now it's own plugin, tests updated acordingly.
 
 
 ##1.7.4
