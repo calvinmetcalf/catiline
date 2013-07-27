@@ -1,4 +1,4 @@
-/*! communist 2.0.0 2013-07-22*/
+/*! communist 2.0.0 2013-07-27*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
