@@ -46,7 +46,7 @@ var worker = cw(function(text){
 		if(word.length === target){
 			this.fire('match',word);
 		};
-	},this);		
+	},this);
 });
 
 worker.on('match',function(a){
@@ -65,18 +65,6 @@ call
 
 The event system was inspired by [Leaflet's](http://leafletjs.com/reference.html#events) but with a similar set of methods. Multiple space separated words can
 but sent to the 'on' and 'off' methods and `off` accepts a function if you only want to delete one of many functions, `on` takes a scope argument in its 3rd spot.
-
-###Even simpler?
-```javascript
-cw(function(a,callback){
-	callback(a[0]*a[1]);
-},[2,5]).then(function(a){
-	console.log(a);
-})//prints 7
-```
-
-pass the data as the second argument and it crunches it returns the data and then closes up for you
-(don't use this if you are every doing more then one thing with workers).
 
 ###Importing Scripts
 If you create a worker and the function imports a script like
@@ -112,7 +100,7 @@ var workers = cw({
 },4);
 ```
 
-Just add a number after the object (for a function just wrap it in `{data:YOUR FUNC}` and it's identical) and it will create that number or workers. Then calls will be divided among them, you can also call bulk methods works just like the regular method but also can call bulk methods which return arrays:
+Just add a number after the object and it will create that number or workers. Then calls will be divided among them, you can also call bulk methods works just like the regular method but also can call bulk methods which return arrays:
 
 
 ```javascript
@@ -192,67 +180,6 @@ workers.batch(function(a){
 49
 64
 */
-```
-
-###Goodies: Map/Reduce
-
-```javascript
-var worker = cw(4);
-//pass it the number of map workers
-worker.data([1,2,3]);
-//pass it data
-worker.map(function(x){
-	return x*x;
-});
-//function do be done once on each datum
-worker.reduce(function(a,b){
-	return a+b;
-});
-//reduce function
-worker.data([4,5,6]);
-worker.fetch().then(function(a){
-	console.log(a);
-});
-//prints 91
-worker.data([6,7,8]).fetch().then(function(a){
-	console.log(a;)
-});
-//prints 240
-//fetch takes an argument "now", if it's undefined then waitins until it's done
-worker.data([6,7,8]).fetch(true).then(function(a){
-	console.log(a);
-});
-//also prints 240
-worker.close().then(function(a){
-	console.log(a);
-});
-//prints 389
-```
-
-the reducer function is also available for you if you want.
-
-```javascript
-var worker = cw.reducer(function, callback);
-//give it data with
-worker.data(3);
-//send back data and call the callback
-worker.fetch();
-//close it
-worker.close([silent]);
-//it'll grab the data one more time and call the callback with it, unless you pass a parameter.
-
-```
-
-there is also a map function you can call if you want
-
-```javascript
-var worker = cw(function,callback,onerr);
-//opens the worker with the function
-worker.data(stuff);
-//send it data any data that comes back callback is called on
-//errs got to onerr if that is not specified callback is called with no data.
-worker.close();
-//close that
 ```
 
 ###Misc

@@ -1,3 +1,4 @@
+"use strict";
 var _db = $$fObj$$;
 var listeners = {};
 _db.on = function (eventName, func, scope) {
@@ -11,7 +12,7 @@ _db.on = function (eventName, func, scope) {
 		listeners[eventName] = [];
 	}
 	listeners[eventName].push(function (a) {
-		func.call(scope, a);
+		func.call(scope, a, _db);
 	});
 };
 var _fire = function (eventName, data) {
@@ -75,9 +76,9 @@ var regMsg = function(e){
 	var cb=function(data,transfer){
 		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);
 	};
-	var result = _db[e.data[1]](e.data[2],cb);
+	var result = _db[e.data[1]](e.data[2],cb,_db);
 	if(typeof result !== "undefined"){
 		cb(result);
 	}
 };
-_db.initialize();
+_db.initialize(_db);

@@ -103,6 +103,7 @@ animateSquare();
 
 <script src="moment.js"></script>
 <script src="../../dist/communist.js"></script>
+<script src="cw.mapReduce.js"></script>
 <script>
 var dict;
 var wFunc=function(data,callback){
@@ -182,13 +183,13 @@ var rb,len,i,char;
 		callback(rb);
 	}
 };
-var c = communist(wFunc);
+var c = cw(wFunc);
 var fulla;
 var startButton = $("#startit");
 startButton.on("click",function(){
 startButton.addClass("disabled").html("<i class='icon-spinner icon-spin'></i> loading...");
 $("#startWarn").html("");
-var starting = c.data(["s",communist.makeUrl("dictionary.txt")]);
+var starting = c.data(["s",cw.makeUrl("dictionary.txt")]);
 starting.then(function(a){
 	var reg,trn,inW,tasb;
 	if(a>0){
@@ -207,7 +208,7 @@ starting.then(function(a){
 				reg.one("click",function(){
 					reg.addClass("disabled").html("<i class='icon-spinner icon-spin'></i> getting my map reduce on");
 					var t1 = moment();
-					var c2 = communist(parseInt($("#mNumber").val(),10)).map(function(dd){
+					var c2 = cw.mapReduce(parseInt($("#mNumber").val(),10)).map(function(dd){
 							var out={},i=0,len = dd.length,char;
 							while(i<len){
 								char = dd[i];
@@ -267,7 +268,7 @@ starting.then(function(a){
 				trn.one("click",function(){
 					var t1 = moment();
 					trn.addClass("disabled").html("<i class='icon-spinner icon-spin'></i> getting my map reduce on");
-				var c3 = communist(parseInt($("#mNumber").val(),10));
+				var c3 = cw.mapReduce(parseInt($("#mNumber").val(),10));
 					c3.map(function(d,cb){
 						var dd = new Uint16Array(d);
 						var out={};

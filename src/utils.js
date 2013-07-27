@@ -8,7 +8,7 @@ function regexImports(string){
 	loopFunc = function(a,b){
 		if(b){
 			"importScripts("+b.split(",").forEach(function(cc){
-				matches[c.makeUrl(cc.match(/\s*[\'\"](\S*)[\'\"]\s*/)[1])]=true; // trim whitespace, add to matches
+				matches[communist.makeUrl(cc.match(/\s*[\'\"](\S*)[\'\"]\s*/)[1])]=true; // trim whitespace, add to matches
 			})+");\n";
 		}
 	};
@@ -48,17 +48,17 @@ function getPath(){
 		}
 }
 //accepts an array of strings, joins them, and turns them into a worker.
-function makeWorker(strings){
+communist.makeWorker = function (strings){
 	var worker;
 	var script =moveImports(strings.join(""));
-	c.URL = c.URL||window.URL || window.webkitURL;
+	communist.URL = communist.URL||window.URL || window.webkitURL;
 	try{
-		worker= new Worker(c.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));
+		worker= new Worker(communist.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));
 	}catch(e){
-		c._noTransferable=true;
+		communist._noTransferable=true;
 		worker = new Worker(getPath());
 		worker.postMessage(script);
 	}finally{
 		return worker;
 	}
-}
+};

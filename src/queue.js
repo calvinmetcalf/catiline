@@ -1,4 +1,4 @@
-function queue(obj,n,dumb){
+communist.queue = function (obj,n,dumb){
 	var w = new Communist();
 	w.__batchcb__=new Communist();
 	w.__batchtcb__=new Communist();
@@ -24,7 +24,7 @@ function queue(obj,n,dumb){
 	var que=[];
 	var queueLen=0;
 	while(numIdle<n){
-		workers[numIdle]=object(obj);
+		workers[numIdle]=communist.worker(obj);
 		idle.push(numIdle);
 		numIdle++;
 	}
@@ -69,7 +69,7 @@ function queue(obj,n,dumb){
 	}
 	function keyFuncBatch(k){
 		return function(array){
-			return c.all(array.map(function(data){
+			return communist.all(array.map(function(data){
 				return doStuff(k,data);
 			}));
 		};
@@ -77,14 +77,14 @@ function queue(obj,n,dumb){
 	function keyFuncBatchCB(k){
 		return function(array){
 			var self = this;
-			return c.all(array.map(function(data){
+			return communist.all(array.map(function(data){
 				return doStuff(k,data).then(self.__cb__);
 			}));
 		};
 	}
 	function keyFuncBatchTransfer(k){
 		return function(array){
-			return c.all(array.map(function(data){
+			return communist.all(array.map(function(data){
 				return doStuff(k,data[0],data[1]);
 			}));
 		};
@@ -92,7 +92,7 @@ function queue(obj,n,dumb){
 	function keyFuncBatchTransferCB(k){
 		return function(array){
 			var self = this;
-			return c.all(array.map(function(data){
+			return communist.all(array.map(function(data){
 				return doStuff(k,data[0],data[1]).then(self.__cb__);
 			}));
 		};
@@ -125,7 +125,7 @@ function queue(obj,n,dumb){
 		if(dumb){
 			return workers[~~(Math.random()*n)][key](data,transfer);
 			}
-		var promise = c.deferred(),num;
+		var promise = communist.deferred(),num;
 		if(!queueLen && numIdle){
 			num = idle.pop();
 			numIdle--;
@@ -142,7 +142,7 @@ function queue(obj,n,dumb){
 		return promise.promise;
 	}
 	w._close = function(){
-		return c.all(workers.map(function(ww){
+		return communist.all(workers.map(function(ww){
 			return ww._close();
 		}));
 	};
@@ -150,4 +150,4 @@ function queue(obj,n,dumb){
 		w.close=w._close;
 	}
 	return w;
-}
+};

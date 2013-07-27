@@ -29,9 +29,9 @@ module.exports = function(grunt) {
 				options: {
 					banner: '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */\n',
 					seperator:";\n",
-					footer : 'c.version = "<%= pkg.version %>";\n})(this);}'
+					footer : 'communist.version = "<%= pkg.version %>";\n})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/single.js','src/general.js','src/fakeWorkers.js','src/temp.object.js','src/queue.js','src/reducer.js','src/mapreduce.incremental.js','src/mapreduce.nonincremental.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/fakeWorkers.js','src/temp.object.js','src/queue.js','src/wrapup.js']}
 			}
 		},
 		mocha_phantomjs: {
@@ -82,6 +82,10 @@ module.exports = function(grunt) {
 						browserName: 'firefox',
 						platform: 'linux',
 						version: '17'
+					},{
+						browserName: 'opera',
+						platform: 'linux',
+						version: '12'
 					},{
 						browserName: "chrome",
 						platform: "OS X 10.8"

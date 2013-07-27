@@ -93,4 +93,4 @@
 
 			return handle;
 		};
-	})(c,global);
+	})(communist,global);
