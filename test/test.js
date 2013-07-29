@@ -398,6 +398,8 @@ describe('cw()', function () {
 					this.fire('q',b<<2);
 				});
 				this.on('double',double);
+			},two:function(a,callback,scope){
+				scope.fire('take1 take2',a);
 			}
 		});
 		it('should work',function(done){
@@ -420,6 +422,27 @@ describe('cw()', function () {
 				}
 			});
 			comrade.fire('multi');
+		});
+		it('should be able to fire multi events',function(done){
+			var count = 0;
+			var times = 0;
+			function wrapup(){
+				if(times === 2){
+					assert.equal(count,15);
+					done();
+				}
+			}
+			comrade.on('take1',function(a){
+				count += a;
+				times++;
+				wrapup();
+			});
+			comrade.on('take2',function(a){
+				count += (a*2);
+				times++;
+				wrapup();
+			});
+			comrade.two(5);
 		});
 		it('and put it out',function(done){
 			comrade.on('q',function(a){
