@@ -141,7 +141,7 @@ workers.batch(function(a){
 ```
 To cancel a queue calling `workers.batch('msg')` will clear the current data and reject all the promises.
 
-If you want to dispense with the queuing system you can also do a dumb queue
+If you want to dispense with the queuing system you can also do an unmanaged queue.
 
 ```javascript
 var workers = cw({
@@ -151,7 +151,7 @@ var workers = cw({
 	square:function(a){
 		return a*a;
 	}
-},4,'dumb');
+},4,true);
 ```
 
 which is exactly like the other queue but instead of carefully queuing and only giving data to workers that are ready, it sprays the workers with the data completely randomly until it's out of data, think very carefully before using
@@ -167,7 +167,7 @@ var workers = cw({
 	square:function(a){
 		return a*a;
 	}
-},4,'dumb');
+},4,true);
 workers.batch(function(a){
 	console.log(a);
 }).square([1,2,3,4,5,6,7,8]);/* prints
