@@ -1,5 +1,5 @@
 function communist(object,queueLength,unmanaged){
-	if(arguments.length === 1 || !queueLength || !(queueLength > 1)){
+	if(arguments.length === 1 || !queueLength || queueLength <= 1){
 		return communist.worker(object);
 	}else{
 		return communist.queue(object,queueLength,unmanaged);

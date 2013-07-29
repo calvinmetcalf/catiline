@@ -16,8 +16,8 @@ _db.on = function (eventName, func, scope) {
 	});
 };
 function _fire(eventName,data){
-	if(eventName.indexOf(' ')>0){
-		eventName.split(' ').forEach(function(v){
+	if(eventName.indexOf(" ")>0){
+		eventName.split(" ").forEach(function(v){
 			_fire(v,data);
 		});
 		return;
