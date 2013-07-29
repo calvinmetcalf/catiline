@@ -118,6 +118,12 @@ function fakeObject(inObj){
 		});
 	};
 	w.fire=function(eventName,data){
+		if(eventName.indexOf(' ')>0){
+			eventName.split(' ').forEach(function(v){
+				w.fire(v,data);
+			});
+			return w;
+		}
 		communist.setImmediate(function () {
 			if(eventName in olisteners && Array.isArray(olisteners[eventName])){
 				olisteners[eventName].forEach(function(v){
@@ -173,6 +179,12 @@ function fakeObject(inObj){
 		return obj;
 	};
 	obj.fire=function(eventName,data){
+		if(eventName.indexOf(' ')>0){
+			eventName.split(' ').forEach(function(v){
+				obj.fire(v,data);
+			});
+			return obj;
+		}
 		if(!(eventName in wlisteners)){
 			return obj;
 		}

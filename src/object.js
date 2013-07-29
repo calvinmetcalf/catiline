@@ -25,7 +25,13 @@ communist.worker = function (obj){
 		});
 		return w;
 	};
-	var _fire=function(eventName,data){
+	function _fire(eventName,data){
+		if(eventName.indexOf(' ')>0){
+			eventName.split(' ').forEach(function(v){
+				_fire(v,data);
+			});
+			return w;
+		}
 		if(!(eventName in listeners)){
 			return w;
 		}
@@ -33,7 +39,7 @@ communist.worker = function (obj){
 			v(data);
 		});
 		return w;
-	};
+	}
 	w.fire = function(eventName,data,transfer){
 		!communist._noTransferable?worker.postMessage([[eventName],data],transfer):worker.postMessage([[eventName],data]);
 		return w;
