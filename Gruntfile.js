@@ -1,12 +1,12 @@
 module.exports = function(grunt) {
 	var templateThings = function(){
-			var parent =  grunt.file.read('./src/object.js');
-			var child = grunt.file.read('./src/worker.object.js');
+			var parent =  grunt.file.read('./src/core.js');
+			var child = grunt.file.read('./src/worker.js');
 			var replacedChild = "['"+child.replace(/\$\$(.+?)\$\$/,function(a,b){
 				return "',"+b+",'";
 			}).replace(/\n/gm,'')+"']";
 			var out = parent.replace(/\$\$fObj\$\$/,replacedChild);
-			grunt.file.write('./src/temp.object.js',out);
+			grunt.file.write('./src/temp.js',out);
 	};
 	// Project configuration.
 	grunt.initConfig({
@@ -31,7 +31,7 @@ module.exports = function(grunt) {
 					seperator:";\n",
 					footer : 'communist.version = "<%= pkg.version %>";\n})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/fakeWorkers.js','src/temp.object.js','src/queue.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/fakeWorkers.js','src/temp.js','src/queue.js','src/wrapup.js']}
 			}
 		},
 		mocha_phantomjs: {

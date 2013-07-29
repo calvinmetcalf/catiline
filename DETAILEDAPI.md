@@ -74,3 +74,25 @@ function(data,callback,scope){
 }
 ```
 
+the worker object and the scope object both have 3 additional methods
+`on`, `off`, and `fire` for working with events. For these 3 methods the following definitions a being used
+
+'event name' can be any JavaScript string that does not include a space.
+
+'event string' is one or more event names seperated by spaces.
+
+```javascript
+workerORscope.on('event string', listnener:Function[,contect:Object])
+	->workerORscope
+```
+
+the listner function is called with the signatrue
+
+```
+listnener(data,scope);
+```
+
+by default scope and context (third argument, `this` inside the listner) are the same
+and be aware changing context does not change scope (the scope object is always the same
+even if `this` is changed).
+
