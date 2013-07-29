@@ -6,12 +6,6 @@ function communist(object,queueLength,unmanaged){
 	}
 }
 
-communist.makeUrl = function (fileName) {
-	var link = document.createElement("link");
-	link.href = fileName;
-	return link.href;
-};
-
 function initBrowser(communist){
 	var origCW = global.cw;
 	communist.noConflict=function(newName){

@@ -62,3 +62,9 @@ communist.makeWorker = function (strings){
 		return worker;
 	}
 };
+
+communist.makeUrl = function (fileName) {
+	var link = document.createElement("link");
+	link.href = fileName;
+	return link.href;
+};
