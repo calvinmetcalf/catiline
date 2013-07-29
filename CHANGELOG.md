@@ -1,6 +1,14 @@
 Changelog
 ===
 
+##2.1.0
+
+- Moved `cw.makeUrl()` to util.js, not sure why it was in wrapup.js.
+- Passing a falsy value or a number less then 2 as the number of workers in a queue
+now just returns a regular (non-queue) worker
+- multiple events can now be fired at once by passing a space sperated list of event
+names to `.fire()`
+
 ##2.0.0
 
 - Ajax and map reduce are now seprate plugins
