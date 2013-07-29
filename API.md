@@ -1,5 +1,6 @@
 API
 ===
+
 ```javascript
 var worker = cw({
 	sum:function(a,callback){
