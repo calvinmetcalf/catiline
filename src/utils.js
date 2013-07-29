@@ -1,5 +1,4 @@
-//this is mainly so the name shows up when you look at the object in the console
-
+//regex out the importScript call and move it up to the top out of the function.
 function regexImports(string){
 	var rest=string,
 	match = true,
