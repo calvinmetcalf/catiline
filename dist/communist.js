@@ -109,7 +109,7 @@ if (typeof document === "undefined") {
 (function (exports) {
 	var func = "function";
 	// Creates a deferred: an object with a promise and corresponding resolve/reject methods
-	function createDeferred() {
+	function Deferred() {
 		// The `handler` variable points to the function that will
 		// 1) handle a .then(onFulfilled, onRejected) call
 		// 2) handle a .resolve or .reject call (if not fulfilled)
@@ -118,22 +118,22 @@ if (typeof document === "undefined") {
 		// We use only one function to save memory and complexity.
 		var handler = function (onFulfilled, onRejected, value) {
 			// Case 1) handle a .then(onFulfilled, onRejected) call
-			var d;
+			var createdDeffered;
 			if (onFulfilled !== handler) {
-				d = createDeferred();
-				handler.c.push({ d: d, resolve: onFulfilled, reject: onRejected });
-				return d.promise;
+				createdDeffered = createDeferred();
+				handler.queue.push({ deferred: createdDeffered, resolve: onFulfilled, reject: onRejected });
+				return createdDeffered.promise;
 			}
 
 			// Case 2) handle a .resolve or .reject call
 			// (`onFulfilled` acts as a sentinel)
 			// The actual function signature is
 			// .re[ject|solve](sentinel, success, value)
-			var action = onRejected ? 'resolve' : 'reject',c,deferred,callback;
-			for (var i = 0, l = handler.c.length; i < l; i++) {
-				c = handler.c[i];
-				deferred = c.d;
-				callback = c[action];
+			var action = onRejected ? 'resolve' : 'reject',queue,deferred,callback;
+			for (var i = 0, l = handler.queue.length; i < l; i++) {
+				queue = handler.queue[i];
+				deferred = queue.deferred;
+				callback = queue[action];
 				if (typeof callback !== func) {
 					deferred[action](value);
 				} else {
@@ -149,21 +149,23 @@ if (typeof document === "undefined") {
 			};
 		}
 		var promise = new Promise();
+		this.promise = promise;
 		// The queue of deferreds
-		handler.c = [];
+		handler.queue = [];
 
-		return {
-			promise: promise,
-			// Only resolve / reject when there is a deferreds queue
-			resolve: function (value)	{
-				handler.c && handler(handler, true, value);
-			},
-			reject : function (reason) {
-				handler.c && handler(handler, false, reason);
-			},
+		this.resolve = function (value)	{
+			handler.queue && handler(handler, true, value);
+		};
+			
+		this.reject = function (reason) {
+			handler.queue && handler(handler, false, reason);
 		};
 	}
-
+	
+	function createDeferred(){
+		return new Deferred();
+	}
+	
 	// Creates a fulfilled or rejected .then function
 	function createHandler(promise, value, success) {
 		return function (onFulfilled, onRejected) {
@@ -302,7 +304,7 @@ communist.makeUrl = function (fileName) {
 };
 function FakeCommunist(inObj) {
 	/*jslint evil: true */
-	var w = this;
+	var self = this;
 	var promises = [];
 	var loaded = false;
 	var wlisteners = {};
@@ -387,7 +389,7 @@ function FakeCommunist(inObj) {
 			i++;
 		}
 		fObj = fObj + key + ":" + inObj[key].toString();
-		w[key] = keyFunc(key);
+		self[key] = keyFunc(key);
 	}
 	fObj = fObj + "}";
 	var re = /(\S+?:function\s*?)([a-zA-Z0-9$_]+?)(\s*?\()/g;
@@ -398,26 +400,26 @@ function FakeCommunist(inObj) {
 		(function () {
 			eval('obj = ' + regexed[1].replace(re, '$1$3'));
 		})();
-		addEvents(w, obj);
+		addEvents(self, obj);
 	}
 	else {
 		loading = communist.all(forImport.map(function (v) {
 			return ajax(v);
 		})).then(function (array) {
 			eval(array.join("\n") + ";\nobj = " + regexed[1].replace(re, '$1$3'));
-			addEvents(w, obj);
+			addEvents(self, obj);
 			return true;
 		});
 	}
 
-	function addEvents(w, obj) {
-		w.on = function (eventName, func, scope) {
-			scope = scope || w;
+	function addEvents(self, obj) {
+		self.on = function (eventName, func, scope) {
+			scope = scope || self;
 			if (eventName.indexOf(' ') > 0) {
 				eventName.split(' ').map(function (v) {
-					return w.on(v, func, scope);
+					return self.on(v, func, scope);
 				}, this);
-				return w;
+				return self;
 			}
 			if (!(eventName in wlisteners)) {
 				wlisteners[eventName] = [];
@@ -426,12 +428,12 @@ function FakeCommunist(inObj) {
 				func.call(scope, a);
 			});
 		};
-		w.fire = function (eventName, data) {
+		self.fire = function (eventName, data) {
 			if (eventName.indexOf(' ') > 0) {
 				eventName.split(' ').forEach(function (v) {
-					w.fire(v, data);
+					self.fire(v, data);
 				});
-				return w;
+				return self;
 			}
 			communist.setImmediate(function () {
 				if (eventName in olisteners && Array.isArray(olisteners[eventName])) {
@@ -440,17 +442,17 @@ function FakeCommunist(inObj) {
 					});
 				}
 			});
-			return w;
+			return self;
 		};
-		w.off = function (eventName, func) {
+		self.off = function (eventName, func) {
 			if (eventName.indexOf(' ') > 0) {
 				eventName.split(' ').map(function (v) {
-					return w.off(v, func);
+					return self.off(v, func);
 				});
-				return w;
+				return self;
 			}
 			if (!(eventName in wlisteners)) {
-				return w;
+				return self;
 			}
 			else if (!func) {
 				delete wlisteners[eventName];
@@ -465,7 +467,7 @@ function FakeCommunist(inObj) {
 					}
 				}
 			}
-			return w;
+			return self;
 		};
 		obj.on = function (eventName, func, scope) {
 			scope = scope || obj;
@@ -532,7 +534,7 @@ function FakeCommunist(inObj) {
 			return obj;
 		};
 	}
-	w._close = function () {
+	self._close = function () {
 		olisteners = {};
 		wlisteners = {};
 		promises.forEach(function (a) {
@@ -540,11 +542,11 @@ function FakeCommunist(inObj) {
 		});
 		return communist.resolve();
 	};
-	if (!('close' in w)) {
-		w.close = w._close;
+	if (!('close' in self)) {
+		self.close = self._close;
 	}
 	if (!called) {
-		w.initialize(obj);
+		self.initialize(obj);
 	}
 }
 
@@ -562,14 +564,14 @@ communist.Worker = function Communist(obj) {
 			return new FakeCommunist(obj);
 		}
 		var listeners = {};
-		var w = this;
-		w.on = function (eventName, func, scope) {
-			scope = scope || w;
+		var self = this;
+		self.on = function (eventName, func, scope) {
+			scope = scope || self;
 			if (eventName.indexOf(' ') > 0) {
 				eventName.split(' ').map(function (v) {
-					return w.on(v, func, scope);
+					return self.on(v, func, scope);
 				}, this);
-				return w;
+				return self;
 			}
 			if (!(eventName in listeners)) {
 				listeners[eventName] = [];
@@ -577,7 +579,7 @@ communist.Worker = function Communist(obj) {
 			listeners[eventName].push(function (a) {
 				func.call(scope, a);
 			});
-			return w;
+			return self;
 		};
 	
 		function _fire(eventName, data) {
@@ -585,31 +587,31 @@ communist.Worker = function Communist(obj) {
 				eventName.split(' ').forEach(function (v) {
 					_fire(v, data);
 				});
-				return w;
+				return self;
 			}
 			if (!(eventName in listeners)) {
-				return w;
+				return self;
 			}
 			listeners[eventName].forEach(function (v) {
 				v(data);
 			});
-			return w;
+			return self;
 		}
-		w.fire = function (eventName, data, transfer) {
+		self.fire = function (eventName, data, transfer) {
 			!communist._noTransferable ? worker.postMessage([
 				[eventName], data], transfer) : worker.postMessage([
 				[eventName], data]);
-			return w;
+			return self;
 		};
-		w.off = function (eventName, func) {
+		self.off = function (eventName, func) {
 			if (eventName.indexOf(' ') > 0) {
 				eventName.split(' ').map(function (v) {
-					return w.off(v, func);
+					return self.off(v, func);
 				});
-				return w;
+				return self;
 			}
 			if (!(eventName in listeners)) {
-				return w;
+				return self;
 			}
 			else if (!func) {
 				delete listeners[eventName];
@@ -624,7 +626,7 @@ communist.Worker = function Communist(obj) {
 					}
 				}
 			}
-			return w;
+			return self;
 		};
 		var i = 0;
 		var promises = [];
@@ -668,7 +670,7 @@ communist.Worker = function Communist(obj) {
 				i++;
 			}
 			fObj = fObj + key + ":" + obj[key].toString();
-			w[key] = keyFunc(key);
+			self[key] = keyFunc(key);
 		}
 		fObj = fObj + "}";
 		var worker = communist.makeWorker(['"use strict";var _db = ',fObj,';var listeners = {};_db.on = function (eventName, func, scope) {	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.on(v,func,scope);		},_db);	}	scope = scope || _db;	if (!(eventName in listeners)) {		listeners[eventName] = [];	}	listeners[eventName].push(function (a) {		func.call(scope, a, _db);	});};function _fire(eventName,data){	if(eventName.indexOf(" ")>0){		eventName.split(" ").forEach(function(v){			_fire(v,data);		});		return;	}	if (!(eventName in listeners)) {		return;	}	listeners[eventName].forEach(function (v) {		v(data);	});}_db.fire = function (eventName, data, transfer) {	!self._noTransferable ? self.postMessage([		[eventName], data], transfer) : self.postMessage([		[eventName], data]);};_db.off=function(eventName,func){	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.off(v,func);		});	}	if(!(eventName in listeners)){		return;	}else if(!func){		delete listeners[eventName];	}else{		if(listeners[eventName].indexOf(func)>-1){			if(listeners[eventName].length>1){				delete listeners[eventName];			}else{				listeners[eventName].splice(listeners[eventName].indexOf(func),1);			}		}	}};var console={};function makeConsole(method){	return function(){		var len = arguments.length;		var out =[];		var i = 0;		while (i<len){			out.push(arguments[i]);			i++;		}		_db.fire("console",[method,out]);	};}["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){	console[v]=makeConsole(v);});self.onmessage=function(e){	_fire("messege",e.data[1]);	if(e.data[0][0]==="com.communistjs"){		return regMsg(e);	}else{		_fire(e.data[0][0],e.data[1]);	}};var regMsg = function(e){	var cb=function(data,transfer){		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);	};	var result = _db[e.data[1]](e.data[2],cb,_db);	if(typeof result !== "undefined"){		cb(result);	}};_db.initialize(_db);']);
@@ -686,16 +688,16 @@ communist.Worker = function Communist(obj) {
 			rejectPromises(e);
 			_fire('error', e);
 		};
-		w.on('console', function (msg) {
+		self.on('console', function (msg) {
 			console[msg[0]].apply(console, msg[1]);
 		});
-		w._close = function () {
+		self._close = function () {
 			worker.terminate();
 			rejectPromises("closed");
 			return communist.resolve();
 		};
-		if (!('close' in w)) {
-			w.close = w._close;
+		if (!('close' in self)) {
+			self.close = self._close;
 		}
 	};
 communist.worker = function (obj){
@@ -703,22 +705,22 @@ communist.worker = function (obj){
 };
 
 communist.Queue = function CommunistQueue(obj, n, dumb) {
-	var w = this;
-	w.__batchcb__ = {};
-	w.__batchtcb__ = {};
-	w.batch = function (cb) {
+	var self = this;
+	self.__batchcb__ = {};
+	self.__batchtcb__ = {};
+	self.batch = function (cb) {
 		if (typeof cb === 'function') {
-			w.__batchcb__.__cb__ = cb;
-			return w.__batchcb__;
+			self.__batchcb__.__cb__ = cb;
+			return self.__batchcb__;
 		}
 		else {
 			return clearQueue(cb);
 		}
 	};
-	w.batchTransfer = function (cb) {
+	self.batchTransfer = function (cb) {
 		if (typeof cb === 'function') {
-			w.__batchtcb__.__cb__ = cb;
-			return w.__batchtcb__;
+			self.__batchtcb__.__cb__ = cb;
+			return self.__batchtcb__;
 		}
 		else {
 			return clearQueue(cb);
@@ -734,30 +736,30 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 		idle.push(numIdle);
 		numIdle++;
 	}
-	w.on = function (eventName, func, context) {
+	self.on = function (eventName, func, context) {
 		workers.forEach(function (worker) {
 			worker.on(eventName, func, context);
 		});
-		return w;
+		return self;
 	};
-	w.off = function (eventName, func, context) {
+	self.off = function (eventName, func, context) {
 		workers.forEach(function (worker) {
 			worker.off(eventName, func, context);
 		});
-		return w;
+		return self;
 	};
 	var batchFire = function (eventName, data) {
 		workers.forEach(function (worker) {
 			worker.fire(eventName, data);
 		});
-		return w;
+		return self;
 	};
-	w.fire = function (eventName, data) {
+	self.fire = function (eventName, data) {
 		workers[~~ (Math.random() * n)].fire(eventName, data);
-		return w;
+		return self;
 	};
-	w.batch.fire = batchFire;
-	w.batchTransfer.fire = batchFire;
+	self.batch.fire = batchFire;
+	self.batchTransfer.fire = batchFire;
 
 	function clearQueue(mgs) {
 		mgs = mgs || 'canceled';
@@ -767,7 +769,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 		oQ.forEach(function (p) {
 			p[3].reject(mgs);
 		});
-		return w;
+		return self;
 	}
 
 	function keyFunc(k) {
@@ -810,11 +812,11 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 		};
 	}
 	for (var key in obj) {
-		w[key] = keyFunc(key);
-		w.batch[key] = keyFuncBatch(key);
-		w.__batchcb__[key] = keyFuncBatchCB(key);
-		w.batchTransfer[key] = keyFuncBatchTransfer(key);
-		w.__batchtcb__[key] = keyFuncBatchTransferCB(key);
+		self[key] = keyFunc(key);
+		self.batch[key] = keyFuncBatch(key);
+		self.__batchcb__[key] = keyFuncBatchCB(key);
+		self.batchTransfer[key] = keyFuncBatchTransfer(key);
+		self.__batchtcb__[key] = keyFuncBatchTransferCB(key);
 	}
 
 	function done(num) {
@@ -858,13 +860,13 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 		}
 		return promise.promise;
 	}
-	w._close = function () {
-		return communist.all(workers.map(function (ww) {
-			return ww._close();
+	self._close = function () {
+		return communist.all(workers.map(function (w) {
+			return w._close();
 		}));
 	};
-	if (!('close' in w)) {
-		w.close = w._close;
+	if (!('close' in self)) {
+		self.close = self._close;
 	}
 };
 communist.queue = function (obj, n, dumb) {
