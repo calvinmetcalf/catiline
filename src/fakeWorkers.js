@@ -1,6 +1,6 @@
 function FakeCommunist(inObj) {
 	/*jslint evil: true */
-	var w = this;
+	var self = this;
 	var promises = [];
 	var loaded = false;
 	var wlisteners = {};
@@ -85,7 +85,7 @@ function FakeCommunist(inObj) {
 			i++;
 		}
 		fObj = fObj + key + ":" + inObj[key].toString();
-		w[key] = keyFunc(key);
+		self[key] = keyFunc(key);
 	}
 	fObj = fObj + "}";
 	var re = /(\S+?:function\s*?)([a-zA-Z0-9$_]+?)(\s*?\()/g;
@@ -96,26 +96,26 @@ function FakeCommunist(inObj) {
 		(function () {
 			eval('obj = ' + regexed[1].replace(re, '$1$3'));
 		})();
-		addEvents(w, obj);
+		addEvents(self, obj);
 	}
 	else {
 		loading = communist.all(forImport.map(function (v) {
 			return ajax(v);
 		})).then(function (array) {
 			eval(array.join("\n") + ";\nobj = " + regexed[1].replace(re, '$1$3'));
-			addEvents(w, obj);
+			addEvents(self, obj);
 			return true;
 		});
 	}
 
-	function addEvents(w, obj) {
-		w.on = function (eventName, func, scope) {
-			scope = scope || w;
+	function addEvents(self, obj) {
+		self.on = function (eventName, func, scope) {
+			scope = scope || self;
 			if (eventName.indexOf(' ') > 0) {
 				eventName.split(' ').map(function (v) {
-					return w.on(v, func, scope);
+					return self.on(v, func, scope);
 				}, this);
-				return w;
+				return self;
 			}
 			if (!(eventName in wlisteners)) {
 				wlisteners[eventName] = [];
@@ -124,12 +124,12 @@ function FakeCommunist(inObj) {
 				func.call(scope, a);
 			});
 		};
-		w.fire = function (eventName, data) {
+		self.fire = function (eventName, data) {
 			if (eventName.indexOf(' ') > 0) {
 				eventName.split(' ').forEach(function (v) {
-					w.fire(v, data);
+					self.fire(v, data);
 				});
-				return w;
+				return self;
 			}
 			communist.setImmediate(function () {
 				if (eventName in olisteners && Array.isArray(olisteners[eventName])) {
@@ -138,17 +138,17 @@ function FakeCommunist(inObj) {
 					});
 				}
 			});
-			return w;
+			return self;
 		};
-		w.off = function (eventName, func) {
+		self.off = function (eventName, func) {
 			if (eventName.indexOf(' ') > 0) {
 				eventName.split(' ').map(function (v) {
-					return w.off(v, func);
+					return self.off(v, func);
 				});
-				return w;
+				return self;
 			}
 			if (!(eventName in wlisteners)) {
-				return w;
+				return self;
 			}
 			else if (!func) {
 				delete wlisteners[eventName];
@@ -163,7 +163,7 @@ function FakeCommunist(inObj) {
 					}
 				}
 			}
-			return w;
+			return self;
 		};
 		obj.on = function (eventName, func, scope) {
 			scope = scope || obj;
@@ -230,7 +230,7 @@ function FakeCommunist(inObj) {
 			return obj;
 		};
 	}
-	w._close = function () {
+	self._close = function () {
 		olisteners = {};
 		wlisteners = {};
 		promises.forEach(function (a) {
@@ -238,11 +238,11 @@ function FakeCommunist(inObj) {
 		});
 		return communist.resolve();
 	};
-	if (!('close' in w)) {
-		w.close = w._close;
+	if (!('close' in self)) {
+		self.close = self._close;
 	}
 	if (!called) {
-		w.initialize(obj);
+		self.initialize(obj);
 	}
 }
 

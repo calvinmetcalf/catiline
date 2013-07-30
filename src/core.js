@@ -8,14 +8,14 @@ communist.Worker = function Communist(obj) {
 			return new FakeCommunist(obj);
 		}
 		var listeners = {};
-		var w = this;
-		w.on = function (eventName, func, scope) {
-			scope = scope || w;
+		var self = this;
+		self.on = function (eventName, func, scope) {
+			scope = scope || self;
 			if (eventName.indexOf(' ') > 0) {
 				eventName.split(' ').map(function (v) {
-					return w.on(v, func, scope);
+					return self.on(v, func, scope);
 				}, this);
-				return w;
+				return self;
 			}
 			if (!(eventName in listeners)) {
 				listeners[eventName] = [];
@@ -23,7 +23,7 @@ communist.Worker = function Communist(obj) {
 			listeners[eventName].push(function (a) {
 				func.call(scope, a);
 			});
-			return w;
+			return self;
 		};
 	
 		function _fire(eventName, data) {
@@ -31,31 +31,31 @@ communist.Worker = function Communist(obj) {
 				eventName.split(' ').forEach(function (v) {
 					_fire(v, data);
 				});
-				return w;
+				return self;
 			}
 			if (!(eventName in listeners)) {
-				return w;
+				return self;
 			}
 			listeners[eventName].forEach(function (v) {
 				v(data);
 			});
-			return w;
+			return self;
 		}
-		w.fire = function (eventName, data, transfer) {
+		self.fire = function (eventName, data, transfer) {
 			!communist._noTransferable ? worker.postMessage([
 				[eventName], data], transfer) : worker.postMessage([
 				[eventName], data]);
-			return w;
+			return self;
 		};
-		w.off = function (eventName, func) {
+		self.off = function (eventName, func) {
 			if (eventName.indexOf(' ') > 0) {
 				eventName.split(' ').map(function (v) {
-					return w.off(v, func);
+					return self.off(v, func);
 				});
-				return w;
+				return self;
 			}
 			if (!(eventName in listeners)) {
-				return w;
+				return self;
 			}
 			else if (!func) {
 				delete listeners[eventName];
@@ -70,7 +70,7 @@ communist.Worker = function Communist(obj) {
 					}
 				}
 			}
-			return w;
+			return self;
 		};
 		var i = 0;
 		var promises = [];
@@ -114,7 +114,7 @@ communist.Worker = function Communist(obj) {
 				i++;
 			}
 			fObj = fObj + key + ":" + obj[key].toString();
-			w[key] = keyFunc(key);
+			self[key] = keyFunc(key);
 		}
 		fObj = fObj + "}";
 		var worker = communist.makeWorker($$fObj$$);
@@ -132,16 +132,16 @@ communist.Worker = function Communist(obj) {
 			rejectPromises(e);
 			_fire('error', e);
 		};
-		w.on('console', function (msg) {
+		self.on('console', function (msg) {
 			console[msg[0]].apply(console, msg[1]);
 		});
-		w._close = function () {
+		self._close = function () {
 			worker.terminate();
 			rejectPromises("closed");
 			return communist.resolve();
 		};
-		if (!('close' in w)) {
-			w.close = w._close;
+		if (!('close' in self)) {
+			self.close = self._close;
 		}
 	};
 communist.worker = function (obj){

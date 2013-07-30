@@ -1,20 +1,20 @@
 communist.Queue = function CommunistQueue(obj, n, dumb) {
-	var w = this;
-	w.__batchcb__ = {};
-	w.__batchtcb__ = {};
-	w.batch = function (cb) {
+	var self = this;
+	self.__batchcb__ = {};
+	self.__batchtcb__ = {};
+	self.batch = function (cb) {
 		if (typeof cb === 'function') {
-			w.__batchcb__.__cb__ = cb;
-			return w.__batchcb__;
+			self.__batchcb__.__cb__ = cb;
+			return self.__batchcb__;
 		}
 		else {
 			return clearQueue(cb);
 		}
 	};
-	w.batchTransfer = function (cb) {
+	self.batchTransfer = function (cb) {
 		if (typeof cb === 'function') {
-			w.__batchtcb__.__cb__ = cb;
-			return w.__batchtcb__;
+			self.__batchtcb__.__cb__ = cb;
+			return self.__batchtcb__;
 		}
 		else {
 			return clearQueue(cb);
@@ -30,30 +30,30 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 		idle.push(numIdle);
 		numIdle++;
 	}
-	w.on = function (eventName, func, context) {
+	self.on = function (eventName, func, context) {
 		workers.forEach(function (worker) {
 			worker.on(eventName, func, context);
 		});
-		return w;
+		return self;
 	};
-	w.off = function (eventName, func, context) {
+	self.off = function (eventName, func, context) {
 		workers.forEach(function (worker) {
 			worker.off(eventName, func, context);
 		});
-		return w;
+		return self;
 	};
 	var batchFire = function (eventName, data) {
 		workers.forEach(function (worker) {
 			worker.fire(eventName, data);
 		});
-		return w;
+		return self;
 	};
-	w.fire = function (eventName, data) {
+	self.fire = function (eventName, data) {
 		workers[~~ (Math.random() * n)].fire(eventName, data);
-		return w;
+		return self;
 	};
-	w.batch.fire = batchFire;
-	w.batchTransfer.fire = batchFire;
+	self.batch.fire = batchFire;
+	self.batchTransfer.fire = batchFire;
 
 	function clearQueue(mgs) {
 		mgs = mgs || 'canceled';
@@ -63,7 +63,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 		oQ.forEach(function (p) {
 			p[3].reject(mgs);
 		});
-		return w;
+		return self;
 	}
 
 	function keyFunc(k) {
@@ -106,11 +106,11 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 		};
 	}
 	for (var key in obj) {
-		w[key] = keyFunc(key);
-		w.batch[key] = keyFuncBatch(key);
-		w.__batchcb__[key] = keyFuncBatchCB(key);
-		w.batchTransfer[key] = keyFuncBatchTransfer(key);
-		w.__batchtcb__[key] = keyFuncBatchTransferCB(key);
+		self[key] = keyFunc(key);
+		self.batch[key] = keyFuncBatch(key);
+		self.__batchcb__[key] = keyFuncBatchCB(key);
+		self.batchTransfer[key] = keyFuncBatchTransfer(key);
+		self.__batchtcb__[key] = keyFuncBatchTransferCB(key);
 	}
 
 	function done(num) {
@@ -154,13 +154,13 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 		}
 		return promise.promise;
 	}
-	w._close = function () {
-		return communist.all(workers.map(function (ww) {
-			return ww._close();
+	self._close = function () {
+		return communist.all(workers.map(function (w) {
+			return w._close();
 		}));
 	};
-	if (!('close' in w)) {
-		w.close = w._close;
+	if (!('close' in self)) {
+		self.close = self._close;
 	}
 };
 communist.queue = function (obj, n, dumb) {
