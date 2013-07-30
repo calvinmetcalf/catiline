@@ -1,4 +1,4 @@
-/*! communist 2.0.0 2013-07-29*/
+/*! communist 2.0.0 2013-07-30*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -231,8 +231,7 @@ if (typeof document === "undefined") {
 	};
 })(communist);
 
-//this is mainly so the name shows up when you look at the object in the console
-
+//regex out the importScript call and move it up to the top out of the function.
 function regexImports(string){
 	var rest=string,
 	match = true,
