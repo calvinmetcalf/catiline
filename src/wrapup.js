@@ -1,8 +1,8 @@
 function communist(object,queueLength,unmanaged){
 	if(arguments.length === 1 || !queueLength || queueLength <= 1){
-		return communist.worker(object);
+		return new communist.Worker(object);
 	}else{
-		return communist.queue(object,queueLength,unmanaged);
+		return new communist.Queue(object,queueLength,unmanaged);
 	}
 }
 

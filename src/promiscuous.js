@@ -1,5 +1,5 @@
 /*! Promiscuous ©2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/
-(function (exports) {
+(function (exports,tick) {
 	var func = "function";
 	// Creates a deferred: an object with a promise and corresponding resolve/reject methods
 	function Deferred() {
@@ -74,7 +74,7 @@
 	// Executes the callback with the specified value,
 	// resolving or rejecting the deferred
 	function execute(callback, value, deferred) {
-		exports.setImmediate(function () {
+		tick(function () {
 			var result;
 			try {
 				result = callback(value);
@@ -125,4 +125,4 @@
 		});
 		return promise.promise;
 	};
-})(communist);
+})(communist,communist.setImmediate);

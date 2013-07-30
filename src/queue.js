@@ -26,7 +26,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 	var que = [];
 	var queueLen = 0;
 	while (numIdle < n) {
-		workers[numIdle] = communist.worker(obj);
+		workers[numIdle] = new communist.Worker(obj);
 		idle.push(numIdle);
 		numIdle++;
 	}
