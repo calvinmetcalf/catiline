@@ -2,7 +2,7 @@
 (function (exports) {
 	var func = "function";
 	// Creates a deferred: an object with a promise and corresponding resolve/reject methods
-	function createDeferred() {
+	function Deferred() {
 		// The `handler` variable points to the function that will
 		// 1) handle a .then(onFulfilled, onRejected) call
 		// 2) handle a .resolve or .reject call (if not fulfilled)
@@ -11,22 +11,22 @@
 		// We use only one function to save memory and complexity.
 		var handler = function (onFulfilled, onRejected, value) {
 			// Case 1) handle a .then(onFulfilled, onRejected) call
-			var d;
+			var createdDeffered;
 			if (onFulfilled !== handler) {
-				d = createDeferred();
-				handler.c.push({ d: d, resolve: onFulfilled, reject: onRejected });
-				return d.promise;
+				createdDeffered = createDeferred();
+				handler.queue.push({ deferred: createdDeffered, resolve: onFulfilled, reject: onRejected });
+				return createdDeffered.promise;
 			}
 
 			// Case 2) handle a .resolve or .reject call
 			// (`onFulfilled` acts as a sentinel)
 			// The actual function signature is
 			// .re[ject|solve](sentinel, success, value)
-			var action = onRejected ? 'resolve' : 'reject',c,deferred,callback;
-			for (var i = 0, l = handler.c.length; i < l; i++) {
-				c = handler.c[i];
-				deferred = c.d;
-				callback = c[action];
+			var action = onRejected ? 'resolve' : 'reject',queue,deferred,callback;
+			for (var i = 0, l = handler.queue.length; i < l; i++) {
+				queue = handler.queue[i];
+				deferred = queue.deferred;
+				callback = queue[action];
 				if (typeof callback !== func) {
 					deferred[action](value);
 				} else {
@@ -42,21 +42,23 @@
 			};
 		}
 		var promise = new Promise();
+		this.promise = promise;
 		// The queue of deferreds
-		handler.c = [];
+		handler.queue = [];
 
-		return {
-			promise: promise,
-			// Only resolve / reject when there is a deferreds queue
-			resolve: function (value)	{
-				handler.c && handler(handler, true, value);
-			},
-			reject : function (reason) {
-				handler.c && handler(handler, false, reason);
-			},
+		this.resolve = function (value)	{
+			handler.queue && handler(handler, true, value);
+		};
+			
+		this.reject = function (reason) {
+			handler.queue && handler(handler, false, reason);
 		};
 	}
-
+	
+	function createDeferred(){
+		return new Deferred();
+	}
+	
 	// Creates a fulfilled or rejected .then function
 	function createHandler(promise, value, success) {
 		return function (onFulfilled, onRejected) {
