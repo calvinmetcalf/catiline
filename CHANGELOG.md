@@ -9,7 +9,8 @@ now just returns a regular (non-queue) worker
 - Multiple events can now be fired at once by passing a space sperated list of event
 names to `.fire()`
 - Internally we are using constructors instead of modules, thus in addition to `communist.worker` there is `communist.Worker` and `communist.Queue` of `communist.queue`
-- the file 'object.js' has been renamed to 'core.js' the file 'worker.object.js' to 'worker.js' and 'worker.temp.js' to 'temp.js'.
+- the file 'object.js' has been renamed to 'core.js' the file 'worker.object.js' to 'worker.js' and 'worker.temp.js' to 'temp.js' and 'fakeWorkers.js' to 'fakeWorker.js'.
+- removed the last of the single letter variables in promiscuous, core,fakeWorker, and queue.
 
 ##2.0.0
 
