@@ -106,7 +106,7 @@ if (typeof document === "undefined") {
 		};
 	})(communist,global);
 /*! Promiscuous ©2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/
-(function (exports) {
+(function (exports,tick) {
 	var func = "function";
 	// Creates a deferred: an object with a promise and corresponding resolve/reject methods
 	function Deferred() {
@@ -181,7 +181,7 @@ if (typeof document === "undefined") {
 	// Executes the callback with the specified value,
 	// resolving or rejecting the deferred
 	function execute(callback, value, deferred) {
-		exports.setImmediate(function () {
+		tick(function () {
 			var result;
 			try {
 				result = callback(value);
@@ -232,7 +232,7 @@ if (typeof document === "undefined") {
 		});
 		return promise.promise;
 	};
-})(communist);
+})(communist,communist.setImmediate);
 
 //regex out the importScript call and move it up to the top out of the function.
 function regexImports(string){
@@ -732,7 +732,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 	var que = [];
 	var queueLen = 0;
 	while (numIdle < n) {
-		workers[numIdle] = communist.worker(obj);
+		workers[numIdle] = new communist.Worker(obj);
 		idle.push(numIdle);
 		numIdle++;
 	}
@@ -875,9 +875,9 @@ communist.queue = function (obj, n, dumb) {
 
 function communist(object,queueLength,unmanaged){
 	if(arguments.length === 1 || !queueLength || queueLength <= 1){
-		return communist.worker(object);
+		return new communist.Worker(object);
 	}else{
-		return communist.queue(object,queueLength,unmanaged);
+		return new communist.Queue(object,queueLength,unmanaged);
 	}
 }
 
