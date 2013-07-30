@@ -400,6 +400,10 @@ describe('cw()', function () {
 				this.on('double',double);
 			},two:function(a,callback,scope){
 				scope.fire('take1 take2',a);
+				return true;
+			},empty:function(a){
+				this.fire(a);
+				return true;
 			}
 		});
 		it('should work',function(done){
@@ -443,6 +447,10 @@ describe('cw()', function () {
 				wrapup();
 			});
 			comrade.two(5);
+		});
+		it('should be able to fire an empty event',function(done){
+			comrade.on('pancake',done);
+			comrade.empty('pancake');
 		});
 		it('and put it out',function(done){
 			comrade.on('q',function(a){
