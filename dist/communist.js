@@ -142,12 +142,13 @@ if (typeof document === "undefined") {
 			}
 			// Replace this handler with a simple resolved or rejected handler
 			handler = createHandler(promise, value, onRejected);
-		},
-		promise = {
-			then: function (onFulfilled, onRejected) {
-				return handler(onFulfilled, onRejected);
-			}
 		};
+		function Promise(){
+			this.then=function (onFulfilled, onRejected) {
+				return handler(onFulfilled, onRejected);
+			};
+		}
+		var promise = new Promise();
 		// The queue of deferreds
 		handler.c = [];
 

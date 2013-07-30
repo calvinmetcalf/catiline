@@ -16,7 +16,7 @@ module.exports = function(grunt) {
 				options:{
 					banner:'/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!(c)2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */\n/*!Includes Promiscuous (c)2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/\n/*!Includes Material from setImmediate Copyright (c) 2012 Barnesandnoble.com, llc, Donavon West, and Domenic Denicola @license MIT https://github.com/NobleJS/setImmediate */\n',
 					mangle: {
-						except: ['Communist']
+						except: ['Communist','CommunistQueue','FakeCommunist','Promise']
 					}
 				},
 				src: 'dist/<%= pkg.name %>.js',
