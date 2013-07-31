@@ -1,6 +1,18 @@
 Changelog
 ===
 
+##2.1.0
+
+- Moved `cw.makeUrl()` to util.js, not sure why it was in wrapup.js.
+- Passing a falsy value or a number less then 2 as the number of workers in a queue
+now just returns a regular (non-queue) worker
+- Multiple events can now be fired at once by passing a space sperated list of event
+names to `.fire()`
+- Internally we are using constructors instead of modules, thus in addition to `communist.worker` there is `communist.Worker` and `communist.Queue` of `communist.queue`
+- the file 'object.js' has been renamed to 'core.js' the file 'worker.object.js' to 'worker.js' and 'worker.temp.js' to 'temp.js' and 'fakeWorkers.js' to 'fakeWorker.js'.
+- removed the last of the single letter variables in promiscuous, core,fakeWorker, and queue.
+- API page is now DOCUMENTATION and new more formal API page.
+
 ##2.0.0
 
 - Ajax and map reduce are now seprate plugins

@@ -1,198 +1,180 @@
 API
 ===
+
 ```javascript
-var worker = cw({
-	sum:function(a,callback){
-		callback(a[0]+a[1]);
-	},
-	square:function(a){
-		return a*a;
-	}
-});
-worker.sum([2,5]).then(function(a){
-	console.log(a);
-})//prints 7
-worker.square(5).then(function(a){
-	console.log(a);
-})//prints 25
-worker.close()//closes the worker, can be overwritten, worker._close() can't be.
+cw(Object or Function[, Number, Boolean])
+	-> worker object
 ```
 
-Give it an object of functions, and you can call them by name, your functions can either return a value or call a callback function which is passed as the second argument.
-Call the function with the data as the first argument and a transfer list for the second.
-It takes two arguments, data and an optional list of any arrayBuffers to transfer ownership of.
-If you want to do things once when the worker is created pass a function called `initialize` or `init` this gets called once with no arguments.  All workers are called in the same context so
-`this` can be used to store things, functions can also use `this` to call each other. 
-
-If you only have one function you’re going to be using, you can omit the object and give it a single function.  This is a shortcut from `cw(yourfunc)`to`cw({data:yourfunc})`.
+is the basic signature but it should be noted that
 
 ```javascript
-var worker = cw(function(a,callback){
-	callback(a[0]+a[1]);
-});
-worker.data([2,5]).then(function(a){
-	console.log(a);
-})//prints 7
-worker.close();//close it up
+cw(Function[, Number, Boolean])
 ```
 
-For slightly more complex communication patterns you can fire events between the the two contexts with 'on', 'fire', and 'off' events.
+is actually a shortcut to
 
 ```javascript
-var worker = cw(function(text){
-	var target = 4;
-	var words = text.split(' ');
-	words.forEach(function(word){
-		if(word.length === target){
-			this.fire('match',word);
-		};
-	},this);
-});
-
-worker.on('match',function(a){
-	console.log(a);
-});
-
-worker.data('Give it an object of functions, and you can call them by name, your functions can either return a value or call a callback function which is passed as the second argument.')
-/*prints
-Give
-call
-them
-your
-call
-*/
+cw({data:Function}[, Number, Boolean])
 ```
 
-The event system was inspired by [Leaflet's](http://leafletjs.com/reference.html#events) but with a similar set of methods. Multiple space separated words can
-but sent to the 'on' and 'off' methods and `off` accepts a function if you only want to delete one of many functions, `on` takes a scope argument in its 3rd spot.
+if number is specified, truthy, and greater then 1 then `cw()` is actually a shortcut to `new cw.Queue`,
+otherwise it is a shortcut to `new cw.Worker()`
 
-###Importing Scripts
-If you create a worker and the function imports a script like
+##cw.Worker
+
+the object passed to the constructor is in the format of keys which map to functions
+the keys of this object are turned into methods of the returned worker object
+additionally if a key with the value 'initialize' is present then its function is
+invoked in the worker as soon as the worker is created with the signature:
 
 ```javascript
-function(base,cb){
-	importScripts('dist/shp.js');
-	shp(base).then(cb);
+scope.initialize(scope)
+```
+
+As a convenience if key named
+'init' is present and a key named 'initialize' is not present then obj['initialize']
+is set to obj['init'].
+
+methods of the worker object derived from keys have the followinging signature
+
+```javascript
+worker.method(data[,transfer:Array])
+	->promise
+```
+
+it is called with any arbatraty data that can be serialized by structured cloning
+and and optional array of buffers to transfer and it returns a promise. 
+In the worker the function specified is called with the signature
+
+```javascript
+scope.method(data, callback, scope)
+```
+
+This function can resolve by either passing a value to the callback function or returning a defined value (aka typeof value !== 'undefined')
+it may only resolve once, if it calls the callback more then once or returns a values and calls callback 1 or more times an error will occur.
+
+The worker object also has a method _close which may be used to close the worker
+
+```javascript
+worker._close()
+	->promise
+```
+
+there is also a shortcut function of `worker.close()` which may be overwritten, 
+`worker._close()` will overwrite the method name on the worker object but not inside the worker.
+The promise always resolves successfully.
+
+The functions in the worker are always called as a method if the 'scope' object meaning 
+function 'a' may call function 'b' as `this.b()` internally, furthermore as a convenience
+the scope is passed as the last parameter when functions are invoked (this is the 3rd parameter for most function except 
+'initialize' where it is the first and only parameter). Meaning function 'a' could do:
+
+```javascript
+function(data,callback,scope){
+	scope.b();
 }
 ```
 
-it will be rewritten inside the worker as 
+the worker object and the scope object both have 3 additional methods
+`on`, `off`, and `fire` for working with events. For these 3 methods the following definitions a being used
+
+'event name' can be any JavaScript string that does not include a space.
+
+'event string' is one or more event names seperated by spaces.
 
 ```javascript
-importScripts('http://full/path/to/dist/shp.js');
-function(base,cb){
-	shp(base).then(cb);
-}
+workerORscope.on('event string', listnener:Function[,contect:Object])
+	->workerORscope
 ```
 
-In other words it will be hoisted out of the function so it will only be called once, and it will rewrite all the URLs to be absolute.
+the listner function is called with the signatrue
 
-###Queues
+```
+listnener(data,scope);
+```
+
+by default scope and context (third argument, `this` inside the listner) are the same
+and be aware changing context does not change scope (the scope object is always the same
+even if `this` is changed).
 
 ```javascript
-var workers = cw({
-	sum:function(a,callback){
-		callback(a[0]+a[1]);
-	},
-	square:function(a){
-		return a*a;
-	}
-},4);
+workerORscope.off('event string')
+	->workerORscope
 ```
 
-Just add a number after the object and it will create that number or workers. Then calls will be divided among them, you can also call bulk methods works just like the regular method but also can call bulk methods which return arrays:
+removes the listener or listeners in the event string
+
+```javascript
+workerORscope.fire('event string'[,data,transfer:Array])
+	->workerORscope
+```
+
+when called in the main page sends the messege with the data (if any) to the worker
+and transfering any buffers if they are specified when called in the worker it gets sent
+to the main page.
+
+Internally on before workers are created any ImportScripts() declarations are hoisted into the global worker scope and 
+deduped.
+
+##cw.Queue
+
+A queue which can be accessed as described above has the signature
+
+```javascript
+new cw.Queue(Object ,Number [,Boolean])
+	-> CommunistQueue
+```
+
+A queue can be treated exactly like a worker and it will behave identically except
+there will be a number of workers equal to the number specified in parameter two.
+
+If parameter 3 is falsy (or omited) then it is a 'Managed Queue' and when methods are called
+then if a worker is free, the call is forwarded to a worker like normal, the worker is
+noted to be busy when the worker responds the promise is resolved like normal and the worker is noted as being free.
+Data is only given to free workers and if all workers are busy it is placed in a queue and will be
+sent to workers on a FIFO basis as they become free.
+
+If parameter 3 is truthy then on each all to queue object a worker is picked at random and the data is sent to that one.
+
+Queues also have properties called 'batch' and 'batchTransfer' which have the same methods as the provided object.
+
+In other words if this queue was created
+
+```javascript
+var queue = cw({method:function});
+```
+
+not only would there be `queue.method()` method but also `queue.batch.method()` and `queue.batchTransfer.method()`.
+
+'queue.batch.method' is like queue.method except it takes an array of values and divides them among the workers
+based on the queue stratagy. If they all resolve successfully then the promise resolves with an array of the results in the same order as the input values.
+If a function has an error then the returned promises is rejected.
+
+'queue.batchTransfer.method' is identical to 'queue.batch.method' but instead of an array of values
+it accepts an array of arrays of length 2 in with the first element the value and the second an array of buffers to transfer, aka: `[value,[buffers]]`
+
+if batch or batchTransfer are given a function when the method is called then that function will be called with each result, aka
+
+```javascript
+queue.batch(Function).method([Array])
+```
+
+function will be called with each result (will not be called in case of an error).
+
+if batch is given a string it will clear the managed queue and it will reject all callbacks, aka 
 
 
 ```javascript
-workers.square(4).then(function(a){
-	console.log(a);
-});//normal way prints 16;
-workers.batch.square([1,2,3,4,5,6,7,8]).then(function(a){
-	console.log(a);
-});//bulk prints [1,4,9,16,25,36,49,64]
+queue.batch.method([Array])
+queue.batch('stopit');
 ```
 
-if you give it a callback then it calls the callback for each of the bulk items instead of waiting for all to be done.
+##Utility functions
 
-```javascript
-var workers = cw({
-	sum:function(a,callback){
-		callback(a[0]+a[1])
-	},
-	square:function(a){
-		return a*a;
-	}
-},4);
-workers.square(4).then(function(a){
-	console.log(a);
-});//the same way prints 16;
-workers.batch(function(a){
-	console.log(a);
-}).square([1,2,3,4,5,6,7,8]);/*prints:
-1
-4
-9
-16
-25
-36
-49
-64
-*/
-```
-To cancel a queue calling `workers.batch('msg')` will clear the current data and reject all the promises.
-
-If you want to dispense with the queuing system you can also do a dumb queue
-
-```javascript
-var workers = cw({
-	sum:function(a,callback){
-		callback(a[0]+a[1]);
-	},
-	square:function(a){
-		return a*a;
-	}
-},4,'dumb');
+'''javascript
+cw.makeUrl(reletiveUrl:String)
+	->absoluteUrl
 ```
 
-which is exactly like the other queue but instead of carefully queuing and only giving data to workers that are ready, it sprays the workers with the data completely randomly until it's out of data, think very carefully before using
-can lead to "three stooges syndrome" where all the results come back at exactly the same time and freeze the dom.
-
-can use bulk and callback with it too but results may be different
-
-```javascript
-var workers = cw({
-	sum:function(a,callback){
-		callback(a[0]+a[1]);
-	},
-	square:function(a){
-		return a*a;
-	}
-},4,'dumb');
-workers.batch(function(a){
-	console.log(a);
-}).square([1,2,3,4,5,6,7,8]);/* prints
-1
-25
-16
-4
-36
-9
-49
-64
-*/
-```
-
-###Misc
-
-we have a few utility functions you can use
-
-`cw.makeUrl(reletiveURL);` returns an absolute url and
-
-`cw.makeWorker([array of strings]);` returns worker made from those strings.
-
-`cw.deferred();` makes a new promise and returns it, used internally. Technically `cw` is a shortcut to [Promiscuous](https://github.com/RubenVerborgh/promiscuous/) which is used for promises, so any of Promiscuous's methods can be used, aka call `cw.resolve(value)` for an already resolved promise and `cw.reject(reason)` for a rejected one. Lastly you can call `cw.all([promises])` on an array of promises, should work just like `Q.all()`.
-
-`cw.setImmediate();` implements [setImmediate](https://github.com/NobleJS/setImmediate), at least the parts that apply to non web workers that can create web workers.
-
-lastly `cw.noConflict()` sets `cw` back to what it was before loading this library and you can use the function via `communist()`
-
+Takes a reletive url and returns an absolute one, handy as reletive urls will resolve badly inside a blob worker.

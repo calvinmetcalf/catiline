@@ -12,7 +12,7 @@ Want to use it? Grab the
 [development version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.js)
 or [production version](https://raw.github.com/calvinmetcalf/communist/master/dist/communist.min.js) from the dist folder. 
 
-For usage in addition to the <a class='navLink' id='API' href='API.md'>API page</a>,
+For usage in addition to the <a class='navLink' id='API' href='API.md'>API page</a> and <a class='navLink' id='DOCUMENTATION' href='DOCUMENTATION.md'>documentation</a>,
 I wrote a [blog posts](http://cwmma.tumblr.com/post/54338607071/making-web-workers-with-communistjs)
 about communist, or you can browse some demos:
 

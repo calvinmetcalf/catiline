@@ -15,14 +15,21 @@ _db.on = function (eventName, func, scope) {
 		func.call(scope, a, _db);
 	});
 };
-var _fire = function (eventName, data) {
+function _fire(eventName,data){
+	if(eventName.indexOf(" ")>0){
+		eventName.split(" ").forEach(function(v){
+			_fire(v,data);
+		});
+		return;
+	}
 	if (!(eventName in listeners)) {
 		return;
 	}
 	listeners[eventName].forEach(function (v) {
 		v(data);
 	});
-};
+}
+
 _db.fire = function (eventName, data, transfer) {
 	!self._noTransferable ? self.postMessage([
 		[eventName], data], transfer) : self.postMessage([

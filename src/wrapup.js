@@ -1,16 +1,10 @@
 function communist(object,queueLength,unmanaged){
-	if(arguments.length === 1){
-		return communist.worker(object);
+	if(arguments.length === 1 || !queueLength || queueLength <= 1){
+		return new communist.Worker(object);
 	}else{
-		return communist.queue(object,queueLength,unmanaged);
+		return new communist.Queue(object,queueLength,unmanaged);
 	}
 }
-
-communist.makeUrl = function (fileName) {
-	var link = document.createElement("link");
-	link.href = fileName;
-	return link.href;
-};
 
 function initBrowser(communist){
 	var origCW = global.cw;

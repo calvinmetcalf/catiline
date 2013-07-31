@@ -1,5 +1,3 @@
-//this is mainly so the name shows up when you look at the object in the console
-var Communist = function(){};
 //regex out the importScript call and move it up to the top out of the function.
 function regexImports(string){
 	var rest=string,
@@ -61,4 +59,10 @@ communist.makeWorker = function (strings){
 	}finally{
 		return worker;
 	}
+};
+
+communist.makeUrl = function (fileName) {
+	var link = document.createElement("link");
+	link.href = fileName;
+	return link.href;
 };
