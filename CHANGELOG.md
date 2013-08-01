@@ -1,6 +1,10 @@
 Changelog
 ===
 
+##2.2.0
+
+- fake workers are now in an iframe
+
 ##2.1.0
 
 - Moved `cw.makeUrl()` to util.js, not sure why it was in wrapup.js.
