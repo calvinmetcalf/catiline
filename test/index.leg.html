@@ -6,15 +6,14 @@
     <link rel="stylesheet" href="lib/mocha.css" />
     <script>
     	var cw = "cw";
+    	var fakeLegacy = true;
     </script>
     <script src="lib/shim.bundle.js"></script>
     <script src="../dist/communist.js"></script>
     <script src="lib/mocha.js"></script>
     <script src="lib/chai.js"></script>
     <script src="test.js"></script>
-    <script>
-    	var fakeLegacy = true;
-    </script>
+    
     <script>
       window.onload = function() {
           if (window.mochaPhantomJS) { mochaPhantomJS.run(); }

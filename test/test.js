@@ -172,8 +172,9 @@ describe('cw()', function () {
 		});
 	});
 	describe('Objects', function () {
-		var comrade = cw({product:product,aSquare:aSquare,square:square});
+		var comrade;
 		it("should be able create an object worker",function (done){
+			comrade = cw({product:product,aSquare:aSquare,square:square});
 			comrade.aSquare(3).then(function(a){
 				assert.equal(a,9);
 			}).then(function(){
@@ -202,8 +203,9 @@ describe('cw()', function () {
 		});
 	});
 	describe('Queues', function () {
-		var comrade = cw({product:product,aSquare:aSquare,square:square},2);
+		var comrade;
 		it("should be able create an object worker",function (done){
+			comrade = cw({product:product,aSquare:aSquare,square:square},2);
 			comrade.aSquare(3).then(function(a){
 				assert.equal(a,9);
 			}).then(function(){
@@ -310,8 +312,9 @@ describe('cw()', function () {
 		});
 	});
 	describe('dumb Queues', function () {
-		var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
+		var comrade;
 		it("should be able create an object worker",function (done){
+			comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
 			comrade.aSquare(3).then(function(a){
 				assert.equal(a,9);
 			}).then(function(){
