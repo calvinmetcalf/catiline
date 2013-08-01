@@ -1,4 +1,3 @@
-"use strict";
 
 var _db = $$fObj$$;
 var __self__={onmessage:function(){}};
@@ -7,7 +6,7 @@ window.onmessage=function(e){
 };
 __self__.postMessage=function(data){
 	data.unshift(_db.__codeWord__);
-	window.parent.postMessage(data,"*");
+	window.top.postMessage(data,"*");
 };
 var listeners = {};
 _db.on = function (eventName, func, scope) {

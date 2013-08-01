@@ -291,33 +291,53 @@ function getPath(){
 			i++;
 		}
 }
+function appendScript(iDoc,text){
+	var iScript = iDoc.createElement('script');
+			if (iScript.text !== void 0) {
+				iScript.text = text;
+			} else {
+				iScript.innerHTML = text;
+			}
+		if(iDoc.readyState==="complete"){
+		iDoc.documentElement.appendChild(iScript);
+		}else{
+			iDoc.onreadystatechange=function(){
+				console.log(iDoc.readyState);
+				if(iDoc.readyState==="complete"){
+		iDoc.documentElement.appendChild(iScript);
+		}
+			};
+		}
+}
 function actualMakeI(script,codeword){
-	var promise = communist.deferred();
 	var iFrame = document.createElement('iframe');
 		iFrame.style.display = 'none';
 		document.body.appendChild(iFrame);
-	var iScript = document.createElement('script');
-	iScript.text='try{ '+
+		var iWin = iFrame.contentWindow;
+		var iDoc = iWin.document;
+	var text='try{ '+
 	'var __scripts__="";function importScripts(scripts){	if(Array.isArray(scripts)&&scripts.length>0){		scripts.forEach(function(url){			var ajax = new XMLHttpRequest();			ajax.open("GET",url,false);ajax.send();__scripts__+=ajax.responseText;__scripts__+="\\n;";});}};'+script+
-	'}catch(e){window.parent.postMessage(["'+codeword+'","error"],"*")}';
-	if(iFrame.contentDocument.readyState==="complete"){
-		iFrame.contentDocument.body.appendChild(iScript);
-		promise.resolve(iFrame);
+	'}catch(e){window.top.postMessage(["'+codeword+'","error"],"*")}';
+	if(true || iDoc.readyState==="complete"){
+		appendScript(iDoc,text);
 	}else{
-		iFrame.contentWindow.addEventListener('load',function(){
-			iFrame.contentDocument.body.appendChild(iScript);
-			promise.resolve(iFrame);
-		});
+		iWin.__loaded__=function(){
+			appendScript(iDoc,text);
+		};
+		iDoc.open();
+		iDoc.write('<script>__loaded__()</script>');
+		iDoc.close();
 	}
-	return promise.promise;
+
+	return iFrame;
 }
 function makeIframe(script,codeword){
 	var promise = communist.deferred();
 	if(document.readyState==="complete"){
-		actualMakeI(script,codeword).then(function(a){promise.resolve(a);});
+		promise.resolve(actualMakeI(script,codeword));
 	}else{
 		window.addEventListener('load',function(){
-			actualMakeI(script,codeword).then(function(a){promise.resolve(a);});
+			promise.resolve(actualMakeI(script,codeword));
 		},false);
 	}
 	return promise.promise;
@@ -730,7 +750,7 @@ communist.IWorker = function iCommunist(obj) {
 			self[key] = keyFunc(key);
 		}
 		fObj = fObj + "}";
-		var worker = communist.makeIWorker(['"use strict";var _db = ',fObj,';var __self__={onmessage:function(){}};window.onmessage=function(e){	__self__.onmessage(e);};__self__.postMessage=function(data){	data.unshift(_db.__codeWord__);	window.parent.postMessage(data,"*");};var listeners = {};_db.on = function (eventName, func, scope) {	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.on(v,func,scope);		},_db);	}	scope = scope || _db;	if (!(eventName in listeners)) {		listeners[eventName] = [];	}	listeners[eventName].push(function (a) {		func.call(scope, a, _db);	});};function _fire(eventName,data){	if(eventName.indexOf(" ")>0){		eventName.split(" ").forEach(function(v){			_fire(v,data);		});		return;	}	if (!(eventName in listeners)) {		return;	}	listeners[eventName].forEach(function (v) {		v(data);	});}_db.fire = function (eventName, data, transfer) {	__self__.postMessage([		[eventName], data]);};_db.off=function(eventName,func){	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.off(v,func);		});	}	if(!(eventName in listeners)){		return;	}else if(!func){		delete listeners[eventName];	}else{		if(listeners[eventName].indexOf(func)>-1){			if(listeners[eventName].length>1){				delete listeners[eventName];			}else{				listeners[eventName].splice(listeners[eventName].indexOf(func),1);			}		}	}};/*var console={};function makeConsole(method){	return function(){		var len = arguments.length;		var out =[];		var i = 0;		while (i<len){			out.push(arguments[i]);			i++;		}		_db.fire("console",[method,out]);	};}["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){	console[v]=makeConsole(v);});*/__self__.onmessage=function(e){	_fire("messege",e.data[1]);	if(e.data[0][0]===_db.__codeWord__){		return regMsg(e);	}else{		_fire(e.data[0][0],e.data[1]);	}};var regMsg = function(e){	var cb=function(data,transfer){		__self__.postMessage([e.data[0],data]);	};	var result;	try{		result = _db[e.data[1]](e.data[2],cb,_db);	}catch(e){		_db.fire("error",JSON.stringify(e));	}	if(typeof result !== "undefined"){		cb(result);	}};_db.initialize(_db);'],__codeWord__);
+		var worker = communist.makeIWorker(['var _db = ',fObj,';var __self__={onmessage:function(){}};window.onmessage=function(e){	__self__.onmessage(e);};__self__.postMessage=function(data){	data.unshift(_db.__codeWord__);	window.top.postMessage(data,"*");};var listeners = {};_db.on = function (eventName, func, scope) {	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.on(v,func,scope);		},_db);	}	scope = scope || _db;	if (!(eventName in listeners)) {		listeners[eventName] = [];	}	listeners[eventName].push(function (a) {		func.call(scope, a, _db);	});};function _fire(eventName,data){	if(eventName.indexOf(" ")>0){		eventName.split(" ").forEach(function(v){			_fire(v,data);		});		return;	}	if (!(eventName in listeners)) {		return;	}	listeners[eventName].forEach(function (v) {		v(data);	});}_db.fire = function (eventName, data, transfer) {	__self__.postMessage([		[eventName], data]);};_db.off=function(eventName,func){	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.off(v,func);		});	}	if(!(eventName in listeners)){		return;	}else if(!func){		delete listeners[eventName];	}else{		if(listeners[eventName].indexOf(func)>-1){			if(listeners[eventName].length>1){				delete listeners[eventName];			}else{				listeners[eventName].splice(listeners[eventName].indexOf(func),1);			}		}	}};/*var console={};function makeConsole(method){	return function(){		var len = arguments.length;		var out =[];		var i = 0;		while (i<len){			out.push(arguments[i]);			i++;		}		_db.fire("console",[method,out]);	};}["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){	console[v]=makeConsole(v);});*/__self__.onmessage=function(e){	_fire("messege",e.data[1]);	if(e.data[0][0]===_db.__codeWord__){		return regMsg(e);	}else{		_fire(e.data[0][0],e.data[1]);	}};var regMsg = function(e){	var cb=function(data,transfer){		__self__.postMessage([e.data[0],data]);	};	var result;	try{		result = _db[e.data[1]](e.data[2],cb,_db);	}catch(e){		_db.fire("error",JSON.stringify(e));	}	if(typeof result !== "undefined"){		cb(result);	}};_db.initialize(_db);'],__codeWord__);
 		worker.onmessage = function (e) {
 			_fire('message', e.data[1]);
 			if (e.data[0][0] === __codeWord__) {
