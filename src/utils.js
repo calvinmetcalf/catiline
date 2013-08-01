@@ -56,6 +56,7 @@ function getPath(){
 		}
 }
 function actualMakeI(script,codeword){
+	var promise = communist.deferred();
 	var iFrame = document.createElement('iframe');
 		iFrame.style.display = 'none';
 		document.body.appendChild(iFrame);
@@ -63,16 +64,24 @@ function actualMakeI(script,codeword){
 	iScript.text='try{ '+
 	'var __scripts__="";function importScripts(scripts){	if(Array.isArray(scripts)&&scripts.length>0){		scripts.forEach(function(url){			var ajax = new XMLHttpRequest();			ajax.open("GET",url,false);ajax.send();__scripts__+=ajax.responseText;__scripts__+="\\n;";});}};'+script+
 	'}catch(e){window.parent.postMessage(["'+codeword+'","error"],"*")}';
-	iFrame.contentDocument.body.appendChild(iScript);
-	return iFrame;
+	if(iFrame.contentDocument.readyState==="complete"){
+		iFrame.contentDocument.body.appendChild(iScript);
+		promise.resolve(iFrame);
+	}else{
+		iFrame.contentWindow.addEventListener('load',function(){
+			iFrame.contentDocument.body.appendChild(iScript);
+			promise.resolve(iFrame);
+		});
+	}
+	return promise.promise;
 }
 function makeIframe(script,codeword){
 	var promise = communist.deferred();
 	if(document.readyState==="complete"){
-		promise.resolve(actualMakeI(script,codeword));
+		actualMakeI(script,codeword).then(function(a){promise.resolve(a);});
 	}else{
 		window.addEventListener('load',function(){
-			promise.resolve(actualMakeI(script,codeword));
+			actualMakeI(script,codeword).then(function(a){promise.resolve(a);});
 		},false);
 	}
 	return promise.promise;
