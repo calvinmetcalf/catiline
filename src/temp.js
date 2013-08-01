@@ -5,7 +5,7 @@ communist.Worker = function Communist(obj) {
 			};
 		}
 		if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
-			return new FakeCommunist(obj);
+			return new communist.IWorker(obj);
 		}
 		var listeners = {};
 		var self = this;

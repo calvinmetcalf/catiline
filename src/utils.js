@@ -31,6 +31,16 @@ function moveImports(string){
 		return rest;
 	}
 }
+function moveIimports(string){
+	var str = regexImports(string);
+	var matches = str[0];
+	var rest = str[1];
+	if(matches.length>0){
+		return 'importScripts("'+matches.join('","')+'");eval(__scripts__);\n'+rest;
+	}else{
+		return rest;
+	}
+}
 function getPath(){
 	if(typeof SHIM_WORKER_PATH !== "undefined"){
 		return SHIM_WORKER_PATH;
@@ -45,6 +55,51 @@ function getPath(){
 			i++;
 		}
 }
+function actualMakeI(script,codeword){
+	var iFrame = document.createElement('iframe');
+		iFrame.style.display = 'none';
+		document.body.appendChild(iFrame);
+	var iScript = document.createElement('script');
+	iScript.text='try{ '+
+	'var __scripts__="";function importScripts(scripts){	if(Array.isArray(scripts)&&scripts.length>0){		scripts.forEach(function(url){			var ajax = new XMLHttpRequest();			ajax.open("GET",url,false);ajax.send();__scripts__+=ajax.responseText;__scripts__+="\\n;";});}};'+script+
+	'}catch(e){window.parent.postMessage(["'+codeword+'","error"],"*")}';
+	iFrame.contentDocument.body.appendChild(iScript);
+	return iFrame;
+}
+function makeIframe(script,codeword){
+	var promise = communist.deferred();
+	if(document.readyState==="complete"){
+		promise.resolve(actualMakeI(script,codeword));
+	}else{
+		window.addEventListener('load',function(){
+			promise.resolve(actualMakeI(script,codeword));
+		},false);
+	}
+	return promise.promise;
+}
+communist.makeIWorker = function (strings,codeword){
+	var script =moveIimports(strings.join(""));
+	var worker = {onmessage:function(){}};
+	var ipromise = makeIframe(script,codeword);
+	window.addEventListener('message',function(e){
+		if(Array.isArray(e.data)&&e.data[0]===codeword){
+			e.data.shift();
+			worker.onmessage(e);
+		}
+	});
+	worker.postMessage=function(data){
+		ipromise.then(function(iFrame){
+			iFrame.contentWindow.postMessage(data,"*");
+		});
+	};
+	worker.terminate=function(){
+		ipromise.then(function(iFrame){
+			document.body.removeChild(iFrame);
+		});
+	};
+	return worker;
+	
+};
 //accepts an array of strings, joins them, and turns them into a worker.
 communist.makeWorker = function (strings){
 	var worker;

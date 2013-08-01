@@ -1,14 +1,7 @@
-communist.Worker = function Communist(obj) {
-		if(typeof obj === 'function'){
-			obj = {
-				data:obj
-			};
-		}
-		if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
-			return new communist.IWorker(obj);
-		}
+communist.IWorker = function iCommunist(obj) {
 		var listeners = {};
 		var self = this;
+		var __codeWord__='com.communistjs.iframe'+Math.random();
 		self.on = function (eventName, func, scope) {
 			scope = scope || self;
 			if (eventName.indexOf(' ') > 0) {
@@ -94,14 +87,14 @@ communist.Worker = function Communist(obj) {
 				obj.initialize = function () {};
 			}
 		}
+		obj.__codeWord__='"'+__codeWord__+'"';
 		var fObj = "{";
 		var keyFunc = function (key) {
 			var out = function (data, transfer) {
 				var i = promises.length;
 				promises[i] = communist.deferred();
-				!communist._noTransferable ? worker.postMessage([
-					['com.communistjs', i], key, data], transfer) : worker.postMessage([
-					['com.communistjs', i], key, data]);
+				worker.postMessage([
+					[__codeWord__, i], key, data], "*");
 				return promises[i].promise;
 			};
 			return out;
@@ -117,10 +110,10 @@ communist.Worker = function Communist(obj) {
 			self[key] = keyFunc(key);
 		}
 		fObj = fObj + "}";
-		var worker = communist.makeWorker($$fObj$$);
+		var worker = communist.makeIWorker($$fObj$$,__codeWord__);
 		worker.onmessage = function (e) {
 			_fire('message', e.data[1]);
-			if (e.data[0][0] === 'com.communistjs') {
+			if (e.data[0][0] === __codeWord__) {
 				promises[e.data[0][1]].resolve(e.data[1]);
 				promises[e.data[0][1]] = 0;
 			}
@@ -128,10 +121,9 @@ communist.Worker = function Communist(obj) {
 				_fire(e.data[0][0], e.data[1]);
 			}
 		};
-		worker.onerror = function (e) {
+		self.on('error', function (e) {
 			rejectPromises(e);
-			_fire('error', e);
-		};
+		});
 		self.on('console', function (msg) {
 			console[msg[0]].apply(console, msg[1]);
 		});
@@ -144,6 +136,6 @@ communist.Worker = function Communist(obj) {
 			self.close = self._close;
 		}
 	};
-communist.worker = function (obj){
-	return new communist.Worker(obj);
+communist.iWorker = function (obj){
+	return new communist.IWorker(obj);
 };
