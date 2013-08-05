@@ -1,4 +1,4 @@
-/*! communist 2.2.0 2013-08-01*/
+/*! communist 2.2.0 2013-08-05*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -302,7 +302,6 @@ function appendScript(iDoc,text){
 		iDoc.documentElement.appendChild(iScript);
 		}else{
 			iDoc.onreadystatechange=function(){
-				console.log(iDoc.readyState);
 				if(iDoc.readyState==="complete"){
 		iDoc.documentElement.appendChild(iScript);
 		}
@@ -315,9 +314,21 @@ function actualMakeI(script,codeword){
 		document.body.appendChild(iFrame);
 		var iWin = iFrame.contentWindow;
 		var iDoc = iWin.document;
-	var text='try{ '+
-	'var __scripts__="";function importScripts(scripts){	if(Array.isArray(scripts)&&scripts.length>0){		scripts.forEach(function(url){			var ajax = new XMLHttpRequest();			ajax.open("GET",url,false);ajax.send();__scripts__+=ajax.responseText;__scripts__+="\\n;";});}};'+script+
-	'}catch(e){window.top.postMessage(["'+codeword+'","error"],"*")}';
+	var text=['try{ ',
+	'var __scripts__="";function importScripts(scripts){',
+	'	if(Array.isArray(scripts)&&scripts.length>0){',
+	'		scripts.forEach(function(url){',
+	'			var ajax = new XMLHttpRequest();',
+	'			ajax.open("GET",url,false);',
+	'			ajax.send();__scripts__+=ajax.responseText;',
+	'			__scripts__+="\\n;";',
+	'		});',
+	'	}',
+	'};',
+	script,
+	'}catch(e){',
+	'	window.parent.postMessage(["'+codeword+'","error"],"*")',
+	'}'].join('\n');
 	if(true || iDoc.readyState==="complete"){
 		appendScript(iDoc,text);
 	}else{
@@ -325,7 +336,7 @@ function actualMakeI(script,codeword){
 			appendScript(iDoc,text);
 		};
 		iDoc.open();
-		iDoc.write('<script>__loaded__()</script>');
+		iDoc.write('<script>"console.log("com.communistjs.iframe0.4709464108912914");__loaded__();</script>');
 		iDoc.close();
 	}
 
@@ -347,14 +358,13 @@ communist.makeIWorker = function (strings,codeword){
 	var worker = {onmessage:function(){}};
 	var ipromise = makeIframe(script,codeword);
 	window.addEventListener('message',function(e){
-		if(Array.isArray(e.data)&&e.data[0]===codeword){
-			e.data.shift();
-			worker.onmessage(e);
+		if(typeof e.data ==="string"&&e.data.length>codeword.length&&e.data.slice(0,codeword.length)===codeword){
+			worker.onmessage({data:JSON.parse(e.data.slice(codeword.length))});
 		}
 	});
 	worker.postMessage=function(data){
 		ipromise.then(function(iFrame){
-			iFrame.contentWindow.postMessage(data,"*");
+			iFrame.contentWindow.postMessage(JSON.stringify(data),"*");
 		});
 	};
 	worker.terminate=function(){
@@ -750,7 +760,7 @@ communist.IWorker = function iCommunist(obj) {
 			self[key] = keyFunc(key);
 		}
 		fObj = fObj + "}";
-		var worker = communist.makeIWorker(['var _db = ',fObj,';var __self__={onmessage:function(){}};window.onmessage=function(e){	__self__.onmessage(e);};__self__.postMessage=function(data){	data.unshift(_db.__codeWord__);	window.top.postMessage(data,"*");};var listeners = {};_db.on = function (eventName, func, scope) {	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.on(v,func,scope);		},_db);	}	scope = scope || _db;	if (!(eventName in listeners)) {		listeners[eventName] = [];	}	listeners[eventName].push(function (a) {		func.call(scope, a, _db);	});};function _fire(eventName,data){	if(eventName.indexOf(" ")>0){		eventName.split(" ").forEach(function(v){			_fire(v,data);		});		return;	}	if (!(eventName in listeners)) {		return;	}	listeners[eventName].forEach(function (v) {		v(data);	});}_db.fire = function (eventName, data, transfer) {	__self__.postMessage([		[eventName], data]);};_db.off=function(eventName,func){	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.off(v,func);		});	}	if(!(eventName in listeners)){		return;	}else if(!func){		delete listeners[eventName];	}else{		if(listeners[eventName].indexOf(func)>-1){			if(listeners[eventName].length>1){				delete listeners[eventName];			}else{				listeners[eventName].splice(listeners[eventName].indexOf(func),1);			}		}	}};/*var console={};function makeConsole(method){	return function(){		var len = arguments.length;		var out =[];		var i = 0;		while (i<len){			out.push(arguments[i]);			i++;		}		_db.fire("console",[method,out]);	};}["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){	console[v]=makeConsole(v);});*/__self__.onmessage=function(e){	_fire("messege",e.data[1]);	if(e.data[0][0]===_db.__codeWord__){		return regMsg(e);	}else{		_fire(e.data[0][0],e.data[1]);	}};var regMsg = function(e){	var cb=function(data,transfer){		__self__.postMessage([e.data[0],data]);	};	var result;	try{		result = _db[e.data[1]](e.data[2],cb,_db);	}catch(e){		_db.fire("error",JSON.stringify(e));	}	if(typeof result !== "undefined"){		cb(result);	}};_db.initialize(_db);'],__codeWord__);
+		var worker = communist.makeIWorker(['var _db = ',fObj,';var __self__={onmessage:function(){}};window.onmessage=function(e){	if(typeof e.data === "string"){		e ={data: JSON.parse(e.data)};	}	__self__.onmessage(e);};__self__.postMessage=function(rawData){	var data = _db.__codeWord__+JSON.stringify(rawData);	window.parent.postMessage(data,"*");};var listeners = {};_db.on = function (eventName, func, scope) {	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.on(v,func,scope);		},_db);	}	scope = scope || _db;	if (!(eventName in listeners)) {		listeners[eventName] = [];	}	listeners[eventName].push(function (a) {		func.call(scope, a, _db);	});};function _fire(eventName,data){	if(eventName.indexOf(" ")>0){		eventName.split(" ").forEach(function(v){			_fire(v,data);		});		return;	}	if (!(eventName in listeners)) {		return;	}	listeners[eventName].forEach(function (v) {		v(data);	});}_db.fire = function (eventName, data, transfer) {	__self__.postMessage([		[eventName], data]);};_db.off=function(eventName,func){	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.off(v,func);		});	}	if(!(eventName in listeners)){		return;	}else if(!func){		delete listeners[eventName];	}else{		if(listeners[eventName].indexOf(func)>-1){			if(listeners[eventName].length>1){				delete listeners[eventName];			}else{				listeners[eventName].splice(listeners[eventName].indexOf(func),1);			}		}	}};if(window.parent.console){	console = window.parent.console;}__self__.onmessage=function(e){	_fire("messege",e.data[1]);	if(e.data[0][0]===_db.__codeWord__){		return regMsg(e);	}else{		_fire(e.data[0][0],e.data[1]);	}};var regMsg = function(e){	var cb=function(data,transfer){		__self__.postMessage([e.data[0],data]);	};	var result;	try{		result = _db[e.data[1]](e.data[2],cb,_db);	}catch(e){		_db.fire("error",JSON.stringify(e));	}	if(typeof result !== "undefined"){		cb(result);	}};_db.initialize(_db);'],__codeWord__);
 		worker.onmessage = function (e) {
 			_fire('message', e.data[1]);
 			if (e.data[0][0] === __codeWord__) {
@@ -763,9 +773,6 @@ communist.IWorker = function iCommunist(obj) {
 		};
 		self.on('error', function (e) {
 			rejectPromises(e);
-		});
-		self.on('console', function (msg) {
-			console[msg[0]].apply(console, msg[1]);
 		});
 		self._close = function () {
 			worker.terminate();
