@@ -1,6 +1,36 @@
-"use strict";
 var _db = $$fObj$$;
 var listeners = {};
+var __iFrame__ = typeof document!=="undefined";
+var __self__={onmessage:function(e){
+	_fire("messege",e.data[1]);
+	if(e.data[0][0]===_db.__codeWord__){
+		return regMsg(e);
+	}else{
+		_fire(e.data[0][0],e.data[1]);
+	}
+}};
+
+if(__iFrame__){
+	window.onmessage=function(e){
+		if(typeof e.data === "string"){
+			e ={data: JSON.parse(e.data)};
+		}
+		__self__.onmessage(e);
+	};
+}else{
+	self.onmessage=__self__.onmessage;
+}
+__self__.postMessage=function(rawData, transfer){
+	var data;
+	if(!self._noTransferable&&!__iFrame__){
+		self.postMessage(rawData, transfer);
+	}else if(__iFrame__){
+		data = _db.__codeWord__+JSON.stringify(rawData);
+		window.parent.postMessage(data,"*");
+	}else if(!self._noTransferable){
+		self.postMessage(rawData);
+	}
+};
 _db.on = function (eventName, func, scope) {
 	if(eventName.indexOf(" ")>0){
 		return eventName.split(" ").map(function(v){
@@ -31,9 +61,7 @@ function _fire(eventName,data){
 }
 
 _db.fire = function (eventName, data, transfer) {
-	!self._noTransferable ? self.postMessage([
-		[eventName], data], transfer) : self.postMessage([
-		[eventName], data]);
+	__self__.postMessage([[eventName], data], transfer);
 };
 _db.off=function(eventName,func){
 	if(eventName.indexOf(" ")>0){
@@ -71,19 +99,20 @@ function makeConsole(method){
 ["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){
 	console[v]=makeConsole(v);
 });
-self.onmessage=function(e){
-	_fire("messege",e.data[1]);
-	if(e.data[0][0]==="com.communistjs"){
-		return regMsg(e);
-	}else{
-		_fire(e.data[0][0],e.data[1]);
-	}
-};
 var regMsg = function(e){
 	var cb=function(data,transfer){
-		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);
+		__self__.postMessage([e.data[0],data],transfer);
 	};
-	var result = _db[e.data[1]](e.data[2],cb,_db);
+	var result;
+	if(__iFrame__){
+		try{
+			result = _db[e.data[1]](e.data[2],cb,_db);
+		}catch(e){
+			_db.fire("error",JSON.stringify(e));
+		}
+	}else{
+		result = _db[e.data[1]](e.data[2],cb,_db);
+	}
 	if(typeof result !== "undefined"){
 		cb(result);
 	}
