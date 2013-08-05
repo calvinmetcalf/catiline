@@ -4,7 +4,7 @@ module.exports = function(grunt) {
 			var child = grunt.file.read('./src/worker.js');
 			var replacedChild = "['"+child.replace(/\$\$(.+?)\$\$/,function(a,b){
 				return "',"+b+",'";
-			}).replace(/\n/gm,'')+"']";
+			}).replace(/\n/gm,'\\n')+"']";
 			var out = parent.replace(/\$\$fObj\$\$/,replacedChild);
 			grunt.file.write('./src/temp.js',out);
 	};
