@@ -27,7 +27,7 @@ __self__.postMessage=function(rawData, transfer){
 	}else if(__iFrame__){
 		data = _db.__codeWord__+JSON.stringify(rawData);
 		window.parent.postMessage(data,"*");
-	}else if(!self._noTransferable){
+	}else if(self._noTransferable){
 		self.postMessage(rawData);
 	}
 };
