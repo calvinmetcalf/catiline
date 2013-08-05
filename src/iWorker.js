@@ -2,11 +2,14 @@
 var _db = $$fObj$$;
 var __self__={onmessage:function(){}};
 window.onmessage=function(e){
+	if(typeof e.data === "string"){
+		e ={data: JSON.parse(e.data)};
+	}
 	__self__.onmessage(e);
 };
-__self__.postMessage=function(data){
-	data.unshift(_db.__codeWord__);
-	window.top.postMessage(data,"*");
+__self__.postMessage=function(rawData){
+	var data = _db.__codeWord__+JSON.stringify(rawData);
+	window.parent.postMessage(data,"*");
 };
 var listeners = {};
 _db.on = function (eventName, func, scope) {
@@ -62,22 +65,9 @@ _db.off=function(eventName,func){
 		}
 	}
 };
-/*var console={};
-function makeConsole(method){
-	return function(){
-		var len = arguments.length;
-		var out =[];
-		var i = 0;
-		while (i<len){
-			out.push(arguments[i]);
-			i++;
-		}
-		_db.fire("console",[method,out]);
-	};
+if(window.parent.console){
+	console = window.parent.console;
 }
-["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){
-	console[v]=makeConsole(v);
-});*/
 __self__.onmessage=function(e){
 	_fire("messege",e.data[1]);
 	if(e.data[0][0]===_db.__codeWord__){

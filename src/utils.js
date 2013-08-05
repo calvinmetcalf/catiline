@@ -66,7 +66,6 @@ function appendScript(iDoc,text){
 		iDoc.documentElement.appendChild(iScript);
 		}else{
 			iDoc.onreadystatechange=function(){
-				console.log(iDoc.readyState);
 				if(iDoc.readyState==="complete"){
 		iDoc.documentElement.appendChild(iScript);
 		}
@@ -79,9 +78,21 @@ function actualMakeI(script,codeword){
 		document.body.appendChild(iFrame);
 		var iWin = iFrame.contentWindow;
 		var iDoc = iWin.document;
-	var text='try{ '+
-	'var __scripts__="";function importScripts(scripts){	if(Array.isArray(scripts)&&scripts.length>0){		scripts.forEach(function(url){			var ajax = new XMLHttpRequest();			ajax.open("GET",url,false);ajax.send();__scripts__+=ajax.responseText;__scripts__+="\\n;";});}};'+script+
-	'}catch(e){window.top.postMessage(["'+codeword+'","error"],"*")}';
+	var text=['try{ ',
+	'var __scripts__="";function importScripts(scripts){',
+	'	if(Array.isArray(scripts)&&scripts.length>0){',
+	'		scripts.forEach(function(url){',
+	'			var ajax = new XMLHttpRequest();',
+	'			ajax.open("GET",url,false);',
+	'			ajax.send();__scripts__+=ajax.responseText;',
+	'			__scripts__+="\\n;";',
+	'		});',
+	'	}',
+	'};',
+	script,
+	'}catch(e){',
+	'	window.parent.postMessage(["'+codeword+'","error"],"*")',
+	'}'].join('\n');
 	if(true || iDoc.readyState==="complete"){
 		appendScript(iDoc,text);
 	}else{
@@ -89,7 +100,7 @@ function actualMakeI(script,codeword){
 			appendScript(iDoc,text);
 		};
 		iDoc.open();
-		iDoc.write('<script>__loaded__()</script>');
+		iDoc.write('<script>"console.log("com.communistjs.iframe0.4709464108912914");__loaded__();</script>');
 		iDoc.close();
 	}
 
@@ -111,14 +122,13 @@ communist.makeIWorker = function (strings,codeword){
 	var worker = {onmessage:function(){}};
 	var ipromise = makeIframe(script,codeword);
 	window.addEventListener('message',function(e){
-		if(Array.isArray(e.data)&&e.data[0]===codeword){
-			e.data.shift();
-			worker.onmessage(e);
+		if(typeof e.data ==="string"&&e.data.length>codeword.length&&e.data.slice(0,codeword.length)===codeword){
+			worker.onmessage({data:JSON.parse(e.data.slice(codeword.length))});
 		}
 	});
 	worker.postMessage=function(data){
 		ipromise.then(function(iFrame){
-			iFrame.contentWindow.postMessage(data,"*");
+			iFrame.contentWindow.postMessage(JSON.stringify(data),"*");
 		});
 	};
 	worker.terminate=function(){

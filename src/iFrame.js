@@ -124,9 +124,6 @@ communist.IWorker = function iCommunist(obj) {
 		self.on('error', function (e) {
 			rejectPromises(e);
 		});
-		self.on('console', function (msg) {
-			console[msg[0]].apply(console, msg[1]);
-		});
 		self._close = function () {
 			worker.terminate();
 			rejectPromises("closed");
