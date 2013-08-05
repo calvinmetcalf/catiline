@@ -29,13 +29,12 @@ if(typeof Uint8Array !== 'undefined'){
 	buf=(new Uint8Array([1,2,3,4,5,6,7,8])).buffer;
 }
 var single = function(func, data){
-	var promise = cw.deferred();
 	var worker = cw(func);
 	return worker.data(data).then(function(a){
 		worker.close();
 		return a;
 	});
-}
+};
 //cw.URL=true;
 describe('cw()', function () {
 	describe('Basic', function () {
@@ -45,33 +44,29 @@ describe('cw()', function () {
 		it('should work when given a function and data async', function (done) {
 			single(aSquare, 9).then(function (a) { assert.equal(a,81); }).then(done, done);
 		});
-		
-		it('should be able to handle an array buffer', function(done){
-			if(typeof Uint8Array === 'undefined'||typeof fakeLegacy!== 'undefined'){
-				done();
-				return;
-			}
-			function wrapUp(){
-				comrade.close();
-				done();
-			}
-			var comrade = cw(function(data,cb){cb(data)});
-			comrade.data((new Uint8Array([1,2,3,4,5,6,7,8])).buffer).then(function(a){assert.equal(a.byteLength,8)}).then(wrapUp,wrapUp);
-		});
-		it('should be able to handle an array buffer as a transferable object', function(done){
-			if(typeof Uint8Array === 'undefined'||typeof fakeLegacy!== 'undefined'){
-				done();
-				return;
-			}
-			function wrapUp(){
-				comrade.close();
-				done();
-			}
-			var comrade = cw(function(data,cb){cb(data,[data])});
-			comrade.data(buf,[buf]).then(function(a){assert.equal(a.byteLength,8)}).then(wrapUp,wrapUp);
-		});
-		
-	});undefined
+		if(typeof Uint8Array !== 'undefined'&&typeof fakeLegacy=== 'undefined'){
+			it('should be able to handle an array buffer', function(done){
+				function wrapUp(){
+					comrade.close();
+					done();
+				}
+				var comrade = cw(function(data,cb){cb(data)});
+				comrade.data((new Uint8Array([1,2,3,4,5,6,7,8])).buffer).then(function(a){assert.equal(a.byteLength,8)}).then(wrapUp,wrapUp);
+			});
+			it('should be able to handle an array buffer as a transferable object', function(done){
+				if(typeof Uint8Array === 'undefined'||typeof fakeLegacy!== 'undefined'){
+					done();
+					return;
+				}
+				function wrapUp(){
+					comrade.close();
+					done();
+				}
+				var comrade = cw(function(data,cb){cb(data,[data])});
+				comrade.data(buf,[buf]).then(function(a){assert.equal(a.byteLength,8)}).then(wrapUp,wrapUp);
+			});
+		}
+	});
 	describe('errors', function () {
 		it('should gracefully handle an error in a sticksaround', function (done) {
 			function wrapUp(){
@@ -172,8 +167,9 @@ describe('cw()', function () {
 		});
 	});
 	describe('Objects', function () {
-		var comrade = cw({product:product,aSquare:aSquare,square:square});
+		var comrade;
 		it("should be able create an object worker",function (done){
+			comrade = cw({product:product,aSquare:aSquare,square:square});
 			comrade.aSquare(3).then(function(a){
 				assert.equal(a,9);
 			}).then(function(){
@@ -202,8 +198,9 @@ describe('cw()', function () {
 		});
 	});
 	describe('Queues', function () {
-		var comrade = cw({product:product,aSquare:aSquare,square:square},2);
+		var comrade;
 		it("should be able create an object worker",function (done){
+			comrade = cw({product:product,aSquare:aSquare,square:square},2);
 			comrade.aSquare(3).then(function(a){
 				assert.equal(a,9);
 			}).then(function(){
@@ -310,8 +307,9 @@ describe('cw()', function () {
 		});
 	});
 	describe('dumb Queues', function () {
-		var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
+		var comrade;
 		it("should be able create an object worker",function (done){
+			comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
 			comrade.aSquare(3).then(function(a){
 				assert.equal(a,9);
 			}).then(function(){

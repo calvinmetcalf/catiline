@@ -4,9 +4,7 @@ communist.Worker = function Communist(obj) {
 				data:obj
 			};
 		}
-		if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
-			return new FakeCommunist(obj);
-		}
+		var __codeWord__='com.communistjs.'+(communist._hasWorker?'iframe':'worker')+Math.random();
 		var listeners = {};
 		var self = this;
 		self.on = function (eventName, func, scope) {
@@ -85,7 +83,7 @@ communist.Worker = function Communist(obj) {
 				}
 			});
 		};
-	
+		obj.__codeWord__='"'+__codeWord__+'"';
 		if (!("initialize" in obj)) {
 			if ('init' in obj) {
 				obj.initialize = obj.init;
@@ -94,21 +92,21 @@ communist.Worker = function Communist(obj) {
 				obj.initialize = function () {};
 			}
 		}
-		var fObj = "{";
+		var fObj = "{\n\t";
 		var keyFunc = function (key) {
 			var out = function (data, transfer) {
 				var i = promises.length;
 				promises[i] = communist.deferred();
 				!communist._noTransferable ? worker.postMessage([
-					['com.communistjs', i], key, data], transfer) : worker.postMessage([
-					['com.communistjs', i], key, data]);
+					[__codeWord__, i], key, data], transfer) : worker.postMessage([
+					[__codeWord__, i], key, data]);
 				return promises[i].promise;
 			};
 			return out;
 		};
 		for (var key in obj) {
 			if (i !== 0) {
-				fObj = fObj + ",";
+				fObj = fObj + ",\n\t";
 			}
 			else {
 				i++;
@@ -117,10 +115,10 @@ communist.Worker = function Communist(obj) {
 			self[key] = keyFunc(key);
 		}
 		fObj = fObj + "}";
-		var worker = communist.makeWorker($$fObj$$);
+		var worker = communist.makeWorker($$fObj$$,__codeWord__);
 		worker.onmessage = function (e) {
 			_fire('message', e.data[1]);
-			if (e.data[0][0] === 'com.communistjs') {
+			if (e.data[0][0] === __codeWord__) {
 				promises[e.data[0][1]].resolve(e.data[1]);
 				promises[e.data[0][1]] = 0;
 			}
@@ -128,8 +126,8 @@ communist.Worker = function Communist(obj) {
 				_fire(e.data[0][0], e.data[1]);
 			}
 		};
+		self.on('error',rejectPromises);
 		worker.onerror = function (e) {
-			rejectPromises(e);
 			_fire('error', e);
 		};
 		self.on('console', function (msg) {

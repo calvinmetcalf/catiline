@@ -1,3 +1,4 @@
+communist._hasWorker = typeof Worker !== 'undefined'&&typeof fakeLegacy === 'undefined';
 //regex out the importScript call and move it up to the top out of the function.
 function regexImports(string){
 	var rest=string,
@@ -31,6 +32,16 @@ function moveImports(string){
 		return rest;
 	}
 }
+function moveIimports(string){
+	var str = regexImports(string);
+	var matches = str[0];
+	var rest = str[1];
+	if(matches.length>0){
+		return 'importScripts("'+matches.join('","')+'");eval(__scripts__);\n'+rest;
+	}else{
+		return rest;
+	}
+}
 function getPath(){
 	if(typeof SHIM_WORKER_PATH !== "undefined"){
 		return SHIM_WORKER_PATH;
@@ -45,8 +56,95 @@ function getPath(){
 			i++;
 		}
 }
+function appendScript(iDoc,text){
+	var iScript = iDoc.createElement('script');
+			if (iScript.text !== void 0) {
+				iScript.text = text;
+			} else {
+				iScript.innerHTML = text;
+			}
+		if(iDoc.readyState==="complete"){
+		iDoc.documentElement.appendChild(iScript);
+		}else{
+			iDoc.onreadystatechange=function(){
+				if(iDoc.readyState==="complete"){
+		iDoc.documentElement.appendChild(iScript);
+		}
+			};
+		}
+}
+function actualMakeI(script,codeword){
+	var iFrame = document.createElement('iframe');
+		iFrame.style.display = 'none';
+		document.body.appendChild(iFrame);
+		var iWin = iFrame.contentWindow;
+		var iDoc = iWin.document;
+	var text=['try{ ',
+	'var __scripts__="";function importScripts(scripts){',
+	'	if(Array.isArray(scripts)&&scripts.length>0){',
+	'		scripts.forEach(function(url){',
+	'			var ajax = new XMLHttpRequest();',
+	'			ajax.open("GET",url,false);',
+	'			ajax.send();__scripts__+=ajax.responseText;',
+	'			__scripts__+="\\n;";',
+	'		});',
+	'	}',
+	'};',
+	script,
+	'}catch(e){',
+	'	window.parent.postMessage(["'+codeword+'","error"],"*")',
+	'}'].join('\n');
+	if(true || iDoc.readyState==="complete"){
+		appendScript(iDoc,text);
+	}else{
+		iWin.__loaded__=function(){
+			appendScript(iDoc,text);
+		};
+		iDoc.open();
+		iDoc.write('<script>"console.log("com.communistjs.iframe0.4709464108912914");__loaded__();</script>');
+		iDoc.close();
+	}
+
+	return iFrame;
+}
+function makeIframe(script,codeword){
+	var promise = communist.deferred();
+	if(document.readyState==="complete"){
+		promise.resolve(actualMakeI(script,codeword));
+	}else{
+		window.addEventListener('load',function(){
+			promise.resolve(actualMakeI(script,codeword));
+		},false);
+	}
+	return promise.promise;
+}
+communist.makeIWorker = function (strings,codeword){
+	var script =moveIimports(strings.join(""));
+	var worker = {onmessage:function(){}};
+	var ipromise = makeIframe(script,codeword);
+	window.addEventListener('message',function(e){
+		if(typeof e.data ==="string"&&e.data.length>codeword.length&&e.data.slice(0,codeword.length)===codeword){
+			worker.onmessage({data:JSON.parse(e.data.slice(codeword.length))});
+		}
+	});
+	worker.postMessage=function(data){
+		ipromise.then(function(iFrame){
+			iFrame.contentWindow.postMessage(JSON.stringify(data),"*");
+		});
+	};
+	worker.terminate=function(){
+		ipromise.then(function(iFrame){
+			document.body.removeChild(iFrame);
+		});
+	};
+	return worker;
+	
+};
 //accepts an array of strings, joins them, and turns them into a worker.
-communist.makeWorker = function (strings){
+communist.makeWorker = function (strings, codeword){
+	if(!communist._hasWorker){
+		return communist.makeIWorker(strings,codeword);
+	}
 	var worker;
 	var script =moveImports(strings.join(""));
 	communist.URL = communist.URL||window.URL || window.webkitURL;

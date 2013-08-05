@@ -1,4 +1,4 @@
-/*! communist 2.1.0 2013-07-31*/
+/*! communist 2.2.0 2013-08-05*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === "undefined") {
 	self._noTransferable=true;
@@ -234,6 +234,7 @@ if (typeof document === "undefined") {
 	};
 })(communist,communist.setImmediate);
 
+communist._hasWorker = typeof Worker !== 'undefined'&&typeof fakeLegacy === 'undefined';
 //regex out the importScript call and move it up to the top out of the function.
 function regexImports(string){
 	var rest=string,
@@ -267,6 +268,16 @@ function moveImports(string){
 		return rest;
 	}
 }
+function moveIimports(string){
+	var str = regexImports(string);
+	var matches = str[0];
+	var rest = str[1];
+	if(matches.length>0){
+		return 'importScripts("'+matches.join('","')+'");eval(__scripts__);\n'+rest;
+	}else{
+		return rest;
+	}
+}
 function getPath(){
 	if(typeof SHIM_WORKER_PATH !== "undefined"){
 		return SHIM_WORKER_PATH;
@@ -281,8 +292,95 @@ function getPath(){
 			i++;
 		}
 }
+function appendScript(iDoc,text){
+	var iScript = iDoc.createElement('script');
+			if (iScript.text !== void 0) {
+				iScript.text = text;
+			} else {
+				iScript.innerHTML = text;
+			}
+		if(iDoc.readyState==="complete"){
+		iDoc.documentElement.appendChild(iScript);
+		}else{
+			iDoc.onreadystatechange=function(){
+				if(iDoc.readyState==="complete"){
+		iDoc.documentElement.appendChild(iScript);
+		}
+			};
+		}
+}
+function actualMakeI(script,codeword){
+	var iFrame = document.createElement('iframe');
+		iFrame.style.display = 'none';
+		document.body.appendChild(iFrame);
+		var iWin = iFrame.contentWindow;
+		var iDoc = iWin.document;
+	var text=['try{ ',
+	'var __scripts__="";function importScripts(scripts){',
+	'	if(Array.isArray(scripts)&&scripts.length>0){',
+	'		scripts.forEach(function(url){',
+	'			var ajax = new XMLHttpRequest();',
+	'			ajax.open("GET",url,false);',
+	'			ajax.send();__scripts__+=ajax.responseText;',
+	'			__scripts__+="\\n;";',
+	'		});',
+	'	}',
+	'};',
+	script,
+	'}catch(e){',
+	'	window.parent.postMessage(["'+codeword+'","error"],"*")',
+	'}'].join('\n');
+	if(true || iDoc.readyState==="complete"){
+		appendScript(iDoc,text);
+	}else{
+		iWin.__loaded__=function(){
+			appendScript(iDoc,text);
+		};
+		iDoc.open();
+		iDoc.write('<script>"console.log("com.communistjs.iframe0.4709464108912914");__loaded__();</script>');
+		iDoc.close();
+	}
+
+	return iFrame;
+}
+function makeIframe(script,codeword){
+	var promise = communist.deferred();
+	if(document.readyState==="complete"){
+		promise.resolve(actualMakeI(script,codeword));
+	}else{
+		window.addEventListener('load',function(){
+			promise.resolve(actualMakeI(script,codeword));
+		},false);
+	}
+	return promise.promise;
+}
+communist.makeIWorker = function (strings,codeword){
+	var script =moveIimports(strings.join(""));
+	var worker = {onmessage:function(){}};
+	var ipromise = makeIframe(script,codeword);
+	window.addEventListener('message',function(e){
+		if(typeof e.data ==="string"&&e.data.length>codeword.length&&e.data.slice(0,codeword.length)===codeword){
+			worker.onmessage({data:JSON.parse(e.data.slice(codeword.length))});
+		}
+	});
+	worker.postMessage=function(data){
+		ipromise.then(function(iFrame){
+			iFrame.contentWindow.postMessage(JSON.stringify(data),"*");
+		});
+	};
+	worker.terminate=function(){
+		ipromise.then(function(iFrame){
+			document.body.removeChild(iFrame);
+		});
+	};
+	return worker;
+	
+};
 //accepts an array of strings, joins them, and turns them into a worker.
-communist.makeWorker = function (strings){
+communist.makeWorker = function (strings, codeword){
+	if(!communist._hasWorker){
+		return communist.makeIWorker(strings,codeword);
+	}
 	var worker;
 	var script =moveImports(strings.join(""));
 	communist.URL = communist.URL||window.URL || window.webkitURL;
@@ -302,267 +400,13 @@ communist.makeUrl = function (fileName) {
 	link.href = fileName;
 	return link.href;
 };
-function FakeCommunist(inObj) {
-	/*jslint evil: true */
-	var self = this;
-	var promises = [];
-	var loaded = false;
-	var wlisteners = {};
-	var olisteners = {};
-	var loading;
-	var called = false;
-
-	function ajax(url) {
-		var promise = communist.deferred();
-		var xhr = new XMLHttpRequest();
-		xhr.open('GET', url);
-		xhr.onload = function () {
-			promise.resolve(xhr.responseText);
-		};
-		xhr.onerror = function () {
-			promise.reject('failed to download');
-		};
-		xhr.send();
-		return promise.promise;
-	}
-	var rejectPromises = function (msg) {
-		if (typeof msg !== "string" && msg.preventDefault) {
-			msg.preventDefault();
-			msg = msg.message;
-		}
-		promises.forEach(function (p) {
-			if (p) {
-				p.reject(msg);
-			}
-		});
-	};
-	var obj;
-	if (!("initialize" in inObj)) {
-		if ('init' in inObj) {
-			inObj.initialize = inObj.init;
-		}
-		else {
-			inObj.initialize = function () {};
-		}
-	}
-	var keyFunc = function (key) {
-		var actualFunc = function (data) {
-			var result, i, callback;
-			i = promises.length;
-			if (!called) {
-				called = true;
-			}
-			promises[i] = communist.deferred();
-			callback = function (data) {
-				promises[i].resolve(data);
-			};
-			try {
-				result = obj[key].call(obj, data, callback, obj);
-				if (typeof result !== "undefined") {
-					callback(result);
-				}
-			}
-			catch (e) {
-				obj.fire('error', e);
-				promises[i].reject(e);
-			}
-			return promises[i].promise;
-		};
-		return function (data) {
-			if (loaded) {
-				return actualFunc(data);
-			}
-			else {
-				return loading.then(function () {
-					return actualFunc(data);
-				});
-			}
-		};
-	};
-	var i = 0;
-	var fObj = "{";
-	for (var key in inObj) {
-		if (i !== 0) {
-			fObj = fObj + ",";
-		}
-		else {
-			i++;
-		}
-		fObj = fObj + key + ":" + inObj[key].toString();
-		self[key] = keyFunc(key);
-	}
-	fObj = fObj + "}";
-	var re = /(\S+?:function\s*?)([a-zA-Z0-9$_]+?)(\s*?\()/g;
-	var regexed = regexImports(fObj);
-	var forImport = regexed[0];
-	if (forImport.length === 0) {
-		loaded = true;
-		(function () {
-			eval('obj = ' + regexed[1].replace(re, '$1$3'));
-		})();
-		addEvents(self, obj);
-	}
-	else {
-		loading = communist.all(forImport.map(function (v) {
-			return ajax(v);
-		})).then(function (array) {
-			eval(array.join("\n") + ";\nobj = " + regexed[1].replace(re, '$1$3'));
-			addEvents(self, obj);
-			return true;
-		});
-	}
-
-	function addEvents(self, obj) {
-		self.on = function (eventName, func, scope) {
-			scope = scope || self;
-			if (eventName.indexOf(' ') > 0) {
-				eventName.split(' ').map(function (v) {
-					return self.on(v, func, scope);
-				}, this);
-				return self;
-			}
-			if (!(eventName in wlisteners)) {
-				wlisteners[eventName] = [];
-			}
-			wlisteners[eventName].push(function (a) {
-				func.call(scope, a);
-			});
-		};
-		self.fire = function (eventName, data) {
-			if (eventName.indexOf(' ') > 0) {
-				eventName.split(' ').forEach(function (v) {
-					self.fire(v, data);
-				});
-				return self;
-			}
-			communist.setImmediate(function () {
-				if (eventName in olisteners && Array.isArray(olisteners[eventName])) {
-					olisteners[eventName].forEach(function (v) {
-						v(data);
-					});
-				}
-			});
-			return self;
-		};
-		self.off = function (eventName, func) {
-			if (eventName.indexOf(' ') > 0) {
-				eventName.split(' ').map(function (v) {
-					return self.off(v, func);
-				});
-				return self;
-			}
-			if (!(eventName in wlisteners)) {
-				return self;
-			}
-			else if (!func) {
-				delete wlisteners[eventName];
-			}
-			else {
-				if (wlisteners[eventName].indexOf(func) > -1) {
-					if (wlisteners[eventName].length > 1) {
-						delete wlisteners[eventName];
-					}
-					else {
-						wlisteners[eventName].splice(wlisteners[eventName].indexOf(func), 1);
-					}
-				}
-			}
-			return self;
-		};
-		obj.on = function (eventName, func, scope) {
-			scope = scope || obj;
-			if (eventName.indexOf(' ') > 0) {
-				eventName.split(' ').map(function (v) {
-					return obj.on(v, func, scope);
-				}, this);
-				return obj;
-			}
-			if (!(eventName in olisteners)) {
-				olisteners[eventName] = [];
-			}
-			olisteners[eventName].push(function (a) {
-				try {
-					func.call(scope, a, obj);
-				}
-				catch (e) {
-					obj.fire('error', {
-						preventDefault: function () {},
-						messege: e
-					});
-				}
-			});
-			return obj;
-		};
-		obj.fire = function (eventName, data) {
-			if (eventName.indexOf(' ') > 0) {
-				eventName.split(' ').forEach(function (v) {
-					obj.fire(v, data);
-				});
-				return obj;
-			}
-			if (!(eventName in wlisteners)) {
-				return obj;
-			}
-			wlisteners[eventName].forEach(function (v) {
-				v(data);
-			});
-			return obj;
-		};
-		obj.off = function (eventName, func) {
-			if (eventName.indexOf(' ') > 0) {
-				eventName.split(' ').map(function (v) {
-					return obj.off(v, func);
-				});
-				return obj;
-			}
-			if (!(eventName in olisteners)) {
-				return obj;
-			}
-			else if (!func) {
-				delete olisteners[eventName];
-			}
-			else {
-				if (olisteners[eventName].indexOf(func) > -1) {
-					if (olisteners[eventName].length > 1) {
-						delete olisteners[eventName];
-					}
-					else {
-						olisteners[eventName].splice(olisteners[eventName].indexOf(func), 1);
-					}
-				}
-			}
-			return obj;
-		};
-	}
-	self._close = function () {
-		olisteners = {};
-		wlisteners = {};
-		promises.forEach(function (a) {
-			a.reject("closed");
-		});
-		return communist.resolve();
-	};
-	if (!('close' in self)) {
-		self.close = self._close;
-	}
-	if (!called) {
-		self.initialize(obj);
-	}
-}
-
-function fakeObject(inObj) {
-	return new FakeCommunist(inObj);
-}
-
 communist.Worker = function Communist(obj) {
 		if(typeof obj === 'function'){
 			obj = {
 				data:obj
 			};
 		}
-		if(typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined'){
-			return new FakeCommunist(obj);
-		}
+		var __codeWord__='com.communistjs.'+(communist._hasWorker?'iframe':'worker')+Math.random();
 		var listeners = {};
 		var self = this;
 		self.on = function (eventName, func, scope) {
@@ -641,7 +485,7 @@ communist.Worker = function Communist(obj) {
 				}
 			});
 		};
-	
+		obj.__codeWord__='"'+__codeWord__+'"';
 		if (!("initialize" in obj)) {
 			if ('init' in obj) {
 				obj.initialize = obj.init;
@@ -650,21 +494,21 @@ communist.Worker = function Communist(obj) {
 				obj.initialize = function () {};
 			}
 		}
-		var fObj = "{";
+		var fObj = "{\n\t";
 		var keyFunc = function (key) {
 			var out = function (data, transfer) {
 				var i = promises.length;
 				promises[i] = communist.deferred();
 				!communist._noTransferable ? worker.postMessage([
-					['com.communistjs', i], key, data], transfer) : worker.postMessage([
-					['com.communistjs', i], key, data]);
+					[__codeWord__, i], key, data], transfer) : worker.postMessage([
+					[__codeWord__, i], key, data]);
 				return promises[i].promise;
 			};
 			return out;
 		};
 		for (var key in obj) {
 			if (i !== 0) {
-				fObj = fObj + ",";
+				fObj = fObj + ",\n\t";
 			}
 			else {
 				i++;
@@ -673,10 +517,10 @@ communist.Worker = function Communist(obj) {
 			self[key] = keyFunc(key);
 		}
 		fObj = fObj + "}";
-		var worker = communist.makeWorker(['"use strict";var _db = ',fObj,';var listeners = {};_db.on = function (eventName, func, scope) {	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.on(v,func,scope);		},_db);	}	scope = scope || _db;	if (!(eventName in listeners)) {		listeners[eventName] = [];	}	listeners[eventName].push(function (a) {		func.call(scope, a, _db);	});};function _fire(eventName,data){	if(eventName.indexOf(" ")>0){		eventName.split(" ").forEach(function(v){			_fire(v,data);		});		return;	}	if (!(eventName in listeners)) {		return;	}	listeners[eventName].forEach(function (v) {		v(data);	});}_db.fire = function (eventName, data, transfer) {	!self._noTransferable ? self.postMessage([		[eventName], data], transfer) : self.postMessage([		[eventName], data]);};_db.off=function(eventName,func){	if(eventName.indexOf(" ")>0){		return eventName.split(" ").map(function(v){			return _db.off(v,func);		});	}	if(!(eventName in listeners)){		return;	}else if(!func){		delete listeners[eventName];	}else{		if(listeners[eventName].indexOf(func)>-1){			if(listeners[eventName].length>1){				delete listeners[eventName];			}else{				listeners[eventName].splice(listeners[eventName].indexOf(func),1);			}		}	}};var console={};function makeConsole(method){	return function(){		var len = arguments.length;		var out =[];		var i = 0;		while (i<len){			out.push(arguments[i]);			i++;		}		_db.fire("console",[method,out]);	};}["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){	console[v]=makeConsole(v);});self.onmessage=function(e){	_fire("messege",e.data[1]);	if(e.data[0][0]==="com.communistjs"){		return regMsg(e);	}else{		_fire(e.data[0][0],e.data[1]);	}};var regMsg = function(e){	var cb=function(data,transfer){		!self._noTransferable?self.postMessage([e.data[0],data],transfer):self.postMessage([e.data[0],data]);	};	var result = _db[e.data[1]](e.data[2],cb,_db);	if(typeof result !== "undefined"){		cb(result);	}};_db.initialize(_db);']);
+		var worker = communist.makeWorker(['var _db = ',fObj,';\nvar listeners = {};\nvar __iFrame__ = typeof document!=="undefined";\nvar __self__={onmessage:function(e){\n	_fire("messege",e.data[1]);\n	if(e.data[0][0]===_db.__codeWord__){\n		return regMsg(e);\n	}else{\n		_fire(e.data[0][0],e.data[1]);\n	}\n}};\nif(__iFrame__){\n	window.onmessage=function(e){\n		if(typeof e.data === "string"){\n			e ={data: JSON.parse(e.data)};\n		}\n		__self__.onmessage(e);\n	};\n}else{\n	self.onmessage=__self__.onmessage;\n}\n__self__.postMessage=function(rawData, transfer){\n	var data;\n	if(!self._noTransferable&&!__iFrame__){\n		self.postMessage(rawData, transfer);\n	}else if(__iFrame__){\n		data = _db.__codeWord__+JSON.stringify(rawData);\n		window.parent.postMessage(data,"*");\n	}else if(self._noTransferable){\n		self.postMessage(rawData);\n	}\n};\n_db.on = function (eventName, func, scope) {\n	if(eventName.indexOf(" ")>0){\n		return eventName.split(" ").map(function(v){\n			return _db.on(v,func,scope);\n		},_db);\n	}\n	scope = scope || _db;\n	if (!(eventName in listeners)) {\n		listeners[eventName] = [];\n	}\n	listeners[eventName].push(function (a) {\n		func.call(scope, a, _db);\n	});\n};\nfunction _fire(eventName,data){\n	if(eventName.indexOf(" ")>0){\n		eventName.split(" ").forEach(function(v){\n			_fire(v,data);\n		});\n		return;\n	}\n	if (!(eventName in listeners)) {\n		return;\n	}\n	listeners[eventName].forEach(function (v) {\n		v(data);\n	});\n}\n\n_db.fire = function (eventName, data, transfer) {\n	__self__.postMessage([[eventName], data], transfer);\n};\n_db.off=function(eventName,func){\n	if(eventName.indexOf(" ")>0){\n		return eventName.split(" ").map(function(v){\n			return _db.off(v,func);\n		});\n	}\n	if(!(eventName in listeners)){\n		return;\n	}else if(!func){\n		delete listeners[eventName];\n	}else{\n		if(listeners[eventName].indexOf(func)>-1){\n			if(listeners[eventName].length>1){\n				delete listeners[eventName];\n			}else{\n				listeners[eventName].splice(listeners[eventName].indexOf(func),1);\n			}\n		}\n	}\n};\nvar console={};\nfunction makeConsole(method){\n	return function(){\n		var len = arguments.length;\n		var out =[];\n		var i = 0;\n		while (i<len){\n			out.push(arguments[i]);\n			i++;\n		}\n		_db.fire("console",[method,out]);\n	};\n}\n["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){\n	console[v]=makeConsole(v);\n});\nvar regMsg = function(e){\n	var cb=function(data,transfer){\n		__self__.postMessage([e.data[0],data],transfer);\n	};\n	var result;\n	if(__iFrame__){\n		try{\n			result = _db[e.data[1]](e.data[2],cb,_db);\n		}catch(e){\n			_db.fire("error",JSON.stringify(e));\n		}\n	}else{\n		result = _db[e.data[1]](e.data[2],cb,_db);\n	}\n	if(typeof result !== "undefined"){\n		cb(result);\n	}\n};\n_db.initialize(_db);\n'],__codeWord__);
 		worker.onmessage = function (e) {
 			_fire('message', e.data[1]);
-			if (e.data[0][0] === 'com.communistjs') {
+			if (e.data[0][0] === __codeWord__) {
 				promises[e.data[0][1]].resolve(e.data[1]);
 				promises[e.data[0][1]] = 0;
 			}
@@ -684,8 +528,8 @@ communist.Worker = function Communist(obj) {
 				_fire(e.data[0][0], e.data[1]);
 			}
 		};
+		self.on('error',rejectPromises);
 		worker.onerror = function (e) {
-			rejectPromises(e);
 			_fire('error', e);
 		};
 		self.on('console', function (msg) {
@@ -898,5 +742,5 @@ if(typeof module === "undefined" || !('exports' in module)){
 } else {
 	module.exports=communist;
 }
-communist.version = "2.1.0";
+communist.version = "2.2.0";
 })(this);}

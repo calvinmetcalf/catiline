@@ -1,6 +1,11 @@
 Changelog
 ===
 
+##2.2.0
+
+- fake workers are now in iFrames and use the same worker creation and boilerplate scripts.
+- the source code for workers is now pretty printed
+
 ##2.1.0
 
 - Moved `cw.makeUrl()` to util.js, not sure why it was in wrapup.js.
