@@ -9,7 +9,6 @@ var __self__={onmessage:function(e){
 		_fire(e.data[0][0],e.data[1]);
 	}
 }};
-
 if(__iFrame__){
 	window.onmessage=function(e){
 		if(typeof e.data === "string"){
