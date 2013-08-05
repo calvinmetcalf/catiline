@@ -3,7 +3,8 @@ Changelog
 
 ##2.2.0
 
-- fake workers are now in an iframe
+- fake workers are now in iFrames and use the same worker creation and boilerplate scripts.
+- the source code for workers is now pretty printed
 
 ##2.1.0
 
