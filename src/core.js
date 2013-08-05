@@ -92,7 +92,7 @@ communist.Worker = function Communist(obj) {
 				obj.initialize = function () {};
 			}
 		}
-		var fObj = "{";
+		var fObj = "{\n\t";
 		var keyFunc = function (key) {
 			var out = function (data, transfer) {
 				var i = promises.length;
@@ -106,7 +106,7 @@ communist.Worker = function Communist(obj) {
 		};
 		for (var key in obj) {
 			if (i !== 0) {
-				fObj = fObj + ",";
+				fObj = fObj + ",\n\t";
 			}
 			else {
 				i++;

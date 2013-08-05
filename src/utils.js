@@ -1,4 +1,4 @@
-communist._hasWorker = typeof Worker === 'undefined'||typeof fakeLegacy !== 'undefined';
+communist._hasWorker = typeof Worker !== 'undefined'&&typeof fakeLegacy === 'undefined';
 //regex out the importScript call and move it up to the top out of the function.
 function regexImports(string){
 	var rest=string,
@@ -142,7 +142,7 @@ communist.makeIWorker = function (strings,codeword){
 };
 //accepts an array of strings, joins them, and turns them into a worker.
 communist.makeWorker = function (strings, codeword){
-	if(!communist.hasWorker){
+	if(!communist._hasWorker){
 		return communist.makeIWorker(strings,codeword);
 	}
 	var worker;
