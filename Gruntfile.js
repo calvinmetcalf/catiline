@@ -2,7 +2,7 @@ module.exports = function(grunt) {
 	var templateThings = function(){
 			var parent =  grunt.file.read('./src/core.js');
 			var child = grunt.file.read('./src/worker.js');
-			var replacedChild = "['"+child.replace(/\$\$(.+?)\$\$/,function(a,b){
+			var replacedChild = "['"+child.replace(/\'/gm,"\\'").replace(/\$\$(.+?)\$\$/,function(a,b){
 				return "',"+b+",'";
 			}).replace(/\n/gm,'\\n')+"']";
 			var out = parent.replace(/\$\$fObj\$\$/,replacedChild);
