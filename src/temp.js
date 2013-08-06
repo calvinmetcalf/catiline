@@ -40,9 +40,12 @@ communist.Worker = function Communist(obj) {
 			return self;
 		}
 		self.fire = function (eventName, data, transfer) {
-			!communist._noTransferable ? worker.postMessage([
-				[eventName], data], transfer) : worker.postMessage([
-				[eventName], data]);
+			if(communist._noTransferable){
+				worker.postMessage([[eventName], data]);
+			}else{
+				worker.postMessage([[eventName], data], transfer);
+			}
+			
 			return self;
 		};
 		self.off = function (eventName, func) {
@@ -97,9 +100,11 @@ communist.Worker = function Communist(obj) {
 			var out = function (data, transfer) {
 				var i = promises.length;
 				promises[i] = communist.deferred();
-				!communist._noTransferable ? worker.postMessage([
-					[__codeWord__, i], key, data], transfer) : worker.postMessage([
-					[__codeWord__, i], key, data]);
+				if(communist._noTransferable){
+					worker.postMessage([[__codeWord__, i], key, data]);
+				}else{
+					worker.postMessage([[__codeWord__, i], key, data], transfer);
+				}
 				return promises[i].promise;
 			};
 			return out;
