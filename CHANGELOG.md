@@ -1,6 +1,13 @@
 Changelog
 ===
 
+##2.2.1
+
+- the worker boilerplate is strict agian
+- the worker boilerplate can use single quotes
+- everywhere uses single quotes
+- simplify the saucelab testing
+
 ##2.2.0
 
 - fake workers are now in iFrames and use the same worker creation and boilerplate scripts.
