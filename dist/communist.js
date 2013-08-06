@@ -235,6 +235,8 @@ if (typeof document === 'undefined') {
 })(communist,communist.setImmediate);
 
 communist._hasWorker = typeof Worker !== 'undefined'&&typeof fakeLegacy === 'undefined';
+communist.URL = window.URL || window.webkitURL;
+communist._noTransferable=!communist.URL;
 //regex out the importScript call and move it up to the top out of the function.
 function regexImports(string){
 	var rest=string,
@@ -370,19 +372,25 @@ communist.makeIWorker = function (strings,codeword){
 	
 };
 //accepts an array of strings, joins them, and turns them into a worker.
+function makeFallbackWorker(script){
+	communist._noTransferable=true;
+	var worker = new Worker(getPath());
+	worker.postMessage(script);
+	return worker;
+}
 communist.makeWorker = function (strings, codeword){
 	if(!communist._hasWorker){
 		return communist.makeIWorker(strings,codeword);
 	}
 	var worker;
 	var script =moveImports(strings.join(''));
-	communist.URL = communist.URL||window.URL || window.webkitURL;
+	if(communist._noTransferable){
+		return makeFallbackWorker(script);
+	}
 	try{
 		worker= new Worker(communist.URL.createObjectURL(new Blob([script],{type: 'text/javascript'})));
 	}catch(e){
-		communist._noTransferable=true;
-		worker = new Worker(getPath());
-		worker.postMessage(script);
+		worker=makeFallbackWorker(script);
 	}finally{
 		return worker;
 	}
@@ -435,9 +443,12 @@ communist.Worker = function Communist(obj) {
 			return self;
 		}
 		self.fire = function (eventName, data, transfer) {
-			!communist._noTransferable ? worker.postMessage([
-				[eventName], data], transfer) : worker.postMessage([
-				[eventName], data]);
+			if(communist._noTransferable){
+				worker.postMessage([[eventName], data]);
+			}else{
+				worker.postMessage([[eventName], data], transfer);
+			}
+			
 			return self;
 		};
 		self.off = function (eventName, func) {
@@ -492,9 +503,11 @@ communist.Worker = function Communist(obj) {
 			var out = function (data, transfer) {
 				var i = promises.length;
 				promises[i] = communist.deferred();
-				!communist._noTransferable ? worker.postMessage([
-					[__codeWord__, i], key, data], transfer) : worker.postMessage([
-					[__codeWord__, i], key, data]);
+				if(communist._noTransferable){
+					worker.postMessage([[__codeWord__, i], key, data]);
+				}else{
+					worker.postMessage([[__codeWord__, i], key, data], transfer);
+				}
 				return promises[i].promise;
 			};
 			return out;

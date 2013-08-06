@@ -7,6 +7,7 @@ Changelog
 - The worker boilerplate can use single quotes
 - Single quotes are used everywhere in fact
 - Simplify the saucelab testing
+- weird issue with old Opera
 
 ##2.2.0
 

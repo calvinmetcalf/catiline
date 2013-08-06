@@ -1,4 +1,6 @@
 communist._hasWorker = typeof Worker !== 'undefined'&&typeof fakeLegacy === 'undefined';
+communist.URL = window.URL || window.webkitURL;
+communist._noTransferable=!communist.URL;
 //regex out the importScript call and move it up to the top out of the function.
 function regexImports(string){
 	var rest=string,
@@ -134,19 +136,25 @@ communist.makeIWorker = function (strings,codeword){
 	
 };
 //accepts an array of strings, joins them, and turns them into a worker.
+function makeFallbackWorker(script){
+	communist._noTransferable=true;
+	var worker = new Worker(getPath());
+	worker.postMessage(script);
+	return worker;
+}
 communist.makeWorker = function (strings, codeword){
 	if(!communist._hasWorker){
 		return communist.makeIWorker(strings,codeword);
 	}
 	var worker;
 	var script =moveImports(strings.join(''));
-	communist.URL = communist.URL||window.URL || window.webkitURL;
+	if(communist._noTransferable){
+		return makeFallbackWorker(script);
+	}
 	try{
 		worker= new Worker(communist.URL.createObjectURL(new Blob([script],{type: 'text/javascript'})));
 	}catch(e){
-		communist._noTransferable=true;
-		worker = new Worker(getPath());
-		worker.postMessage(script);
+		worker=makeFallbackWorker(script);
 	}finally{
 		return worker;
 	}

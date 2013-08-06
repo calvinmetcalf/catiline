@@ -44,7 +44,7 @@ describe('cw()', function () {
 		it('should work when given a function and data async', function (done) {
 			single(aSquare, 9).then(function (a) { assert.equal(a,81); }).then(done, done);
 		});
-		if(typeof Uint8Array !== 'undefined'&&cw._hasWorker&&typeof window.URL!== 'undefined'){
+		if(typeof Uint8Array !== 'undefined'&&navigator.userAgent.slice(-5).slice(0,2)!=="11"&&navigator.userAgent.slice(0,5)!=="Opera"){//look do you want me to test for old opera or not
 			it('should be able to handle an array buffer', function(done){
 				function wrapUp(){
 					comrade.close();
