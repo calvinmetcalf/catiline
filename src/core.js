@@ -73,7 +73,7 @@ communist.Worker = function Communist(obj) {
 		var i = 0;
 		var promises = [];
 		var rejectPromises = function (msg) {
-			if (typeof msg !== "string" && 'preventDefault' in msg) {
+			if (typeof msg !== 'string' && 'preventDefault' in msg) {
 				msg.preventDefault();
 				msg = msg.message;
 			}
@@ -84,7 +84,7 @@ communist.Worker = function Communist(obj) {
 			});
 		};
 		obj.__codeWord__='"'+__codeWord__+'"';
-		if (!("initialize" in obj)) {
+		if (!('initialize' in obj)) {
 			if ('init' in obj) {
 				obj.initialize = obj.init;
 			}
@@ -92,7 +92,7 @@ communist.Worker = function Communist(obj) {
 				obj.initialize = function () {};
 			}
 		}
-		var fObj = "{\n\t";
+		var fObj = '{\n\t';
 		var keyFunc = function (key) {
 			var out = function (data, transfer) {
 				var i = promises.length;
@@ -106,15 +106,15 @@ communist.Worker = function Communist(obj) {
 		};
 		for (var key in obj) {
 			if (i !== 0) {
-				fObj = fObj + ",\n\t";
+				fObj = fObj + ',\n\t';
 			}
 			else {
 				i++;
 			}
-			fObj = fObj + key + ":" + obj[key].toString();
+			fObj = fObj + key + ':' + obj[key].toString();
 			self[key] = keyFunc(key);
 		}
-		fObj = fObj + "}";
+		fObj = fObj + '}';
 		var worker = communist.makeWorker($$fObj$$,__codeWord__);
 		worker.onmessage = function (e) {
 			_fire('message', e.data[1]);
@@ -135,7 +135,7 @@ communist.Worker = function Communist(obj) {
 		});
 		self._close = function () {
 			worker.terminate();
-			rejectPromises("closed");
+			rejectPromises('closed');
 			return communist.resolve();
 		};
 		if (!('close' in self)) {

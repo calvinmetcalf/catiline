@@ -18,7 +18,7 @@ function initBrowser(communist){
 	global.cw = communist;
 	
 }
-if(typeof module === "undefined" || !('exports' in module)){
+if(typeof module === 'undefined' || !('exports' in module)){
 	initBrowser(communist);
 } else {
 	module.exports=communist;

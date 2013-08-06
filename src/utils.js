@@ -6,14 +6,14 @@ function regexImports(string){
 	matches = {},
 	loopFunc = function(a,b){
 		if(b){
-			"importScripts("+b.split(",").forEach(function(cc){
+			'importScripts('+b.split(',').forEach(function(cc){
 				matches[communist.makeUrl(cc.match(/\s*[\'\"](\S*)[\'\"]\s*/)[1])]=true; // trim whitespace, add to matches
-			})+");\n";
+			})+');\n';
 		}
 	};
 	while(match){
 		match = rest.match(/(importScripts\(.*?\);?)/);
-		rest = rest.replace(/(importScripts\(\s*(?:[\'\"].*?[\'\"])?\s*\);?)/,"\n");
+		rest = rest.replace(/(importScripts\(\s*(?:[\'\"].*?[\'\"])?\s*\);?)/,'\n');
 		if(match){
 			match[0].replace(/importScripts\(\s*([\'\"].*?[\'\"])?\s*\);?/g,loopFunc);
 		}
@@ -27,7 +27,7 @@ function moveImports(string){
 	var matches = str[0];
 	var rest = str[1];
 	if(matches.length>0){
-		return 'importScripts("'+matches.join('","')+'");\n'+rest;
+		return 'importScripts(\''+matches.join('\',\'')+'\');\n'+rest;
 	}else{
 		return rest;
 	}
@@ -37,16 +37,16 @@ function moveIimports(string){
 	var matches = str[0];
 	var rest = str[1];
 	if(matches.length>0){
-		return 'importScripts("'+matches.join('","')+'");eval(__scripts__);\n'+rest;
+		return 'importScripts(\''+matches.join('\',\'')+'\');eval(__scripts__);\n'+rest;
 	}else{
 		return rest;
 	}
 }
 function getPath(){
-	if(typeof SHIM_WORKER_PATH !== "undefined"){
+	if(typeof SHIM_WORKER_PATH !== 'undefined'){
 		return SHIM_WORKER_PATH;
 	}
-	var scripts = document.getElementsByTagName("script");
+	var scripts = document.getElementsByTagName('script');
 		var len = scripts.length;
 		var i = 0;
 		while(i<len){
@@ -58,21 +58,23 @@ function getPath(){
 }
 function appendScript(iDoc,text){
 	var iScript = iDoc.createElement('script');
-			if (iScript.text !== void 0) {
+			if (typeof iScript.text !== 'undefined') {
 				iScript.text = text;
 			} else {
 				iScript.innerHTML = text;
 			}
-		if(iDoc.readyState==="complete"){
-		iDoc.documentElement.appendChild(iScript);
+		if(iDoc.readyState==='complete'){
+			iDoc.documentElement.appendChild(iScript);
 		}else{
 			iDoc.onreadystatechange=function(){
-				if(iDoc.readyState==="complete"){
-		iDoc.documentElement.appendChild(iScript);
-		}
+				if(iDoc.readyState==='complete'){
+					iDoc.documentElement.appendChild(iScript);
+				}
 			};
 		}
 }
+//much of the iframe stuff inspired by https://github.com/padolsey/operative
+//mos tthings besides the names have since been changed
 function actualMakeI(script,codeword){
 	var iFrame = document.createElement('iframe');
 		iFrame.style.display = 'none';
@@ -80,36 +82,27 @@ function actualMakeI(script,codeword){
 		var iWin = iFrame.contentWindow;
 		var iDoc = iWin.document;
 	var text=['try{ ',
-	'var __scripts__="";function importScripts(scripts){',
+	'var __scripts__=\'\';function importScripts(scripts){',
 	'	if(Array.isArray(scripts)&&scripts.length>0){',
 	'		scripts.forEach(function(url){',
 	'			var ajax = new XMLHttpRequest();',
-	'			ajax.open("GET",url,false);',
+	'			ajax.open(\'GET\',url,false);',
 	'			ajax.send();__scripts__+=ajax.responseText;',
-	'			__scripts__+="\\n;";',
+	'			__scripts__+=\'\\n;\';',
 	'		});',
 	'	}',
 	'};',
 	script,
 	'}catch(e){',
-	'	window.parent.postMessage(["'+codeword+'","error"],"*")',
+	'	window.parent.postMessage([\''+codeword+'\',\'error\'],\'*\')',
 	'}'].join('\n');
-	if(true || iDoc.readyState==="complete"){
-		appendScript(iDoc,text);
-	}else{
-		iWin.__loaded__=function(){
-			appendScript(iDoc,text);
-		};
-		iDoc.open();
-		iDoc.write('<script>"console.log("com.communistjs.iframe0.4709464108912914");__loaded__();</script>');
-		iDoc.close();
-	}
+	appendScript(iDoc,text);
 
 	return iFrame;
 }
 function makeIframe(script,codeword){
 	var promise = communist.deferred();
-	if(document.readyState==="complete"){
+	if(document.readyState==='complete'){
 		promise.resolve(actualMakeI(script,codeword));
 	}else{
 		window.addEventListener('load',function(){
@@ -119,17 +112,17 @@ function makeIframe(script,codeword){
 	return promise.promise;
 }
 communist.makeIWorker = function (strings,codeword){
-	var script =moveIimports(strings.join(""));
+	var script =moveIimports(strings.join(''));
 	var worker = {onmessage:function(){}};
 	var ipromise = makeIframe(script,codeword);
 	window.addEventListener('message',function(e){
-		if(typeof e.data ==="string"&&e.data.length>codeword.length&&e.data.slice(0,codeword.length)===codeword){
+		if(typeof e.data ==='string'&&e.data.length>codeword.length&&e.data.slice(0,codeword.length)===codeword){
 			worker.onmessage({data:JSON.parse(e.data.slice(codeword.length))});
 		}
 	});
 	worker.postMessage=function(data){
 		ipromise.then(function(iFrame){
-			iFrame.contentWindow.postMessage(JSON.stringify(data),"*");
+			iFrame.contentWindow.postMessage(JSON.stringify(data),'*');
 		});
 	};
 	worker.terminate=function(){
@@ -146,10 +139,10 @@ communist.makeWorker = function (strings, codeword){
 		return communist.makeIWorker(strings,codeword);
 	}
 	var worker;
-	var script =moveImports(strings.join(""));
+	var script =moveImports(strings.join(''));
 	communist.URL = communist.URL||window.URL || window.webkitURL;
 	try{
-		worker= new Worker(communist.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));
+		worker= new Worker(communist.URL.createObjectURL(new Blob([script],{type: 'text/javascript'})));
 	}catch(e){
 		communist._noTransferable=true;
 		worker = new Worker(getPath());
@@ -160,7 +153,7 @@ communist.makeWorker = function (strings, codeword){
 };
 
 communist.makeUrl = function (fileName) {
-	var link = document.createElement("link");
+	var link = document.createElement('link');
 	link.href = fileName;
 	return link.href;
 };

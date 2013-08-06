@@ -7,12 +7,12 @@
 		}
 		Task.prototype.run = function () {
 			// See steps in section 5 of the spec.
-			if (typeof this.handler === "function") {
+			if (typeof this.handler === 'function') {
 				// Choice of `thisArg` is not in the setImmediate spec; `undefined` is in the setTimeout spec though:
 				// http://www.whatwg.org/specs/web-apps/current-work/multipage/timers.html
 				this.handler.apply(undefined, this.args);
 			} else {
-				var scriptSource = "" + this.handler;
+				var scriptSource = '' + this.handler;
 				/*jshint evil: true */
 				eval(scriptSource);
 			}
@@ -33,7 +33,7 @@
 				return thisHandle;
 			},
 			runIfPresent: function (handle) {
-				// From the spec: "Wait until any invocations of this algorithm started before this one have completed."
+				// From the spec: 'Wait until any invocations of this algorithm started before this one have completed.'
 				// So if we're currently running a task, we'll need to delay this invocation.
 				if (!currentlyRunningATask) {
 					var task = tasksByHandle[handle];
@@ -48,7 +48,7 @@
 					}
 				} else {
 					// Delay by doing a setTimeout. setImmediate was tried instead, but in Firefox 7 it generated a
-					// "too much recursion" error.
+					// 'too much recursion' error.
 					global.setTimeout(function () {
 						tasks.runIfPresent(handle);
 					}, 0);
@@ -63,10 +63,10 @@
 		// * https://developer.mozilla.org/en/DOM/window.postMessage
 		// * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
 
-		var MESSAGE_PREFIX = "com.communistjs.setImmediate" + Math.random();
+		var MESSAGE_PREFIX = 'com.communistjs.setImmediate' + Math.random();
 
 		function isStringAndStartsWith(string, putativeStart) {
-			return typeof string === "string" && string.substring(0, putativeStart.length) === putativeStart;
+			return typeof string === 'string' && string.substring(0, putativeStart.length) === putativeStart;
 		}
 
 		function onGlobalMessage(event) {
@@ -79,9 +79,9 @@
 			}
 		}
 		if (global.addEventListener) {
-			global.addEventListener("message", onGlobalMessage, false);
+			global.addEventListener('message', onGlobalMessage, false);
 		} else {
-			global.attachEvent("onmessage", onGlobalMessage);
+			global.attachEvent('onmessage', onGlobalMessage);
 		}
 
 		attachTo.setImmediate = function () {
@@ -89,7 +89,7 @@
 
 			// Make `global` post a message to itself with the handle and identifying prefix, thus asynchronously
 			// invoking our onGlobalMessage listener above.
-			global.postMessage(MESSAGE_PREFIX + handle, "*");
+			global.postMessage(MESSAGE_PREFIX + handle, '*');
 
 			return handle;
 		};

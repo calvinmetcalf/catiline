@@ -1,6 +1,6 @@
 /*! Promiscuous ©2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/
 (function (exports,tick) {
-	var func = "function";
+	var func = 'function';
 	// Creates a deferred: an object with a promise and corresponding resolve/reject methods
 	function Deferred() {
 		// The `handler` variable points to the function that will

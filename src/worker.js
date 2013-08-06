@@ -1,3 +1,5 @@
+'use strict';
+
 var _db = $$fObj$$;
 var listeners = {};
 var __iFrame__ = typeof document!=="undefined";

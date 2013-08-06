@@ -1,4 +1,4 @@
-if (typeof document === "undefined") {
+if (typeof document === 'undefined') {
 	self._noTransferable=true;
 	self.onmessage=function(e){
 		/*jslint evil: true */
@@ -6,4 +6,4 @@ if (typeof document === "undefined") {
 	};
 } else {
 (function(global){
-	"use strict";
+	'use strict';
