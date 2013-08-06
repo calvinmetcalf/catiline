@@ -29,7 +29,7 @@ module.exports = function(grunt) {
 				options: {
 					banner: '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */\n',
 					seperator:";\n",
-					footer : 'communist.version = "<%= pkg.version %>";\n})(this);}'
+					footer : 'communist.version = \'<%= pkg.version %>\';\n})(this);}'
 				},
 				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/temp.js','src/queue.js','src/wrapup.js']}
 			}
@@ -59,7 +59,8 @@ module.exports = function(grunt) {
 			expr:true,
 			trailing:true,
 			eqeqeq:true,
-			curly:true
+			curly:true,
+			quotmark:'single'
 		},
 		beforeconcat: ['src/*.js'],
 		afterconcat: ['dist/communist.js']
