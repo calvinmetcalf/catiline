@@ -44,7 +44,7 @@ describe('cw()', function () {
 		it('should work when given a function and data async', function (done) {
 			single(aSquare, 9).then(function (a) { assert.equal(a,81); }).then(done, done);
 		});
-		if(typeof Uint8Array !== 'undefined'&&typeof fakeLegacy=== 'undefined'){
+		if(typeof Uint8Array !== 'undefined'&&!cw._hasWorker){
 			it('should be able to handle an array buffer', function(done){
 				function wrapUp(){
 					comrade.close();
@@ -54,10 +54,6 @@ describe('cw()', function () {
 				comrade.data((new Uint8Array([1,2,3,4,5,6,7,8])).buffer).then(function(a){assert.equal(a.byteLength,8)}).then(wrapUp,wrapUp);
 			});
 			it('should be able to handle an array buffer as a transferable object', function(done){
-				if(typeof Uint8Array === 'undefined'||typeof fakeLegacy!== 'undefined'){
-					done();
-					return;
-				}
 				function wrapUp(){
 					comrade.close();
 					done();
