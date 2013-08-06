@@ -47,6 +47,8 @@ function moveIimports(string){
 function getPath(){
 	if(typeof SHIM_WORKER_PATH !== 'undefined'){
 		return SHIM_WORKER_PATH;
+	}else if('SHIM_WORKER_PATH' in communist){
+		return communist.SHIM_WORKER_PATH;
 	}
 	var scripts = document.getElementsByTagName('script');
 		var len = scripts.length;
