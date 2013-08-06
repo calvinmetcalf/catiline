@@ -44,7 +44,7 @@ describe('cw()', function () {
 		it('should work when given a function and data async', function (done) {
 			single(aSquare, 9).then(function (a) { assert.equal(a,81); }).then(done, done);
 		});
-		if(typeof Uint8Array !== 'undefined'&&!cw._hasWorker){
+		if(typeof Uint8Array !== 'undefined'&&cw._hasWorker){
 			it('should be able to handle an array buffer', function(done){
 				function wrapUp(){
 					comrade.close();
