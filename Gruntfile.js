@@ -161,6 +161,10 @@ module.exports = function(grunt) {
 						browserName: 'opera',
 						platform: 'xp',
 						version:'11'
+					},{
+						browserName: 'android',
+						platform: 'linux',
+						version: '4.0'
 					}
 				],
 			urls:[
