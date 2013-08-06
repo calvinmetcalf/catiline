@@ -84,6 +84,11 @@ module.exports = function(grunt) {
 			options:{
 				browsers: [
 					{
+						browserName: 'android',
+						platform: 'linux',
+						version:'4.0'
+					},
+					{
 						browserName: 'firefox',
 						platform: 'linux'
 					},{
@@ -120,10 +125,6 @@ module.exports = function(grunt) {
 					},{
 						browserName: 'chrome',
 						platform: 'XP'
-					},{
-						browserName: 'android',
-						platform: 'linux',
-						version:'4.0'
 					}
 				],
 				urls:[
