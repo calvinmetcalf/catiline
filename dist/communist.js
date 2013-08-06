@@ -1,6 +1,6 @@
-/*! communist 2.2.0 2013-08-05*/
+/*! communist 2.2.1 2013-08-06*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
-if (typeof document === "undefined") {
+if (typeof document === 'undefined') {
 	self._noTransferable=true;
 	self.onmessage=function(e){
 		/*jslint evil: true */
@@ -8,7 +8,7 @@ if (typeof document === "undefined") {
 	};
 } else {
 (function(global){
-	"use strict";
+	'use strict';
 /*!From setImmediate Copyright (c) 2012 Barnesandnoble.com,llc, Donavon West, and Domenic Denicola @license MIT https://github.com/NobleJS/setImmediate */
 (function(attachTo,global) {
 	var tasks = (function () {
@@ -18,12 +18,12 @@ if (typeof document === "undefined") {
 		}
 		Task.prototype.run = function () {
 			// See steps in section 5 of the spec.
-			if (typeof this.handler === "function") {
+			if (typeof this.handler === 'function') {
 				// Choice of `thisArg` is not in the setImmediate spec; `undefined` is in the setTimeout spec though:
 				// http://www.whatwg.org/specs/web-apps/current-work/multipage/timers.html
 				this.handler.apply(undefined, this.args);
 			} else {
-				var scriptSource = "" + this.handler;
+				var scriptSource = '' + this.handler;
 				/*jshint evil: true */
 				eval(scriptSource);
 			}
@@ -44,7 +44,7 @@ if (typeof document === "undefined") {
 				return thisHandle;
 			},
 			runIfPresent: function (handle) {
-				// From the spec: "Wait until any invocations of this algorithm started before this one have completed."
+				// From the spec: 'Wait until any invocations of this algorithm started before this one have completed.'
 				// So if we're currently running a task, we'll need to delay this invocation.
 				if (!currentlyRunningATask) {
 					var task = tasksByHandle[handle];
@@ -59,7 +59,7 @@ if (typeof document === "undefined") {
 					}
 				} else {
 					// Delay by doing a setTimeout. setImmediate was tried instead, but in Firefox 7 it generated a
-					// "too much recursion" error.
+					// 'too much recursion' error.
 					global.setTimeout(function () {
 						tasks.runIfPresent(handle);
 					}, 0);
@@ -74,10 +74,10 @@ if (typeof document === "undefined") {
 		// * https://developer.mozilla.org/en/DOM/window.postMessage
 		// * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
 
-		var MESSAGE_PREFIX = "com.communistjs.setImmediate" + Math.random();
+		var MESSAGE_PREFIX = 'com.communistjs.setImmediate' + Math.random();
 
 		function isStringAndStartsWith(string, putativeStart) {
-			return typeof string === "string" && string.substring(0, putativeStart.length) === putativeStart;
+			return typeof string === 'string' && string.substring(0, putativeStart.length) === putativeStart;
 		}
 
 		function onGlobalMessage(event) {
@@ -90,9 +90,9 @@ if (typeof document === "undefined") {
 			}
 		}
 		if (global.addEventListener) {
-			global.addEventListener("message", onGlobalMessage, false);
+			global.addEventListener('message', onGlobalMessage, false);
 		} else {
-			global.attachEvent("onmessage", onGlobalMessage);
+			global.attachEvent('onmessage', onGlobalMessage);
 		}
 
 		attachTo.setImmediate = function () {
@@ -100,14 +100,14 @@ if (typeof document === "undefined") {
 
 			// Make `global` post a message to itself with the handle and identifying prefix, thus asynchronously
 			// invoking our onGlobalMessage listener above.
-			global.postMessage(MESSAGE_PREFIX + handle, "*");
+			global.postMessage(MESSAGE_PREFIX + handle, '*');
 
 			return handle;
 		};
 	})(communist,global);
 /*! Promiscuous ©2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/
 (function (exports,tick) {
-	var func = "function";
+	var func = 'function';
 	// Creates a deferred: an object with a promise and corresponding resolve/reject methods
 	function Deferred() {
 		// The `handler` variable points to the function that will
@@ -242,14 +242,14 @@ function regexImports(string){
 	matches = {},
 	loopFunc = function(a,b){
 		if(b){
-			"importScripts("+b.split(",").forEach(function(cc){
+			'importScripts('+b.split(',').forEach(function(cc){
 				matches[communist.makeUrl(cc.match(/\s*[\'\"](\S*)[\'\"]\s*/)[1])]=true; // trim whitespace, add to matches
-			})+");\n";
+			})+');\n';
 		}
 	};
 	while(match){
 		match = rest.match(/(importScripts\(.*?\);?)/);
-		rest = rest.replace(/(importScripts\(\s*(?:[\'\"].*?[\'\"])?\s*\);?)/,"\n");
+		rest = rest.replace(/(importScripts\(\s*(?:[\'\"].*?[\'\"])?\s*\);?)/,'\n');
 		if(match){
 			match[0].replace(/importScripts\(\s*([\'\"].*?[\'\"])?\s*\);?/g,loopFunc);
 		}
@@ -263,7 +263,7 @@ function moveImports(string){
 	var matches = str[0];
 	var rest = str[1];
 	if(matches.length>0){
-		return 'importScripts("'+matches.join('","')+'");\n'+rest;
+		return 'importScripts(\''+matches.join('\',\'')+'\');\n'+rest;
 	}else{
 		return rest;
 	}
@@ -273,16 +273,16 @@ function moveIimports(string){
 	var matches = str[0];
 	var rest = str[1];
 	if(matches.length>0){
-		return 'importScripts("'+matches.join('","')+'");eval(__scripts__);\n'+rest;
+		return 'importScripts(\''+matches.join('\',\'')+'\');eval(__scripts__);\n'+rest;
 	}else{
 		return rest;
 	}
 }
 function getPath(){
-	if(typeof SHIM_WORKER_PATH !== "undefined"){
+	if(typeof SHIM_WORKER_PATH !== 'undefined'){
 		return SHIM_WORKER_PATH;
 	}
-	var scripts = document.getElementsByTagName("script");
+	var scripts = document.getElementsByTagName('script');
 		var len = scripts.length;
 		var i = 0;
 		while(i<len){
@@ -294,21 +294,23 @@ function getPath(){
 }
 function appendScript(iDoc,text){
 	var iScript = iDoc.createElement('script');
-			if (iScript.text !== void 0) {
+			if (typeof iScript.text !== 'undefined') {
 				iScript.text = text;
 			} else {
 				iScript.innerHTML = text;
 			}
-		if(iDoc.readyState==="complete"){
-		iDoc.documentElement.appendChild(iScript);
+		if(iDoc.readyState==='complete'){
+			iDoc.documentElement.appendChild(iScript);
 		}else{
 			iDoc.onreadystatechange=function(){
-				if(iDoc.readyState==="complete"){
-		iDoc.documentElement.appendChild(iScript);
-		}
+				if(iDoc.readyState==='complete'){
+					iDoc.documentElement.appendChild(iScript);
+				}
 			};
 		}
 }
+//much of the iframe stuff inspired by https://github.com/padolsey/operative
+//mos tthings besides the names have since been changed
 function actualMakeI(script,codeword){
 	var iFrame = document.createElement('iframe');
 		iFrame.style.display = 'none';
@@ -316,36 +318,27 @@ function actualMakeI(script,codeword){
 		var iWin = iFrame.contentWindow;
 		var iDoc = iWin.document;
 	var text=['try{ ',
-	'var __scripts__="";function importScripts(scripts){',
+	'var __scripts__=\'\';function importScripts(scripts){',
 	'	if(Array.isArray(scripts)&&scripts.length>0){',
 	'		scripts.forEach(function(url){',
 	'			var ajax = new XMLHttpRequest();',
-	'			ajax.open("GET",url,false);',
+	'			ajax.open(\'GET\',url,false);',
 	'			ajax.send();__scripts__+=ajax.responseText;',
-	'			__scripts__+="\\n;";',
+	'			__scripts__+=\'\\n;\';',
 	'		});',
 	'	}',
 	'};',
 	script,
 	'}catch(e){',
-	'	window.parent.postMessage(["'+codeword+'","error"],"*")',
+	'	window.parent.postMessage([\''+codeword+'\',\'error\'],\'*\')',
 	'}'].join('\n');
-	if(true || iDoc.readyState==="complete"){
-		appendScript(iDoc,text);
-	}else{
-		iWin.__loaded__=function(){
-			appendScript(iDoc,text);
-		};
-		iDoc.open();
-		iDoc.write('<script>"console.log("com.communistjs.iframe0.4709464108912914");__loaded__();</script>');
-		iDoc.close();
-	}
+	appendScript(iDoc,text);
 
 	return iFrame;
 }
 function makeIframe(script,codeword){
 	var promise = communist.deferred();
-	if(document.readyState==="complete"){
+	if(document.readyState==='complete'){
 		promise.resolve(actualMakeI(script,codeword));
 	}else{
 		window.addEventListener('load',function(){
@@ -355,17 +348,17 @@ function makeIframe(script,codeword){
 	return promise.promise;
 }
 communist.makeIWorker = function (strings,codeword){
-	var script =moveIimports(strings.join(""));
+	var script =moveIimports(strings.join(''));
 	var worker = {onmessage:function(){}};
 	var ipromise = makeIframe(script,codeword);
 	window.addEventListener('message',function(e){
-		if(typeof e.data ==="string"&&e.data.length>codeword.length&&e.data.slice(0,codeword.length)===codeword){
+		if(typeof e.data ==='string'&&e.data.length>codeword.length&&e.data.slice(0,codeword.length)===codeword){
 			worker.onmessage({data:JSON.parse(e.data.slice(codeword.length))});
 		}
 	});
 	worker.postMessage=function(data){
 		ipromise.then(function(iFrame){
-			iFrame.contentWindow.postMessage(JSON.stringify(data),"*");
+			iFrame.contentWindow.postMessage(JSON.stringify(data),'*');
 		});
 	};
 	worker.terminate=function(){
@@ -382,10 +375,10 @@ communist.makeWorker = function (strings, codeword){
 		return communist.makeIWorker(strings,codeword);
 	}
 	var worker;
-	var script =moveImports(strings.join(""));
+	var script =moveImports(strings.join(''));
 	communist.URL = communist.URL||window.URL || window.webkitURL;
 	try{
-		worker= new Worker(communist.URL.createObjectURL(new Blob([script],{type: "text/javascript"})));
+		worker= new Worker(communist.URL.createObjectURL(new Blob([script],{type: 'text/javascript'})));
 	}catch(e){
 		communist._noTransferable=true;
 		worker = new Worker(getPath());
@@ -396,7 +389,7 @@ communist.makeWorker = function (strings, codeword){
 };
 
 communist.makeUrl = function (fileName) {
-	var link = document.createElement("link");
+	var link = document.createElement('link');
 	link.href = fileName;
 	return link.href;
 };
@@ -475,7 +468,7 @@ communist.Worker = function Communist(obj) {
 		var i = 0;
 		var promises = [];
 		var rejectPromises = function (msg) {
-			if (typeof msg !== "string" && 'preventDefault' in msg) {
+			if (typeof msg !== 'string' && 'preventDefault' in msg) {
 				msg.preventDefault();
 				msg = msg.message;
 			}
@@ -486,7 +479,7 @@ communist.Worker = function Communist(obj) {
 			});
 		};
 		obj.__codeWord__='"'+__codeWord__+'"';
-		if (!("initialize" in obj)) {
+		if (!('initialize' in obj)) {
 			if ('init' in obj) {
 				obj.initialize = obj.init;
 			}
@@ -494,7 +487,7 @@ communist.Worker = function Communist(obj) {
 				obj.initialize = function () {};
 			}
 		}
-		var fObj = "{\n\t";
+		var fObj = '{\n\t';
 		var keyFunc = function (key) {
 			var out = function (data, transfer) {
 				var i = promises.length;
@@ -508,16 +501,16 @@ communist.Worker = function Communist(obj) {
 		};
 		for (var key in obj) {
 			if (i !== 0) {
-				fObj = fObj + ",\n\t";
+				fObj = fObj + ',\n\t';
 			}
 			else {
 				i++;
 			}
-			fObj = fObj + key + ":" + obj[key].toString();
+			fObj = fObj + key + ':' + obj[key].toString();
 			self[key] = keyFunc(key);
 		}
-		fObj = fObj + "}";
-		var worker = communist.makeWorker(['var _db = ',fObj,';\nvar listeners = {};\nvar __iFrame__ = typeof document!=="undefined";\nvar __self__={onmessage:function(e){\n	_fire("messege",e.data[1]);\n	if(e.data[0][0]===_db.__codeWord__){\n		return regMsg(e);\n	}else{\n		_fire(e.data[0][0],e.data[1]);\n	}\n}};\nif(__iFrame__){\n	window.onmessage=function(e){\n		if(typeof e.data === "string"){\n			e ={data: JSON.parse(e.data)};\n		}\n		__self__.onmessage(e);\n	};\n}else{\n	self.onmessage=__self__.onmessage;\n}\n__self__.postMessage=function(rawData, transfer){\n	var data;\n	if(!self._noTransferable&&!__iFrame__){\n		self.postMessage(rawData, transfer);\n	}else if(__iFrame__){\n		data = _db.__codeWord__+JSON.stringify(rawData);\n		window.parent.postMessage(data,"*");\n	}else if(self._noTransferable){\n		self.postMessage(rawData);\n	}\n};\n_db.on = function (eventName, func, scope) {\n	if(eventName.indexOf(" ")>0){\n		return eventName.split(" ").map(function(v){\n			return _db.on(v,func,scope);\n		},_db);\n	}\n	scope = scope || _db;\n	if (!(eventName in listeners)) {\n		listeners[eventName] = [];\n	}\n	listeners[eventName].push(function (a) {\n		func.call(scope, a, _db);\n	});\n};\nfunction _fire(eventName,data){\n	if(eventName.indexOf(" ")>0){\n		eventName.split(" ").forEach(function(v){\n			_fire(v,data);\n		});\n		return;\n	}\n	if (!(eventName in listeners)) {\n		return;\n	}\n	listeners[eventName].forEach(function (v) {\n		v(data);\n	});\n}\n\n_db.fire = function (eventName, data, transfer) {\n	__self__.postMessage([[eventName], data], transfer);\n};\n_db.off=function(eventName,func){\n	if(eventName.indexOf(" ")>0){\n		return eventName.split(" ").map(function(v){\n			return _db.off(v,func);\n		});\n	}\n	if(!(eventName in listeners)){\n		return;\n	}else if(!func){\n		delete listeners[eventName];\n	}else{\n		if(listeners[eventName].indexOf(func)>-1){\n			if(listeners[eventName].length>1){\n				delete listeners[eventName];\n			}else{\n				listeners[eventName].splice(listeners[eventName].indexOf(func),1);\n			}\n		}\n	}\n};\nvar console={};\nfunction makeConsole(method){\n	return function(){\n		var len = arguments.length;\n		var out =[];\n		var i = 0;\n		while (i<len){\n			out.push(arguments[i]);\n			i++;\n		}\n		_db.fire("console",[method,out]);\n	};\n}\n["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){\n	console[v]=makeConsole(v);\n});\nvar regMsg = function(e){\n	var cb=function(data,transfer){\n		__self__.postMessage([e.data[0],data],transfer);\n	};\n	var result;\n	if(__iFrame__){\n		try{\n			result = _db[e.data[1]](e.data[2],cb,_db);\n		}catch(e){\n			_db.fire("error",JSON.stringify(e));\n		}\n	}else{\n		result = _db[e.data[1]](e.data[2],cb,_db);\n	}\n	if(typeof result !== "undefined"){\n		cb(result);\n	}\n};\n_db.initialize(_db);\n'],__codeWord__);
+		fObj = fObj + '}';
+		var worker = communist.makeWorker(['\'use strict\';\n\nvar _db = ',fObj,';\nvar listeners = {};\nvar __iFrame__ = typeof document!=="undefined";\nvar __self__={onmessage:function(e){\n	_fire("messege",e.data[1]);\n	if(e.data[0][0]===_db.__codeWord__){\n		return regMsg(e);\n	}else{\n		_fire(e.data[0][0],e.data[1]);\n	}\n}};\nif(__iFrame__){\n	window.onmessage=function(e){\n		if(typeof e.data === "string"){\n			e ={data: JSON.parse(e.data)};\n		}\n		__self__.onmessage(e);\n	};\n}else{\n	self.onmessage=__self__.onmessage;\n}\n__self__.postMessage=function(rawData, transfer){\n	var data;\n	if(!self._noTransferable&&!__iFrame__){\n		self.postMessage(rawData, transfer);\n	}else if(__iFrame__){\n		data = _db.__codeWord__+JSON.stringify(rawData);\n		window.parent.postMessage(data,"*");\n	}else if(self._noTransferable){\n		self.postMessage(rawData);\n	}\n};\n_db.on = function (eventName, func, scope) {\n	if(eventName.indexOf(" ")>0){\n		return eventName.split(" ").map(function(v){\n			return _db.on(v,func,scope);\n		},_db);\n	}\n	scope = scope || _db;\n	if (!(eventName in listeners)) {\n		listeners[eventName] = [];\n	}\n	listeners[eventName].push(function (a) {\n		func.call(scope, a, _db);\n	});\n};\nfunction _fire(eventName,data){\n	if(eventName.indexOf(" ")>0){\n		eventName.split(" ").forEach(function(v){\n			_fire(v,data);\n		});\n		return;\n	}\n	if (!(eventName in listeners)) {\n		return;\n	}\n	listeners[eventName].forEach(function (v) {\n		v(data);\n	});\n}\n\n_db.fire = function (eventName, data, transfer) {\n	__self__.postMessage([[eventName], data], transfer);\n};\n_db.off=function(eventName,func){\n	if(eventName.indexOf(" ")>0){\n		return eventName.split(" ").map(function(v){\n			return _db.off(v,func);\n		});\n	}\n	if(!(eventName in listeners)){\n		return;\n	}else if(!func){\n		delete listeners[eventName];\n	}else{\n		if(listeners[eventName].indexOf(func)>-1){\n			if(listeners[eventName].length>1){\n				delete listeners[eventName];\n			}else{\n				listeners[eventName].splice(listeners[eventName].indexOf(func),1);\n			}\n		}\n	}\n};\nvar console={};\nfunction makeConsole(method){\n	return function(){\n		var len = arguments.length;\n		var out =[];\n		var i = 0;\n		while (i<len){\n			out.push(arguments[i]);\n			i++;\n		}\n		_db.fire("console",[method,out]);\n	};\n}\n["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){\n	console[v]=makeConsole(v);\n});\nvar regMsg = function(e){\n	var cb=function(data,transfer){\n		__self__.postMessage([e.data[0],data],transfer);\n	};\n	var result;\n	if(__iFrame__){\n		try{\n			result = _db[e.data[1]](e.data[2],cb,_db);\n		}catch(e){\n			_db.fire("error",JSON.stringify(e));\n		}\n	}else{\n		result = _db[e.data[1]](e.data[2],cb,_db);\n	}\n	if(typeof result !== "undefined"){\n		cb(result);\n	}\n};\n_db.initialize(_db);\n'],__codeWord__);
 		worker.onmessage = function (e) {
 			_fire('message', e.data[1]);
 			if (e.data[0][0] === __codeWord__) {
@@ -537,7 +530,7 @@ communist.Worker = function Communist(obj) {
 		});
 		self._close = function () {
 			worker.terminate();
-			rejectPromises("closed");
+			rejectPromises('closed');
 			return communist.resolve();
 		};
 		if (!('close' in self)) {
@@ -737,10 +730,10 @@ function initBrowser(communist){
 	global.cw = communist;
 	
 }
-if(typeof module === "undefined" || !('exports' in module)){
+if(typeof module === 'undefined' || !('exports' in module)){
 	initBrowser(communist);
 } else {
 	module.exports=communist;
 }
-communist.version = "2.2.0";
+communist.version = '2.2.1';
 })(this);}
