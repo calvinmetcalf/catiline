@@ -48,7 +48,7 @@ module.exports = function(grunt) {
 					urls: [
 						"http://"+process.env.IP+":8080/test/index.html",
 						"http://"+process.env.IP+":8080/test/index.min.html",
-						"http://"+process.env.IP+":8080/test/index.shim.html"
+						"http://"+process.env.IP+":8080/test/index.leg.html"
 					]
 				}
 			}
@@ -61,80 +61,114 @@ module.exports = function(grunt) {
 				}
 			}
 		},
-		jshint: {
-			options:{
-				latedef:"nofunc",
-				expr:true,
-				trailing:true,
-				eqeqeq:true,
-				curly:true,
-				quotmark:'single'
-			},
-			beforeconcat: ['src/*.js'],
-			afterconcat: ['dist/communist.js']
+	jshint: {
+		options:{
+			latedef:"nofunc",
+			expr:true,
+			trailing:true,
+			eqeqeq:true,
+			curly:true,
+			quotmark:'single'
 		},
-		"saucelabs-mocha":{
+		beforeconcat: ['src/*.js'],
+		afterconcat: ['dist/communist.js']
+	},
+	"saucelabs-mocha":{
+		options:{
+			username:"calvinmetcalf",
+			key: "f288b74b-589a-4fb4-9e65-d8b6ddd09d0e",
+			concurrency:3,
+			build: process.env.TRAVIS_JOB_ID
+		},
+		big:{
 			options:{
-				username:"calvinmetcalf",
-				key: "f288b74b-589a-4fb4-9e65-d8b6ddd09d0e",
-				concurrency:3,
-				build: process.env.TRAVIS_JOB_ID
-			},
-			big:{
-				options:{
-					browsers: [
-						{
-							browserName: 'firefox',
-							platform: 'linux',
-							version: '22'
-						},{
-							browserName: 'firefox',
-							platform: 'linux',
-							version: '17'
-						},{
-							browserName: 'opera',
-							platform: 'linux',
-							version: '12'
-						},{
-							browserName: "chrome",
-							platform: "OS X 10.8"
-						},{
-							browserName: "safari",
-							platform: "OS X 10.8",
-							version:'6'
-						},{
-							browserName: "safari",
-							platform: "OS X 10.6",
-							version:'5'
-						},{
-							browserName: "iphone",
-							platform: "OS X 10.8",
-							version:'6'
-						}, {
-							browserName: 'internet explorer',
-							platform: 'WIN8',
-							version: '10'
-						},{
-							browserName: 'safari',
-							platform: 'win7',
-							version: '5'
-						},{
-							browserName: 'chrome',
-							platform: 'XP'
-						},{
-							browserName: 'internet explorer',
-							platform: 'WIN7',
-							version: '9'
-						}
-					],
-					urls:[
-						"http://127.0.0.1:8080/test/index.html",
-						"http://127.0.0.1:8080/test/index.min.html",
-						//"http://127.0.0.1:8080/test/index.shim.html"
-					]
-				}
+				browsers: [
+					{
+						browserName: 'firefox',
+						platform: 'linux',
+						version: '22'
+					},{
+						browserName: 'firefox',
+						platform: 'linux',
+						version: '17'
+					},{
+						browserName: 'opera',
+						platform: 'linux',
+						version: '12'
+					},{
+						browserName: "chrome",
+						platform: "OS X 10.8"
+					},{
+						browserName: "safari",
+						platform: "OS X 10.8",
+						version:'6'
+					},{
+						browserName: "safari",
+						platform: "OS X 10.6",
+						version:'5'
+					},{
+						browserName: "iphone",
+						platform: "OS X 10.8",
+						version:'6'
+					}, {
+						browserName: 'internet explorer',
+						platform: 'WIN8',
+						version: '10'
+					},{
+						browserName: 'safari',
+						platform: 'win7',
+						version: '5'
+					},{
+						browserName: 'chrome',
+						platform: 'XP'
+					}
+				],
+				urls:[
+					"http://127.0.0.1:8080/test/index.html",
+					"http://127.0.0.1:8080/test/index.min.html"
+				]
+			}
+		},
+		shim:{
+			options:{
+				browsers: [
+					{
+						browserName: 'internet explorer',
+						platform: 'WIN8',
+						version: '10'
+					},{
+						browserName: 'safari',
+						platform: 'win7',
+						version: '5'
+					}
+				],
+			urls:[
+					"http://127.0.0.1:8080/test/index.shim.html"
+				]
+			}
+		},
+		legacy:{
+			options:{
+				browsers: [
+					{
+						browserName: 'internet explorer',
+						platform: 'WIN7',
+						version: '9'
+					},{
+						browserName: 'chrome',
+						platform: 'linux'
+					},{
+						browserName: 'opera',
+						platform: 'xp',
+						version:'11'
+					}
+				],
+			urls:[
+					"http://127.0.0.1:8080/test/index.leg.html"
+				]
 			}
 		}
+	},
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -144,7 +178,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-saucelabs');
 	grunt.registerTask('template',templateThings);
-	grunt.registerTask('sauce',['connect','saucelabs-mocha:big']);
+	grunt.registerTask('sauce',['connect','saucelabs-mocha:big','saucelabs-mocha:shim','saucelabs-mocha:legacy']);
 	grunt.registerTask('server',['connect']);
 	grunt.registerTask('browser',['concat:browser','uglify:browser']);
 	grunt.registerTask('lint',['jshint:afterconcat']);
