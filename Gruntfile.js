@@ -1,12 +1,18 @@
+var UglifyJS = require("uglify-js");
 module.exports = function(grunt) {
+	var replaceStuff = function(inString,outFile,parent){
+		var replacedChild = "['"+inString.replace(/\'/gm,"\\'").replace(/\$\$(.+?)\$\$/,function(a,b){
+				return "',"+b+",'";
+		}).replace(/\n/gm,'\\n')+"']";
+		var out = parent.replace(/\$\$fObj\$\$/,replacedChild);
+		grunt.file.write(outFile,out);
+	};
 	var templateThings = function(){
 			var parent =  grunt.file.read('./src/core.js');
 			var child = grunt.file.read('./src/worker.js');
-			var replacedChild = "['"+child.replace(/\'/gm,"\\'").replace(/\$\$(.+?)\$\$/,function(a,b){
-				return "',"+b+",'";
-			}).replace(/\n/gm,'\\n')+"']";
-			var out = parent.replace(/\$\$fObj\$\$/,replacedChild);
-			grunt.file.write('./src/temp.js',out);
+			var childmin = UglifyJS.minify('./src/worker.js').code;
+			replaceStuff(child,'./src/temp.js',parent);
+			replaceStuff(childmin,'./src/temp.min.js',parent);
 	};
 	// Project configuration.
 	grunt.initConfig({
@@ -17,10 +23,12 @@ module.exports = function(grunt) {
 					banner:'/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!(c)2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */\n/*!Includes Promiscuous (c)2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/\n/*!Includes Material from setImmediate Copyright (c) 2012 Barnesandnoble.com, llc, Donavon West, and Domenic Denicola @license MIT https://github.com/NobleJS/setImmediate */\n',
 					mangle: {
 						except: ['Communist','CommunistQueue','FakeCommunist','Promise','Deferred']
-					}
-				},
-				src: 'dist/<%= pkg.name %>.js',
-				dest: 'dist/<%= pkg.name %>.min.js'
+					},
+					seperator:";\n",
+					footer : 'communist.version = \'<%= pkg.version %>\';\n})(this);}',
+					files: {'dist/<%= pkg.name %>.min.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/temp.min.js','src/queue.js','src/wrapup.js']}
+				}
+				
 			}
 		},
 		concat: {
@@ -31,7 +39,7 @@ module.exports = function(grunt) {
 					seperator:";\n",
 					footer : 'communist.version = \'<%= pkg.version %>\';\n})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/temp.js','src/queue.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/temp.min.js','src/queue.js','src/wrapup.js']}
 			}
 		},
 		mocha_phantomjs: {
@@ -113,50 +121,20 @@ module.exports = function(grunt) {
 					},{
 						browserName: 'chrome',
 						platform: 'XP'
-					}
-				],
-				urls:[
-					"http://127.0.0.1:8080/test/index.html",
-					"http://127.0.0.1:8080/test/index.min.html"
-				]
-			}
-		},
-		shim:{
-			options:{
-				browsers: [
-					{
-						browserName: 'internet explorer',
-						platform: 'WIN8',
-						version: '10'
 					},{
-						browserName: 'safari',
-						platform: 'win7',
-						version: '5'
-					}
-				],
-			urls:[
-					"http://127.0.0.1:8080/test/index.shim.html"
-				]
-			}
-		},
-		legacy:{
-			options:{
-				browsers: [
-					{
 						browserName: 'internet explorer',
 						platform: 'WIN7',
 						version: '9'
-					},{
-						browserName: 'chrome',
-						platform: 'linux'
 					},{
 						browserName: 'opera',
 						platform: 'xp',
 						version:'11'
 					}
 				],
-			urls:[
-					"http://127.0.0.1:8080/test/index.leg.html"
+				urls:[
+					"http://127.0.0.1:8080/test/index.html",
+					"http://127.0.0.1:8080/test/index.min.html",
+					"http://127.0.0.1:8080/test/index.shim.html"
 				]
 			}
 		}
@@ -170,7 +148,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-saucelabs');
 	grunt.registerTask('template',templateThings);
-	grunt.registerTask('sauce',['connect','saucelabs-mocha:big','saucelabs-mocha:shim','saucelabs-mocha:legacy']);
+	grunt.registerTask('sauce',['connect','saucelabs-mocha:big','saucelabs-mocha:shim']);
 	grunt.registerTask('server',['connect']);
 	grunt.registerTask('browser',['concat:browser','uglify:browser']);
 	grunt.registerTask('lint',['jshint:afterconcat']);
