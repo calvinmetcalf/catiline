@@ -1,6 +1,10 @@
 Changelog
 ===
 
+##2.3.1
+
+- reversion of pretty printing of workers fixed
+
 ##2.3.0
 
 - works with AMD module loaders (and test!) though caveats about bundling still apply
