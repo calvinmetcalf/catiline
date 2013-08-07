@@ -1,10 +1,12 @@
+curl(['lib/chai.js', 'dist/communist']).then(
+function   (        chai,   cw) {
 mocha.setup({
     ui: "bdd",
     globals: ["console","__fxdriver_unwrapped"],
-    timeout: 300000
+    timeout: 300000,
+      ignoreLeaks: true
 });
 var assert = chai.assert;
-
 function aSquare(x,cb) {
 	cb( x * x );
 }
@@ -297,7 +299,7 @@ describe('cw()', function () {
 			});
 		});
 	});
-	describe('no conflict', function () {
+	/*describe('no conflict', function () {
 		it('no conflict should work',function(){
 			cw.noConflict();
 			assert.equal(cw,"cw");
@@ -306,11 +308,11 @@ describe('cw()', function () {
 			communist.noConflict('cw');
 			assert.equal(cw,communist);
 		});
-	});
+	});*/
 	describe('dumb Queues', function () {
 		var comrade;
 		it("should be able create an object worker",function (done){
-			comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
+			comrade = cw({product:product,aSquare:aSquare,square:square},2,"dumb");
 			comrade.aSquare(3).then(function(a){
 				assert.equal(a,9);
 			}).then(function(){
@@ -334,7 +336,7 @@ describe('cw()', function () {
 			function wrapUp(){
 				comrade.close().then(function(){done()},function(){done()});
 			}
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
+			var comrade = cw({product:product,aSquare:aSquare,square:square},2,"dumb");
 			comrade.batch
 				.square([2,4,6,8])
 				.then(function(a){
@@ -346,7 +348,7 @@ describe('cw()', function () {
 		function wrapUp(){
 				comrade.close().then(function(){done()},function(){done()});
 			}
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
+			var comrade = cw({product:product,aSquare:aSquare,square:square},2,"dumb");
 			comrade.batch
 				.square([2,4,6,8,'explode'])
 				.then(
@@ -362,7 +364,7 @@ describe('cw()', function () {
 			}
 			var i = 4;
 			var tot = 0;
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb"
+			var comrade = cw({product:product,aSquare:aSquare,square:square},2,"dumb"
 		);
 		comrade.batch(function(a){
 				i--;
@@ -378,7 +380,7 @@ describe('cw()', function () {
 			function wrapUp(){
 				comrade.close().then(function(){done()},function(){done()});
 			}
-			var comrade=communist({initialize:function(){this.a=7},test:function(){return this.a}},2,"dumb");
+			var comrade=cw({initialize:function(){this.a=7},test:function(){return this.a}},2,"dumb");
 			comrade.test().then(function(a){assert.equal(a,7)}).then(wrapUp);
 		});
 	});
@@ -463,3 +465,7 @@ describe('cw()', function () {
 		
 	});
 });
+if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
+      else { mocha.run(); }
+},function(a){console.log(a)}
+);

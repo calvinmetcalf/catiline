@@ -18,7 +18,13 @@ function initBrowser(communist){
 	global.cw = communist;
 	
 }
-if(typeof module === 'undefined' || !('exports' in module)){
+
+if(typeof define === 'function'){
+	define(function(require){
+		communist.SHIM_WORKER_PATH=require.toUrl('./communist.js');
+		return communist;
+	});
+}else if(typeof module === 'undefined' || !('exports' in module)){
 	initBrowser(communist);
 } else {
 	module.exports=communist;

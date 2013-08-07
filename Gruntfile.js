@@ -48,7 +48,8 @@ module.exports = function(grunt) {
 					urls: [
 						"http://"+process.env.IP+":8080/test/index.html",
 						"http://"+process.env.IP+":8080/test/index.min.html",
-						"http://"+process.env.IP+":8080/test/index.leg.html"
+						"http://"+process.env.IP+":8080/test/index.leg.html",
+						"http://"+process.env.IP+":8080/test/index.amd.html"
 					]
 				}
 			}
@@ -83,10 +84,10 @@ module.exports = function(grunt) {
 		big:{
 			options:{
 				browsers: [
+					
 					{
 						browserName: 'firefox',
-						platform: 'linux',
-						version: '22'
+						platform: 'linux'
 					},{
 						browserName: 'firefox',
 						platform: 'linux',
@@ -125,7 +126,8 @@ module.exports = function(grunt) {
 				],
 				urls:[
 					"http://127.0.0.1:8080/test/index.html",
-					"http://127.0.0.1:8080/test/index.min.html"
+					"http://127.0.0.1:8080/test/index.min.html",
+					"http://127.0.0.1:8080/test/index.amd.html",
 				]
 			}
 		},

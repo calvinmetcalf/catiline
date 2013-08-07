@@ -1,4 +1,4 @@
-/*! communist 2.2.1 2013-08-06*/
+/*! communist 2.2.1 2013-08-07*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
 if (typeof document === 'undefined') {
 	self._noTransferable=true;
@@ -283,6 +283,8 @@ function moveIimports(string){
 function getPath(){
 	if(typeof SHIM_WORKER_PATH !== 'undefined'){
 		return SHIM_WORKER_PATH;
+	}else if('SHIM_WORKER_PATH' in communist){
+		return communist.SHIM_WORKER_PATH;
 	}
 	var scripts = document.getElementsByTagName('script');
 		var len = scripts.length;
@@ -743,7 +745,13 @@ function initBrowser(communist){
 	global.cw = communist;
 	
 }
-if(typeof module === 'undefined' || !('exports' in module)){
+
+if(typeof define === 'function'){
+	define(function(require){
+		communist.SHIM_WORKER_PATH=require.toUrl('./communist.js');
+		return communist;
+	});
+}else if(typeof module === 'undefined' || !('exports' in module)){
 	initBrowser(communist);
 } else {
 	module.exports=communist;
