@@ -84,11 +84,7 @@ module.exports = function(grunt) {
 		big:{
 			options:{
 				browsers: [
-					{
-						browserName: 'android',
-						platform: 'linux',
-						version:'4.0'
-					},
+					
 					{
 						browserName: 'firefox',
 						platform: 'linux'
