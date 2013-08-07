@@ -18,28 +18,33 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		uglify: {
-			browser: {
-				options:{
+			all: {
+    			options:{
 					banner:'/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!(c)2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */\n/*!Includes Promiscuous (c)2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/\n/*!Includes Material from setImmediate Copyright (c) 2012 Barnesandnoble.com, llc, Donavon West, and Domenic Denicola @license MIT https://github.com/NobleJS/setImmediate */\n',
 					mangle: {
 						except: ['Communist','CommunistQueue','FakeCommunist','Promise','Deferred']
-					},
-					seperator:";\n",
-					footer : 'communist.version = \'<%= pkg.version %>\';\n})(this);}',
-					files: {'dist/<%= pkg.name %>.min.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/temp.min.js','src/queue.js','src/wrapup.js']}
-				}
-				
+					}
+				},
+				src: 'dist/<%= pkg.name %>.min.js',
+				dest: 'dist/<%= pkg.name %>.min.js'
 			}
 		},
 		concat: {
-		 
+		    ugly: { 
+    			options: {
+					banner: '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */\n',
+					seperator:";\n",
+					footer : 'communist.version = \'<%= pkg.version %>\';\n})(this);}'
+				},
+				files: {'dist/<%= pkg.name %>.min.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/temp.min.js','src/queue.js','src/wrapup.js']}
+			},
 			browser: { 
 				options: {
 					banner: '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */\n',
 					seperator:";\n",
 					footer : 'communist.version = \'<%= pkg.version %>\';\n})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/temp.min.js','src/queue.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/temp.js','src/queue.js','src/wrapup.js']}
 			}
 		},
 		mocha_phantomjs: {
@@ -182,11 +187,12 @@ module.exports = function(grunt) {
 	grunt.registerTask('template',templateThings);
 	grunt.registerTask('sauce',['connect','saucelabs-mocha:big','saucelabs-mocha:shim','saucelabs-mocha:legacy']);
 	grunt.registerTask('server',['connect']);
-	grunt.registerTask('browser',['concat:browser','uglify:browser']);
+	grunt.registerTask('browser',['concat:browser','ugly']);
 	grunt.registerTask('lint',['jshint:afterconcat']);
 	grunt.registerTask('testing', ['connect', 'mocha_phantomjs']);
 	grunt.registerTask('test', ['lint','sauce']);
 	grunt.registerTask('build', ['template','browser']);
+    grunt.registerTask('ugly', ['concat:ugly','uglify']);
 	grunt.registerTask('default', ['build','test']);
 	grunt.registerTask('c9', ['build','lint','testing']);
 
