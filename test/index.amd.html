@@ -2,12 +2,19 @@
 <head>
   <meta charset="utf-8">
   <title>Mocha Tests</title>
-  <link rel="stylesheet" href="lib/mocha.css" />
+    <link rel="stylesheet" href="lib/mocha.css" />
 </head>
 <body>
+<div id="mocha"></div>
   <script src="lib/mocha.js"></script>
-  <div id="mocha"></div>
-  <script data-main="testamd.js" src="lib/require.js"></script>
- 
+  <script>
+  curl = {
+        paths:{
+        	dist:'../dist'
+        }
+    };
+  </script>
+  <script src="lib/curl.js"></script>
+ <script src="testamd.js"></script>
 </body>
 </html>

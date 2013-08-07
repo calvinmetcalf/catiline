@@ -1,29 +1,11 @@
-
-requirejs.config({
-    //By default load any module IDs from js/lib
-    baseUrl: '../dist',
-    //except, if the module ID starts with "app",
-    //load it from the js/app directory. paths
-    //config is relative to the baseUrl, and
-    //never includes a ".js" extension since
-    //the paths config could be for a directory.
-    use: {
-        mocha: {
-            attach: 'mocha'
-        },
-        mochaPhantomJS: {
-            attach: 'mochaPhantomJS'
-        }
-    }
-});
+curl(['lib/chai.js', 'dist/communist']).then(
+function   (        chai,   cw) {
 mocha.setup({
     ui: "bdd",
     globals: ["console","__fxdriver_unwrapped"],
     timeout: 300000,
       ignoreLeaks: true
 });
-requirejs(['../test/lib/chai.js', 'communist'],
-function   (        chai,   cw) {
 var assert = chai.assert;
 function aSquare(x,cb) {
 	cb( x * x );
@@ -486,4 +468,5 @@ describe('cw()', function () {
 });
 if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
       else { mocha.run(); }
-});
+},function(a){console.log(a)}
+);
