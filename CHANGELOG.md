@@ -1,6 +1,10 @@
 Changelog
 ===
 
+##2.3.0
+
+- works with AMD module loaders (and test!) though caveats about bundling still apply
+
 ##2.2.1
 
 - The worker boilerplate is strict again
