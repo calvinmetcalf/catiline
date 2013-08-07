@@ -67,7 +67,6 @@ describe('cw()', function () {
 	});
 	describe('urls', function () {
 		it('should work',function(){
-			console.log(cw.SHIM_WORKER_PATH);
 			assert.equal(location.protocol+'//'+location.host+'/',cw.makeUrl('/'));
 		});
 	});
