@@ -195,5 +195,5 @@ we have a few utility functions you can use
 
 `cw.setImmediate();` implements [setImmediate](https://github.com/NobleJS/setImmediate), at least the parts that apply to non web workers that can create web workers.
 
-lastly `cw.noConflict()` sets `cw` back to what it was before loading this library and you can use the function via `communist()`
+lastly `cw.noConflict()` sets `cw` back to what it was before loading this library and you can use the function via `catiline()`
 

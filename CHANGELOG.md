@@ -1,6 +1,10 @@
 Changelog
 ===
 
+##2.4.0
+
+- renamed it to catiline (name was holding it back)
+
 ##2.3.1
 
 - reversion of pretty printing of workers fixed

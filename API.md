@@ -123,7 +123,7 @@ A queue which can be accessed as described above has the signature
 
 ```javascript
 new cw.Queue(Object ,Number [,Boolean])
-	-> CommunistQueue
+	-> CatilineQueue
 ```
 
 A queue can be treated exactly like a worker and it will behave identically except
