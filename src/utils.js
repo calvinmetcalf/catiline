@@ -156,7 +156,11 @@ catiline.makeWorker = function (strings, codeword){
 	try{
 		worker= new Worker(catiline.URL.createObjectURL(new Blob([script],{type: 'text/javascript'})));
 	}catch(e){
-		worker=makeFallbackWorker(script);
+		try{
+			worker=makeFallbackWorker(script);
+		}catch(e){
+			worker = catiline.makeIWorker(strings,codeword);
+		}
 	}finally{
 		return worker;
 	}

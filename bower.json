@@ -1,6 +1,6 @@
 {
   "name": "catiline",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "main": "dist/catiline.js",
   "ignore": [
     "**/.*",

@@ -1,6 +1,14 @@
 Changelog
 ===
 
+##2.4.2
+
+- eval worker falls back to iframe worker
+
+##2.4.1
+
+- fixed issue with package.json and bower.json
+
 ##2.4.0
 
 - renamed it to catiline (name was holding it back)
