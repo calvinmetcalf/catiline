@@ -178,3 +178,18 @@ cw.makeUrl(reletiveUrl:String)
 ```
 
 Takes a reletive url and returns an absolute one, handy as reletive urls will resolve badly inside a blob worker.
+
+'''javascript
+cw.setImmediate(func)
+```
+
+executes `func` in the next event loop, think `setTimeout(func,0);` but faster.
+
+```javascript
+cw.deferred();//creates deffered object
+cw.resolve(value);//create resolved promise
+cw.reject(value);//create rejected promise
+cw.all([promises]);
+//returns a promise for an array of promsies
+//resolved value is array of results in order.
+```
