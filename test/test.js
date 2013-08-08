@@ -303,14 +303,14 @@ describe('cw()', function () {
 			assert.equal(cw,"cw");
 		});
 		it('should be able to put it back',function(){
-			communist.noConflict('cw');
-			assert.equal(cw,communist);
+			catiline.noConflict('cw');
+			assert.equal(cw,catiline);
 		});
 	});
 	describe('dumb Queues', function () {
 		var comrade;
 		it("should be able create an object worker",function (done){
-			comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
+			comrade = catiline({product:product,aSquare:aSquare,square:square},2,"dumb");
 			comrade.aSquare(3).then(function(a){
 				assert.equal(a,9);
 			}).then(function(){
@@ -334,7 +334,7 @@ describe('cw()', function () {
 			function wrapUp(){
 				comrade.close().then(function(){done()},function(){done()});
 			}
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
+			var comrade = catiline({product:product,aSquare:aSquare,square:square},2,"dumb");
 			comrade.batch
 				.square([2,4,6,8])
 				.then(function(a){
@@ -346,7 +346,7 @@ describe('cw()', function () {
 		function wrapUp(){
 				comrade.close().then(function(){done()},function(){done()});
 			}
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb");
+			var comrade = catiline({product:product,aSquare:aSquare,square:square},2,"dumb");
 			comrade.batch
 				.square([2,4,6,8,'explode'])
 				.then(
@@ -362,7 +362,7 @@ describe('cw()', function () {
 			}
 			var i = 4;
 			var tot = 0;
-			var comrade = communist({product:product,aSquare:aSquare,square:square},2,"dumb"
+			var comrade = catiline({product:product,aSquare:aSquare,square:square},2,"dumb"
 		);
 		comrade.batch(function(a){
 				i--;
@@ -378,7 +378,7 @@ describe('cw()', function () {
 			function wrapUp(){
 				comrade.close().then(function(){done()},function(){done()});
 			}
-			var comrade=communist({initialize:function(){this.a=7},test:function(){return this.a}},2,"dumb");
+			var comrade=catiline({initialize:function(){this.a=7},test:function(){return this.a}},2,"dumb");
 			comrade.test().then(function(a){assert.equal(a,7)}).then(wrapUp);
 		});
 	});

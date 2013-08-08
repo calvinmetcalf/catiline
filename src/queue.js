@@ -1,4 +1,4 @@
-communist.Queue = function CommunistQueue(obj, n, dumb) {
+catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	var self = this;
 	self.__batchcb__ = {};
 	self.__batchtcb__ = {};
@@ -26,7 +26,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 	var que = [];
 	var queueLen = 0;
 	while (numIdle < n) {
-		workers[numIdle] = new communist.Worker(obj);
+		workers[numIdle] = new catiline.Worker(obj);
 		idle.push(numIdle);
 		numIdle++;
 	}
@@ -74,7 +74,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 
 	function keyFuncBatch(k) {
 		return function (array) {
-			return communist.all(array.map(function (data) {
+			return catiline.all(array.map(function (data) {
 				return doStuff(k, data);
 			}));
 		};
@@ -83,7 +83,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 	function keyFuncBatchCB(k) {
 		return function (array) {
 			var self = this;
-			return communist.all(array.map(function (data) {
+			return catiline.all(array.map(function (data) {
 				return doStuff(k, data).then(self.__cb__);
 			}));
 		};
@@ -91,7 +91,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 
 	function keyFuncBatchTransfer(k) {
 		return function (array) {
-			return communist.all(array.map(function (data) {
+			return catiline.all(array.map(function (data) {
 				return doStuff(k, data[0], data[1]);
 			}));
 		};
@@ -100,7 +100,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 	function keyFuncBatchTransferCB(k) {
 		return function (array) {
 			var self = this;
-			return communist.all(array.map(function (data) {
+			return catiline.all(array.map(function (data) {
 				return doStuff(k, data[0], data[1]).then(self.__cb__);
 			}));
 		};
@@ -136,7 +136,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 		if (dumb) {
 			return workers[~~ (Math.random() * n)][key](data, transfer);
 		}
-		var promise = communist.deferred(),
+		var promise = catiline.deferred(),
 			num;
 		if (!queueLen && numIdle) {
 			num = idle.pop();
@@ -155,7 +155,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 		return promise.promise;
 	}
 	self._close = function () {
-		return communist.all(workers.map(function (w) {
+		return catiline.all(workers.map(function (w) {
 			return w._close();
 		}));
 	};
@@ -163,6 +163,6 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 		self.close = self._close;
 	}
 };
-communist.queue = function (obj, n, dumb) {
-	return new communist.Queue(obj, n, dumb);
+catiline.queue = function (obj, n, dumb) {
+	return new catiline.Queue(obj, n, dumb);
 };

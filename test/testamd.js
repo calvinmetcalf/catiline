@@ -1,4 +1,4 @@
-curl(['lib/chai.js', 'dist/communist']).then(
+curl(['lib/chai.js', 'dist/catiline']).then(
 function   (        chai,   cw) {
 mocha.setup({
     ui: "bdd",
@@ -305,8 +305,8 @@ describe('cw()', function () {
 			assert.equal(cw,"cw");
 		});
 		it('should be able to put it back',function(){
-			communist.noConflict('cw');
-			assert.equal(cw,communist);
+			catiline.noConflict('cw');
+			assert.equal(cw,catiline);
 		});
 	});*/
 	describe('dumb Queues', function () {

@@ -63,7 +63,7 @@
 		// * https://developer.mozilla.org/en/DOM/window.postMessage
 		// * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
 
-		var MESSAGE_PREFIX = 'com.communistjs.setImmediate' + Math.random();
+		var MESSAGE_PREFIX = 'com.catilinejs.setImmediate' + Math.random();
 
 		function isStringAndStartsWith(string, putativeStart) {
 			return typeof string === 'string' && string.substring(0, putativeStart.length) === putativeStart;
@@ -93,4 +93,4 @@
 
 			return handle;
 		};
-	})(communist,global);
+	})(catiline,global);

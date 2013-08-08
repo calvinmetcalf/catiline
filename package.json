@@ -1,6 +1,6 @@
 {
-  "name": "communist",
-  "version": "2.3.1",
+  "name": "catiline",
+  "version": "2.4.0",
   "description": "Multi proccessing with workers in the browser.",
   "keywords": [
     "workers",
@@ -9,11 +9,11 @@
   ],
   "author": "Calvin Metcalf <calvin.metcalf@gmail.com> (https://github.com/calvinmetcalf)",
   "bugs": {
-    "url": "https://github.com/calvinmetcalf/communist/issues"
+    "url": "https://github.com/calvinmetcalf/catiline/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/calvinmetcalf/communist.git"
+    "url": "git://github.com/calvinmetcalf/catiline.git"
   },
   "scripts": {
     "test": "grunt"

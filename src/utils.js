@@ -1,6 +1,6 @@
-communist._hasWorker = typeof Worker !== 'undefined'&&typeof fakeLegacy === 'undefined';
-communist.URL = window.URL || window.webkitURL;
-communist._noTransferable=!communist.URL;
+catiline._hasWorker = typeof Worker !== 'undefined'&&typeof fakeLegacy === 'undefined';
+catiline.URL = window.URL || window.webkitURL;
+catiline._noTransferable=!catiline.URL;
 //regex out the importScript call and move it up to the top out of the function.
 function regexImports(string){
 	var rest=string,
@@ -9,7 +9,7 @@ function regexImports(string){
 	loopFunc = function(a,b){
 		if(b){
 			'importScripts('+b.split(',').forEach(function(cc){
-				matches[communist.makeUrl(cc.match(/\s*[\'\"](\S*)[\'\"]\s*/)[1])]=true; // trim whitespace, add to matches
+				matches[catiline.makeUrl(cc.match(/\s*[\'\"](\S*)[\'\"]\s*/)[1])]=true; // trim whitespace, add to matches
 			})+');\n';
 		}
 	};
@@ -47,14 +47,14 @@ function moveIimports(string){
 function getPath(){
 	if(typeof SHIM_WORKER_PATH !== 'undefined'){
 		return SHIM_WORKER_PATH;
-	}else if('SHIM_WORKER_PATH' in communist){
-		return communist.SHIM_WORKER_PATH;
+	}else if('SHIM_WORKER_PATH' in catiline){
+		return catiline.SHIM_WORKER_PATH;
 	}
 	var scripts = document.getElementsByTagName('script');
 		var len = scripts.length;
 		var i = 0;
 		while(i<len){
-			if(/communist(\.min)?\.js/.test(scripts[i].src)){
+			if(/catiline(\.min)?\.js/.test(scripts[i].src)){
 				return scripts[i].src;
 			}
 			i++;
@@ -105,7 +105,7 @@ function actualMakeI(script,codeword){
 	return iFrame;
 }
 function makeIframe(script,codeword){
-	var promise = communist.deferred();
+	var promise = catiline.deferred();
 	if(document.readyState==='complete'){
 		promise.resolve(actualMakeI(script,codeword));
 	}else{
@@ -115,7 +115,7 @@ function makeIframe(script,codeword){
 	}
 	return promise.promise;
 }
-communist.makeIWorker = function (strings,codeword){
+catiline.makeIWorker = function (strings,codeword){
 	var script =moveIimports(strings.join(''));
 	var worker = {onmessage:function(){}};
 	var ipromise = makeIframe(script,codeword);
@@ -139,22 +139,22 @@ communist.makeIWorker = function (strings,codeword){
 };
 //accepts an array of strings, joins them, and turns them into a worker.
 function makeFallbackWorker(script){
-	communist._noTransferable=true;
+	catiline._noTransferable=true;
 	var worker = new Worker(getPath());
 	worker.postMessage(script);
 	return worker;
 }
-communist.makeWorker = function (strings, codeword){
-	if(!communist._hasWorker){
-		return communist.makeIWorker(strings,codeword);
+catiline.makeWorker = function (strings, codeword){
+	if(!catiline._hasWorker){
+		return catiline.makeIWorker(strings,codeword);
 	}
 	var worker;
 	var script =moveImports(strings.join(''));
-	if(communist._noTransferable){
+	if(catiline._noTransferable){
 		return makeFallbackWorker(script);
 	}
 	try{
-		worker= new Worker(communist.URL.createObjectURL(new Blob([script],{type: 'text/javascript'})));
+		worker= new Worker(catiline.URL.createObjectURL(new Blob([script],{type: 'text/javascript'})));
 	}catch(e){
 		worker=makeFallbackWorker(script);
 	}finally{
@@ -162,7 +162,7 @@ communist.makeWorker = function (strings, codeword){
 	}
 };
 
-communist.makeUrl = function (fileName) {
+catiline.makeUrl = function (fileName) {
 	var link = document.createElement('link');
 	link.href = fileName;
 	return link.href;

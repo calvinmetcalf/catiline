@@ -20,9 +20,9 @@ module.exports = function(grunt) {
 		uglify: {
 			all: {
     			options:{
-					banner:'/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!(c)2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */\n/*!Includes Promiscuous (c)2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/\n/*!Includes Material from setImmediate Copyright (c) 2012 Barnesandnoble.com, llc, Donavon West, and Domenic Denicola @license MIT https://github.com/NobleJS/setImmediate */\n',
+					banner:'/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!(c)2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */\n/*!Includes Promiscuous (c)2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/\n/*!Includes Material from setImmediate Copyright (c) 2012 Barnesandnoble.com, llc, Donavon West, and Domenic Denicola @license MIT https://github.com/NobleJS/setImmediate */\n',
 					mangle: {
-						except: ['Communist','CommunistQueue','FakeCommunist','Promise','Deferred']
+						except: ['Catiline','CatilineQueue','FakeCatiline','Promise','Deferred']
 					}
 				},
 				src: 'dist/<%= pkg.name %>.min.js',
@@ -32,17 +32,17 @@ module.exports = function(grunt) {
 		concat: {
 		    ugly: { 
     			options: {
-					banner: '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */\n',
+					banner: '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */\n',
 					seperator:";\n",
-					footer : 'communist.version = \'<%= pkg.version %>\';\n})(this);}'
+					footer : 'catiline.version = \'<%= pkg.version %>\';\n})(this);}'
 				},
 				files: {'dist/<%= pkg.name %>.min.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/temp.min.js','src/queue.js','src/wrapup.js']}
 			},
 			browser: { 
 				options: {
-					banner: '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */\n',
+					banner: '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */\n',
 					seperator:";\n",
-					footer : 'communist.version = \'<%= pkg.version %>\';\n})(this);}'
+					footer : 'catiline.version = \'<%= pkg.version %>\';\n})(this);}'
 				},
 				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/temp.js','src/queue.js','src/wrapup.js']}
 			}
@@ -77,7 +77,7 @@ module.exports = function(grunt) {
 			quotmark:'single'
 		},
 		beforeconcat: ['src/*.js'],
-		afterconcat: ['dist/communist.js']
+		afterconcat: ['dist/catiline.js']
 	},
 	"saucelabs-mocha":{
 		options:{

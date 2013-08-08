@@ -159,7 +159,7 @@ L.TileLayer.FractalLayer = L.TileLayer.Canvas.extend({
         this.queue.tiles = [];
     	while(i<this.numWorkers){
             this.queue.free.push(i);
-		    this._workers[i]=communist(obj);
+		    this._workers[i]=catiline(obj);
 		    i++;
 		}
         

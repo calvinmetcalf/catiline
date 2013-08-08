@@ -1,31 +1,34 @@
-function communist(object,queueLength,unmanaged){
+function catiline(object,queueLength,unmanaged){
 	if(arguments.length === 1 || !queueLength || queueLength <= 1){
-		return new communist.Worker(object);
+		return new catiline.Worker(object);
 	}else{
-		return new communist.Queue(object,queueLength,unmanaged);
+		return new catiline.Queue(object,queueLength,unmanaged);
 	}
 }
 
-function initBrowser(communist){
+function initBrowser(catiline){
 	var origCW = global.cw;
-	communist.noConflict=function(newName){
+	catiline.noConflict=function(newName){
 		global.cw = origCW;
 		if(newName){
-			global[newName]=communist;
+			global[newName]=catiline;
 		}
 	};
-	global.communist = communist;
-	global.cw = communist;
+	global.catiline = catiline;
+	global.cw = catiline;
+	if(!('communist' in global)){
+		global.communist=catiline;
+	}
 	
 }
 
 if(typeof define === 'function'){
 	define(function(require){
-		communist.SHIM_WORKER_PATH=require.toUrl('./communist.js');
-		return communist;
+		catiline.SHIM_WORKER_PATH=require.toUrl('./catiline.js');
+		return catiline;
 	});
 }else if(typeof module === 'undefined' || !('exports' in module)){
-	initBrowser(communist);
+	initBrowser(catiline);
 } else {
-	module.exports=communist;
+	module.exports=catiline;
 }

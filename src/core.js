@@ -1,10 +1,10 @@
-communist.Worker = function Communist(obj) {
+catiline.Worker = function Catiline(obj) {
 		if(typeof obj === 'function'){
 			obj = {
 				data:obj
 			};
 		}
-		var __codeWord__='com.communistjs.'+(communist._hasWorker?'iframe':'worker')+Math.random();
+		var __codeWord__='com.catilinejs.'+(catiline._hasWorker?'iframe':'worker')+Math.random();
 		var listeners = {};
 		var self = this;
 		self.on = function (eventName, func, scope) {
@@ -40,7 +40,7 @@ communist.Worker = function Communist(obj) {
 			return self;
 		}
 		self.fire = function (eventName, data, transfer) {
-			if(communist._noTransferable){
+			if(catiline._noTransferable){
 				worker.postMessage([[eventName], data]);
 			}else{
 				worker.postMessage([[eventName], data], transfer);
@@ -99,8 +99,8 @@ communist.Worker = function Communist(obj) {
 		var keyFunc = function (key) {
 			var out = function (data, transfer) {
 				var i = promises.length;
-				promises[i] = communist.deferred();
-				if(communist._noTransferable){
+				promises[i] = catiline.deferred();
+				if(catiline._noTransferable){
 					worker.postMessage([[__codeWord__, i], key, data]);
 				}else{
 					worker.postMessage([[__codeWord__, i], key, data], transfer);
@@ -120,7 +120,7 @@ communist.Worker = function Communist(obj) {
 			self[key] = keyFunc(key);
 		}
 		fObj = fObj + '}';
-		var worker = communist.makeWorker($$fObj$$,__codeWord__);
+		var worker = catiline.makeWorker($$fObj$$,__codeWord__);
 		worker.onmessage = function (e) {
 			_fire('message', e.data[1]);
 			if (e.data[0][0] === __codeWord__) {
@@ -141,12 +141,12 @@ communist.Worker = function Communist(obj) {
 		self._close = function () {
 			worker.terminate();
 			rejectPromises('closed');
-			return communist.resolve();
+			return catiline.resolve();
 		};
 		if (!('close' in self)) {
 			self.close = self._close;
 		}
 	};
-communist.worker = function (obj){
-	return new communist.Worker(obj);
+catiline.worker = function (obj){
+	return new catiline.Worker(obj);
 };

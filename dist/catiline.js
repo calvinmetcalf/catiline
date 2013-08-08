@@ -1,5 +1,5 @@
-/*! communist 2.3.0 2013-08-07*/
-/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/communist */
+/*! catiline 2.4.0 2013-08-07*/
+/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */
 if (typeof document === 'undefined') {
 	self._noTransferable=true;
 	self.onmessage=function(e){
@@ -74,7 +74,7 @@ if (typeof document === 'undefined') {
 		// * https://developer.mozilla.org/en/DOM/window.postMessage
 		// * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
 
-		var MESSAGE_PREFIX = 'com.communistjs.setImmediate' + Math.random();
+		var MESSAGE_PREFIX = 'com.catilinejs.setImmediate' + Math.random();
 
 		function isStringAndStartsWith(string, putativeStart) {
 			return typeof string === 'string' && string.substring(0, putativeStart.length) === putativeStart;
@@ -104,7 +104,8 @@ if (typeof document === 'undefined') {
 
 			return handle;
 		};
-	})(communist,global);
+	})(catiline,global);
+
 /*! Promiscuous ©2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/
 (function (exports,tick) {
 	var func = 'function';
@@ -232,11 +233,11 @@ if (typeof document === 'undefined') {
 		});
 		return promise.promise;
 	};
-})(communist,communist.setImmediate);
+})(catiline,catiline.setImmediate);
 
-communist._hasWorker = typeof Worker !== 'undefined'&&typeof fakeLegacy === 'undefined';
-communist.URL = window.URL || window.webkitURL;
-communist._noTransferable=!communist.URL;
+catiline._hasWorker = typeof Worker !== 'undefined'&&typeof fakeLegacy === 'undefined';
+catiline.URL = window.URL || window.webkitURL;
+catiline._noTransferable=!catiline.URL;
 //regex out the importScript call and move it up to the top out of the function.
 function regexImports(string){
 	var rest=string,
@@ -245,7 +246,7 @@ function regexImports(string){
 	loopFunc = function(a,b){
 		if(b){
 			'importScripts('+b.split(',').forEach(function(cc){
-				matches[communist.makeUrl(cc.match(/\s*[\'\"](\S*)[\'\"]\s*/)[1])]=true; // trim whitespace, add to matches
+				matches[catiline.makeUrl(cc.match(/\s*[\'\"](\S*)[\'\"]\s*/)[1])]=true; // trim whitespace, add to matches
 			})+');\n';
 		}
 	};
@@ -283,14 +284,14 @@ function moveIimports(string){
 function getPath(){
 	if(typeof SHIM_WORKER_PATH !== 'undefined'){
 		return SHIM_WORKER_PATH;
-	}else if('SHIM_WORKER_PATH' in communist){
-		return communist.SHIM_WORKER_PATH;
+	}else if('SHIM_WORKER_PATH' in catiline){
+		return catiline.SHIM_WORKER_PATH;
 	}
 	var scripts = document.getElementsByTagName('script');
 		var len = scripts.length;
 		var i = 0;
 		while(i<len){
-			if(/communist(\.min)?\.js/.test(scripts[i].src)){
+			if(/catiline(\.min)?\.js/.test(scripts[i].src)){
 				return scripts[i].src;
 			}
 			i++;
@@ -341,7 +342,7 @@ function actualMakeI(script,codeword){
 	return iFrame;
 }
 function makeIframe(script,codeword){
-	var promise = communist.deferred();
+	var promise = catiline.deferred();
 	if(document.readyState==='complete'){
 		promise.resolve(actualMakeI(script,codeword));
 	}else{
@@ -351,7 +352,7 @@ function makeIframe(script,codeword){
 	}
 	return promise.promise;
 }
-communist.makeIWorker = function (strings,codeword){
+catiline.makeIWorker = function (strings,codeword){
 	var script =moveIimports(strings.join(''));
 	var worker = {onmessage:function(){}};
 	var ipromise = makeIframe(script,codeword);
@@ -375,22 +376,22 @@ communist.makeIWorker = function (strings,codeword){
 };
 //accepts an array of strings, joins them, and turns them into a worker.
 function makeFallbackWorker(script){
-	communist._noTransferable=true;
+	catiline._noTransferable=true;
 	var worker = new Worker(getPath());
 	worker.postMessage(script);
 	return worker;
 }
-communist.makeWorker = function (strings, codeword){
-	if(!communist._hasWorker){
-		return communist.makeIWorker(strings,codeword);
+catiline.makeWorker = function (strings, codeword){
+	if(!catiline._hasWorker){
+		return catiline.makeIWorker(strings,codeword);
 	}
 	var worker;
 	var script =moveImports(strings.join(''));
-	if(communist._noTransferable){
+	if(catiline._noTransferable){
 		return makeFallbackWorker(script);
 	}
 	try{
-		worker= new Worker(communist.URL.createObjectURL(new Blob([script],{type: 'text/javascript'})));
+		worker= new Worker(catiline.URL.createObjectURL(new Blob([script],{type: 'text/javascript'})));
 	}catch(e){
 		worker=makeFallbackWorker(script);
 	}finally{
@@ -398,18 +399,19 @@ communist.makeWorker = function (strings, codeword){
 	}
 };
 
-communist.makeUrl = function (fileName) {
+catiline.makeUrl = function (fileName) {
 	var link = document.createElement('link');
 	link.href = fileName;
 	return link.href;
 };
-communist.Worker = function Communist(obj) {
+
+catiline.Worker = function Catiline(obj) {
 		if(typeof obj === 'function'){
 			obj = {
 				data:obj
 			};
 		}
-		var __codeWord__='com.communistjs.'+(communist._hasWorker?'iframe':'worker')+Math.random();
+		var __codeWord__='com.catilinejs.'+(catiline._hasWorker?'iframe':'worker')+Math.random();
 		var listeners = {};
 		var self = this;
 		self.on = function (eventName, func, scope) {
@@ -445,7 +447,7 @@ communist.Worker = function Communist(obj) {
 			return self;
 		}
 		self.fire = function (eventName, data, transfer) {
-			if(communist._noTransferable){
+			if(catiline._noTransferable){
 				worker.postMessage([[eventName], data]);
 			}else{
 				worker.postMessage([[eventName], data], transfer);
@@ -504,8 +506,8 @@ communist.Worker = function Communist(obj) {
 		var keyFunc = function (key) {
 			var out = function (data, transfer) {
 				var i = promises.length;
-				promises[i] = communist.deferred();
-				if(communist._noTransferable){
+				promises[i] = catiline.deferred();
+				if(catiline._noTransferable){
 					worker.postMessage([[__codeWord__, i], key, data]);
 				}else{
 					worker.postMessage([[__codeWord__, i], key, data], transfer);
@@ -525,7 +527,7 @@ communist.Worker = function Communist(obj) {
 			self[key] = keyFunc(key);
 		}
 		fObj = fObj + '}';
-		var worker = communist.makeWorker(['\'use strict\';\n\nvar _db = ',fObj,';\nvar listeners = {};\nvar __iFrame__ = typeof document!=="undefined";\nvar __self__={onmessage:function(e){\n	_fire("messege",e.data[1]);\n	if(e.data[0][0]===_db.__codeWord__){\n		return regMsg(e);\n	}else{\n		_fire(e.data[0][0],e.data[1]);\n	}\n}};\nif(__iFrame__){\n	window.onmessage=function(e){\n		if(typeof e.data === "string"){\n			e ={data: JSON.parse(e.data)};\n		}\n		__self__.onmessage(e);\n	};\n}else{\n	self.onmessage=__self__.onmessage;\n}\n__self__.postMessage=function(rawData, transfer){\n	var data;\n	if(!self._noTransferable&&!__iFrame__){\n		self.postMessage(rawData, transfer);\n	}else if(__iFrame__){\n		data = _db.__codeWord__+JSON.stringify(rawData);\n		window.parent.postMessage(data,"*");\n	}else if(self._noTransferable){\n		self.postMessage(rawData);\n	}\n};\n_db.on = function (eventName, func, scope) {\n	if(eventName.indexOf(" ")>0){\n		return eventName.split(" ").map(function(v){\n			return _db.on(v,func,scope);\n		},_db);\n	}\n	scope = scope || _db;\n	if (!(eventName in listeners)) {\n		listeners[eventName] = [];\n	}\n	listeners[eventName].push(function (a) {\n		func.call(scope, a, _db);\n	});\n};\nfunction _fire(eventName,data){\n	if(eventName.indexOf(" ")>0){\n		eventName.split(" ").forEach(function(v){\n			_fire(v,data);\n		});\n		return;\n	}\n	if (!(eventName in listeners)) {\n		return;\n	}\n	listeners[eventName].forEach(function (v) {\n		v(data);\n	});\n}\n\n_db.fire = function (eventName, data, transfer) {\n	__self__.postMessage([[eventName], data], transfer);\n};\n_db.off=function(eventName,func){\n	if(eventName.indexOf(" ")>0){\n		return eventName.split(" ").map(function(v){\n			return _db.off(v,func);\n		});\n	}\n	if(!(eventName in listeners)){\n		return;\n	}else if(!func){\n		delete listeners[eventName];\n	}else{\n		if(listeners[eventName].indexOf(func)>-1){\n			if(listeners[eventName].length>1){\n				delete listeners[eventName];\n			}else{\n				listeners[eventName].splice(listeners[eventName].indexOf(func),1);\n			}\n		}\n	}\n};\nvar console={};\nfunction makeConsole(method){\n	return function(){\n		var len = arguments.length;\n		var out =[];\n		var i = 0;\n		while (i<len){\n			out.push(arguments[i]);\n			i++;\n		}\n		_db.fire("console",[method,out]);\n	};\n}\n["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){\n	console[v]=makeConsole(v);\n});\nvar regMsg = function(e){\n	var cb=function(data,transfer){\n		__self__.postMessage([e.data[0],data],transfer);\n	};\n	var result;\n	if(__iFrame__){\n		try{\n			result = _db[e.data[1]](e.data[2],cb,_db);\n		}catch(e){\n			_db.fire("error",JSON.stringify(e));\n		}\n	}else{\n		result = _db[e.data[1]](e.data[2],cb,_db);\n	}\n	if(typeof result !== "undefined"){\n		cb(result);\n	}\n};\n_db.initialize(_db);\n'],__codeWord__);
+		var worker = catiline.makeWorker(['\'use strict\';\n\nvar _db = ',fObj,';\nvar listeners = {};\nvar __iFrame__ = typeof document!=="undefined";\nvar __self__={onmessage:function(e){\n	_fire("messege",e.data[1]);\n	if(e.data[0][0]===_db.__codeWord__){\n		return regMsg(e);\n	}else{\n		_fire(e.data[0][0],e.data[1]);\n	}\n}};\nif(__iFrame__){\n	window.onmessage=function(e){\n		if(typeof e.data === "string"){\n			e ={data: JSON.parse(e.data)};\n		}\n		__self__.onmessage(e);\n	};\n}else{\n	self.onmessage=__self__.onmessage;\n}\n__self__.postMessage=function(rawData, transfer){\n	var data;\n	if(!self._noTransferable&&!__iFrame__){\n		self.postMessage(rawData, transfer);\n	}else if(__iFrame__){\n		data = _db.__codeWord__+JSON.stringify(rawData);\n		window.parent.postMessage(data,"*");\n	}else if(self._noTransferable){\n		self.postMessage(rawData);\n	}\n};\n_db.on = function (eventName, func, scope) {\n	if(eventName.indexOf(" ")>0){\n		return eventName.split(" ").map(function(v){\n			return _db.on(v,func,scope);\n		},_db);\n	}\n	scope = scope || _db;\n	if (!(eventName in listeners)) {\n		listeners[eventName] = [];\n	}\n	listeners[eventName].push(function (a) {\n		func.call(scope, a, _db);\n	});\n};\nfunction _fire(eventName,data){\n	if(eventName.indexOf(" ")>0){\n		eventName.split(" ").forEach(function(v){\n			_fire(v,data);\n		});\n		return;\n	}\n	if (!(eventName in listeners)) {\n		return;\n	}\n	listeners[eventName].forEach(function (v) {\n		v(data);\n	});\n}\n\n_db.fire = function (eventName, data, transfer) {\n	__self__.postMessage([[eventName], data], transfer);\n};\n_db.off=function(eventName,func){\n	if(eventName.indexOf(" ")>0){\n		return eventName.split(" ").map(function(v){\n			return _db.off(v,func);\n		});\n	}\n	if(!(eventName in listeners)){\n		return;\n	}else if(!func){\n		delete listeners[eventName];\n	}else{\n		if(listeners[eventName].indexOf(func)>-1){\n			if(listeners[eventName].length>1){\n				delete listeners[eventName];\n			}else{\n				listeners[eventName].splice(listeners[eventName].indexOf(func),1);\n			}\n		}\n	}\n};\nvar console={};\nfunction makeConsole(method){\n	return function(){\n		var len = arguments.length;\n		var out =[];\n		var i = 0;\n		while (i<len){\n			out.push(arguments[i]);\n			i++;\n		}\n		_db.fire("console",[method,out]);\n	};\n}\n["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){\n	console[v]=makeConsole(v);\n});\nvar regMsg = function(e){\n	var cb=function(data,transfer){\n		__self__.postMessage([e.data[0],data],transfer);\n	};\n	var result;\n	if(__iFrame__){\n		try{\n			result = _db[e.data[1]](e.data[2],cb,_db);\n		}catch(e){\n			_db.fire("error",JSON.stringify(e));\n		}\n	}else{\n		result = _db[e.data[1]](e.data[2],cb,_db);\n	}\n	if(typeof result !== "undefined"){\n		cb(result);\n	}\n};\n_db.initialize(_db);\n'],__codeWord__);
 		worker.onmessage = function (e) {
 			_fire('message', e.data[1]);
 			if (e.data[0][0] === __codeWord__) {
@@ -546,17 +548,17 @@ communist.Worker = function Communist(obj) {
 		self._close = function () {
 			worker.terminate();
 			rejectPromises('closed');
-			return communist.resolve();
+			return catiline.resolve();
 		};
 		if (!('close' in self)) {
 			self.close = self._close;
 		}
 	};
-communist.worker = function (obj){
-	return new communist.Worker(obj);
+catiline.worker = function (obj){
+	return new catiline.Worker(obj);
 };
 
-communist.Queue = function CommunistQueue(obj, n, dumb) {
+catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	var self = this;
 	self.__batchcb__ = {};
 	self.__batchtcb__ = {};
@@ -584,7 +586,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 	var que = [];
 	var queueLen = 0;
 	while (numIdle < n) {
-		workers[numIdle] = new communist.Worker(obj);
+		workers[numIdle] = new catiline.Worker(obj);
 		idle.push(numIdle);
 		numIdle++;
 	}
@@ -632,7 +634,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 
 	function keyFuncBatch(k) {
 		return function (array) {
-			return communist.all(array.map(function (data) {
+			return catiline.all(array.map(function (data) {
 				return doStuff(k, data);
 			}));
 		};
@@ -641,7 +643,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 	function keyFuncBatchCB(k) {
 		return function (array) {
 			var self = this;
-			return communist.all(array.map(function (data) {
+			return catiline.all(array.map(function (data) {
 				return doStuff(k, data).then(self.__cb__);
 			}));
 		};
@@ -649,7 +651,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 
 	function keyFuncBatchTransfer(k) {
 		return function (array) {
-			return communist.all(array.map(function (data) {
+			return catiline.all(array.map(function (data) {
 				return doStuff(k, data[0], data[1]);
 			}));
 		};
@@ -658,7 +660,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 	function keyFuncBatchTransferCB(k) {
 		return function (array) {
 			var self = this;
-			return communist.all(array.map(function (data) {
+			return catiline.all(array.map(function (data) {
 				return doStuff(k, data[0], data[1]).then(self.__cb__);
 			}));
 		};
@@ -694,7 +696,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 		if (dumb) {
 			return workers[~~ (Math.random() * n)][key](data, transfer);
 		}
-		var promise = communist.deferred(),
+		var promise = catiline.deferred(),
 			num;
 		if (!queueLen && numIdle) {
 			num = idle.pop();
@@ -713,7 +715,7 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 		return promise.promise;
 	}
 	self._close = function () {
-		return communist.all(workers.map(function (w) {
+		return catiline.all(workers.map(function (w) {
 			return w._close();
 		}));
 	};
@@ -721,40 +723,43 @@ communist.Queue = function CommunistQueue(obj, n, dumb) {
 		self.close = self._close;
 	}
 };
-communist.queue = function (obj, n, dumb) {
-	return new communist.Queue(obj, n, dumb);
+catiline.queue = function (obj, n, dumb) {
+	return new catiline.Queue(obj, n, dumb);
 };
 
-function communist(object,queueLength,unmanaged){
+function catiline(object,queueLength,unmanaged){
 	if(arguments.length === 1 || !queueLength || queueLength <= 1){
-		return new communist.Worker(object);
+		return new catiline.Worker(object);
 	}else{
-		return new communist.Queue(object,queueLength,unmanaged);
+		return new catiline.Queue(object,queueLength,unmanaged);
 	}
 }
 
-function initBrowser(communist){
+function initBrowser(catiline){
 	var origCW = global.cw;
-	communist.noConflict=function(newName){
+	catiline.noConflict=function(newName){
 		global.cw = origCW;
 		if(newName){
-			global[newName]=communist;
+			global[newName]=catiline;
 		}
 	};
-	global.communist = communist;
-	global.cw = communist;
+	global.catiline = catiline;
+	global.cw = catiline;
+	if(!('communist' in global)){
+		global.communist=catiline;
+	}
 	
 }
 
 if(typeof define === 'function'){
 	define(function(require){
-		communist.SHIM_WORKER_PATH=require.toUrl('./communist.js');
-		return communist;
+		catiline.SHIM_WORKER_PATH=require.toUrl('./catiline.js');
+		return catiline;
 	});
 }else if(typeof module === 'undefined' || !('exports' in module)){
-	initBrowser(communist);
+	initBrowser(catiline);
 } else {
-	module.exports=communist;
+	module.exports=catiline;
 }
-communist.version = '2.3.0';
+catiline.version = '2.4.0';
 })(this);}
