@@ -1,5 +1,9 @@
 /*!From setImmediate Copyright (c) 2012 Barnesandnoble.com,llc, Donavon West, and Domenic Denicola @license MIT https://github.com/NobleJS/setImmediate */
 (function(attachTo,global) {
+    if(global.setImmediate){
+        attachTo.setImmediate = global.setImmediate;
+        return;
+    }
 	var tasks = (function () {
 		function Task(handler, args) {
 			this.handler = handler;
