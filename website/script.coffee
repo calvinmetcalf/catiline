@@ -18,8 +18,12 @@ class View extends Backbone.View
 		false
 	render:->
 		@$el.html "<p class='text-center'><i class='icon-spinner icon-spin icon-4x'></i>loading...</p>"
+		if @cur is 'README'
+			page = @cur
+		else
+			page = "docs/#{@cur}"
 		unless typeof window.Worker is 'undefined'
-			worker.ajax(cw.makeUrl("#{@cur}.md")).then (md)=>
+			worker.ajax(cw.makeUrl("#{page}.md")).then (md)=>
 				@$el.html(marked(md))
 		else
 			$('#cont').html """
@@ -27,7 +31,7 @@ class View extends Backbone.View
 		"""
 			$('#unfacncy').on 'click', (e)=>
 				e.preventDefault()
-				$.ajax("#{@cur}.md").then (md)=>
+				$.ajax("#{page}.md").then (md)=>
 					@$el.html(marked(md))
 view = new View()
 class Routes extends Backbone.Router

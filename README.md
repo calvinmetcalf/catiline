@@ -8,13 +8,13 @@ How easy? `var worker = cw(myFunc)` creates a worker, send it data with
 `var response = worker.data(YOUR DATA);`, response is a
 [promise](http://blogs.msdn.com/b/ie/archive/2011/09/11/asynchronous-programming-in-javascript-with-promises.aspx).
 It's that easy, for more in depth usage checkout the examples bellow or the 
-<a class='navLink' id='API' href='API.md'>API page</a>.
+<a class='navLink' id='API' href='docs/API.md'>API page</a>.
 
 Want to use it? Grab the 
 [development version](https://raw.github.com/calvinmetcalf/catiline/master/dist/catiline.js)
 or [production version](https://raw.github.com/calvinmetcalf/catiline/master/dist/catiline.min.js) from the dist folder. 
 
-For usage in addition to the <a class='navLink' id='API' href='API.md'>API page</a> and <a class='navLink' id='DOCUMENTATION' href='DOCUMENTATION.md'>documentation</a>,
+For usage in addition to the <a class='navLink' id='API' href='docs/API.md'>API page</a> and <a class='navLink' id='DOCUMENTATION' href='docs/DOCUMENTATION.md'>documentation</a>,
 I wrote a [blog posts](http://cwmma.tumblr.com/post/54338607071/making-web-workers-with-communistjs)
 about Catiline, or you can browse some demos:
 
@@ -25,9 +25,9 @@ about Catiline, or you can browse some demos:
 - [Vector Map Tiles](http://calvinmetcalf.github.io/vector-layers/)
 - [Unzipping files and reprojecting maps](http://calvinmetcalf.github.io/shapefile-js/proj.html)
 
-Updates and changes are all in the <a class='navLink' id='CHANGELOG' href='CHANGELOG.md'>changelog</a>.
+Updates and changes are all in the <a class='navLink' id='CHANGELOG' href='docs/CHANGELOG.md'>changelog</a>.
 
-There is also a <a class='navLink' id='PLUGINS' href='PLUGINS.md'>plugin list</a>.
+There is also a <a class='navLink' id='PLUGINS' href='docs/PLUGINS.md'>plugin list</a>.
 
 __Important:__ the file catiline.js or catiline.min.js should be a stand alone file hosted on the same domain as your web page, if you can't or need to bundle catiline but you need it to work on IE10, Opera, and Safari. You have to host the file "SHIM_WORKER.js" on the same domain as the html file 
 and set the path to it in a global variable `SHIM_WORKER_PATH` before you load catiline.
