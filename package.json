@@ -1,6 +1,6 @@
 {
   "name": "catiline",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "Multi proccessing with workers in the browser.",
   "keywords": [
     "workers",
@@ -18,7 +18,7 @@
   "scripts": {
     "test": "grunt"
   },
-  "main": "dist/communist.js",
+  "main": "dist/catiline.js",
   "license": "MIT",
   "devDependencies": {
     "grunt-cli": "~0.1.9",

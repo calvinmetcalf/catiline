@@ -1,7 +1,7 @@
 {
-  "name": "Catiline",
-  "version": "2.3.1",
-  "main": "dist/communist.js",
+  "name": "catiline",
+  "version": "2.4.1",
+  "main": "dist/catiline.js",
   "ignore": [
     "**/.*",
     "node_modules",
