@@ -158,7 +158,7 @@ catiline.makeWorker = function (strings, codeword){
 	}catch(e){
 		try{
 			worker=makeFallbackWorker(script);
-		}catch(e){
+		}catch(ee){
 			worker = catiline.makeIWorker(strings,codeword);
 		}
 	}finally{
