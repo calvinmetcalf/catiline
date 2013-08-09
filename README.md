@@ -1,8 +1,6 @@
-Formerly known as Communist, Catiline is the same great web worker library but with a name you can use with your boss.
-
 A JavaScript library all about workers. Workers should make your life easier not 
-harder and with Catiline launching a new worker is as simple as calling a 
-function, and it works the same across all (modern) browsers.
+harder and with Catiline.js launching a new worker is as simple as calling a 
+function, and it works the same across all (modern) browser. Catiline.js was formerly known as Communist.js, this is the same great library with a less controversial name.
 
 How easy? `var worker = cw(myFunc)` creates a worker, send it data with 
 `var response = worker.data(YOUR DATA);`, response is a
@@ -16,7 +14,7 @@ or [production version](https://raw.github.com/calvinmetcalf/catiline/master/dis
 
 For usage in addition to the <a class='navLink' id='API' href='docs/API.md'>API page</a> and <a class='navLink' id='DOCUMENTATION' href='docs/DOCUMENTATION.md'>documentation</a>,
 I wrote a [blog posts](http://cwmma.tumblr.com/post/54338607071/making-web-workers-with-communistjs)
-about Catiline, or you can browse some demos:
+about Catiline.js (under it's old name), or you can browse some demos:
 
 - [Parsing a dictionary](http://catilinejs.com/website/dict/)
 - [Fractal Map](http://catilinejs.com/website/leaflet-fractal/), (April Mozilla Dev Derby [Finalist](https://hacks.mozilla.org/2013/06/announcing-the-winners-of-the-april-2013-dev-derby/))
