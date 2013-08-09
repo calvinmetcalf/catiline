@@ -1,6 +1,10 @@
 Changelog
 ===
 
+##2.5.0
+
+- setImmediate uses native version
+
 ##2.4.2
 
 - eval worker falls back to iframe worker
