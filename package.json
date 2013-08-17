@@ -1,6 +1,6 @@
 {
   "name": "catiline",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "Multi proccessing with workers in the browser.",
   "keywords": [
     "workers",
@@ -30,7 +30,8 @@
     "grunt-saucelabs": "~4.0.4",
     "grunt": "~0.4.1",
     "grunt-mocha-phantomjs": "~0.3.0",
-    "uglify-js": "~2.3.6"
+    "uglify-js": "~2.3.6",
+    "lie": "~0.6.2"
   },
   "directories": {
     "test": "test"
