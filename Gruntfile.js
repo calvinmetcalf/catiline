@@ -36,7 +36,7 @@ module.exports = function(grunt) {
 					seperator:";\n",
 					footer : 'catiline.version = \'<%= pkg.version %>\';\n})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.min.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/temp.min.js','src/queue.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.min.js':['src/IE.js','src/setImmediate.js','src/lie.banner.js','node_modules/lie/src/lie.js','node_modules/lie/src/all.js','src/lie.footer.js','src/utils.js','src/temp.min.js','src/queue.js','src/wrapup.js']}
 			},
 			browser: { 
 				options: {
@@ -44,7 +44,7 @@ module.exports = function(grunt) {
 					seperator:";\n",
 					footer : 'catiline.version = \'<%= pkg.version %>\';\n})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/promiscuous.js','src/utils.js','src/temp.js','src/queue.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/lie.banner.js','node_modules/lie/src/lie.js','node_modules/lie/src/all.js','src/lie.footer.js','src/utils.js','src/temp.js','src/queue.js','src/wrapup.js']}
 			}
 		},
 		mocha_phantomjs: {
