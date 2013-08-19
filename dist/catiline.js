@@ -1,4 +1,4 @@
-/*! catiline 2.6.0 2013-08-17*/
+/*! catiline 2.7.0 2013-08-19*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */
 if (typeof document === 'undefined') {
 	self._noTransferable=true;
@@ -259,10 +259,10 @@ catiline.URL = window.URL || window.webkitURL;
 catiline._noTransferable=!catiline.URL;
 //regex out the importScript call and move it up to the top out of the function.
 function regexImports(string){
-	var rest=string,
-	match = true,
-	matches = {},
-	loopFunc = function(a,b){
+	var rest=string;
+	var match = true;
+	var matches = {};
+	var loopFunc = function(a,b){
 		if(b){
 			'importScripts('+b.split(',').forEach(function(cc){
 				matches[catiline.makeUrl(cc.match(/\s*[\'\"](\S*)[\'\"]\s*/)[1])]=true; // trim whitespace, add to matches
@@ -307,40 +307,40 @@ function getPath(){
 		return catiline.SHIM_WORKER_PATH;
 	}
 	var scripts = document.getElementsByTagName('script');
-		var len = scripts.length;
-		var i = 0;
-		while(i<len){
-			if(/catiline(\.min)?\.js/.test(scripts[i].src)){
-				return scripts[i].src;
-			}
-			i++;
+	var len = scripts.length;
+	var i = 0;
+	while(i<len){
+		if(/catiline(\.min)?\.js/.test(scripts[i].src)){
+			return scripts[i].src;
 		}
+		i++;
+	}
 }
 function appendScript(iDoc,text){
 	var iScript = iDoc.createElement('script');
-			if (typeof iScript.text !== 'undefined') {
-				iScript.text = text;
-			} else {
-				iScript.innerHTML = text;
+	if (typeof iScript.text !== 'undefined') {
+		iScript.text = text;
+	} else {
+		iScript.innerHTML = text;
+	}
+	if(iDoc.readyState==='complete'){
+		iDoc.documentElement.appendChild(iScript);
+	}else{
+		iDoc.onreadystatechange=function(){
+			if(iDoc.readyState==='complete'){
+				iDoc.documentElement.appendChild(iScript);
 			}
-		if(iDoc.readyState==='complete'){
-			iDoc.documentElement.appendChild(iScript);
-		}else{
-			iDoc.onreadystatechange=function(){
-				if(iDoc.readyState==='complete'){
-					iDoc.documentElement.appendChild(iScript);
-				}
-			};
-		}
+		};
+	}
 }
 //much of the iframe stuff inspired by https://github.com/padolsey/operative
 //mos tthings besides the names have since been changed
 function actualMakeI(script,codeword){
 	var iFrame = document.createElement('iframe');
-		iFrame.style.display = 'none';
-		document.body.appendChild(iFrame);
-		var iWin = iFrame.contentWindow;
-		var iDoc = iWin.document;
+	iFrame.style.display = 'none';
+	document.body.appendChild(iFrame);
+	var iWin = iFrame.contentWindow;
+	var iDoc = iWin.document;
 	var text=['try{ ',
 	'var __scripts__=\'\';function importScripts(scripts){',
 	'	if(Array.isArray(scripts)&&scripts.length>0){',
@@ -357,7 +357,6 @@ function actualMakeI(script,codeword){
 	'	window.parent.postMessage([\''+codeword+'\',\'error\'],\'*\')',
 	'}'].join('\n');
 	appendScript(iDoc,text);
-
 	return iFrame;
 }
 function makeIframe(script,codeword){
@@ -405,7 +404,7 @@ catiline.makeWorker = function (strings, codeword){
 		return catiline.makeIWorker(strings,codeword);
 	}
 	var worker;
-	var script =moveImports(strings.join(''));
+	var script = moveImports(strings.join(''));
 	if(catiline._noTransferable){
 		return makeFallbackWorker(script);
 	}
@@ -503,7 +502,7 @@ catiline.Worker = function Catiline(obj) {
 			}
 			return self;
 		};
-		var i = 0;
+
 		var promises = [];
 		var rejectPromises = function (msg) {
 			if (typeof msg !== 'string' && 'preventDefault' in msg) {
@@ -539,6 +538,7 @@ catiline.Worker = function Catiline(obj) {
 			};
 			return out;
 		};
+		var i = 0;
 		for (var key in obj) {
 			if (i !== 0) {
 				fObj = fObj + ',\n\t';
@@ -550,7 +550,7 @@ catiline.Worker = function Catiline(obj) {
 			self[key] = keyFunc(key);
 		}
 		fObj = fObj + '}';
-		var worker = catiline.makeWorker(['\'use strict\';\n\nvar _db = ',fObj,';\nvar listeners = {};\nvar __iFrame__ = typeof document!=="undefined";\nvar __self__={onmessage:function(e){\n	_fire("messege",e.data[1]);\n	if(e.data[0][0]===_db.__codeWord__){\n		return regMsg(e);\n	}else{\n		_fire(e.data[0][0],e.data[1]);\n	}\n}};\nif(__iFrame__){\n	window.onmessage=function(e){\n		if(typeof e.data === "string"){\n			e ={data: JSON.parse(e.data)};\n		}\n		__self__.onmessage(e);\n	};\n}else{\n	self.onmessage=__self__.onmessage;\n}\n__self__.postMessage=function(rawData, transfer){\n	var data;\n	if(!self._noTransferable&&!__iFrame__){\n		self.postMessage(rawData, transfer);\n	}else if(__iFrame__){\n		data = _db.__codeWord__+JSON.stringify(rawData);\n		window.parent.postMessage(data,"*");\n	}else if(self._noTransferable){\n		self.postMessage(rawData);\n	}\n};\n_db.on = function (eventName, func, scope) {\n	if(eventName.indexOf(" ")>0){\n		return eventName.split(" ").map(function(v){\n			return _db.on(v,func,scope);\n		},_db);\n	}\n	scope = scope || _db;\n	if (!(eventName in listeners)) {\n		listeners[eventName] = [];\n	}\n	listeners[eventName].push(function (a) {\n		func.call(scope, a, _db);\n	});\n};\nfunction _fire(eventName,data){\n	if(eventName.indexOf(" ")>0){\n		eventName.split(" ").forEach(function(v){\n			_fire(v,data);\n		});\n		return;\n	}\n	if (!(eventName in listeners)) {\n		return;\n	}\n	listeners[eventName].forEach(function (v) {\n		v(data);\n	});\n}\n\n_db.fire = function (eventName, data, transfer) {\n	__self__.postMessage([[eventName], data], transfer);\n};\n_db.off=function(eventName,func){\n	if(eventName.indexOf(" ")>0){\n		return eventName.split(" ").map(function(v){\n			return _db.off(v,func);\n		});\n	}\n	if(!(eventName in listeners)){\n		return;\n	}else if(!func){\n		delete listeners[eventName];\n	}else{\n		if(listeners[eventName].indexOf(func)>-1){\n			if(listeners[eventName].length>1){\n				delete listeners[eventName];\n			}else{\n				listeners[eventName].splice(listeners[eventName].indexOf(func),1);\n			}\n		}\n	}\n};\nvar console={};\nfunction makeConsole(method){\n	return function(){\n		var len = arguments.length;\n		var out =[];\n		var i = 0;\n		while (i<len){\n			out.push(arguments[i]);\n			i++;\n		}\n		_db.fire("console",[method,out]);\n	};\n}\n["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){\n	console[v]=makeConsole(v);\n});\nvar regMsg = function(e){\n	var cb=function(data,transfer){\n		__self__.postMessage([e.data[0],data],transfer);\n	};\n	var result;\n	if(__iFrame__){\n		try{\n			result = _db[e.data[1]](e.data[2],cb,_db);\n		}catch(e){\n			_db.fire("error",JSON.stringify(e));\n		}\n	}else{\n		result = _db[e.data[1]](e.data[2],cb,_db);\n	}\n	if(typeof result !== "undefined"){\n		cb(result);\n	}\n};\n_db.initialize(_db);\n'],__codeWord__);
+		var worker = catiline.makeWorker(['\'use strict\';\n\nvar _db = ',fObj,';\nvar listeners = {};\nvar __iFrame__ = typeof document!=="undefined";\nvar __self__={onmessage:function(e){\n	_fire("messege",e.data[1]);\n	if(e.data[0][0]===_db.__codeWord__){\n		return regMsg(e);\n	}else{\n		_fire(e.data[0][0],e.data[1]);\n	}\n}};\nif(__iFrame__){\n	window.onmessage=function(e){\n		if(typeof e.data === "string"){\n			e ={data: JSON.parse(e.data)};\n		}\n		__self__.onmessage(e);\n	};\n}else{\n	self.onmessage=__self__.onmessage;\n}\n__self__.postMessage=function(rawData, transfer){\n	if(!self._noTransferable&&!__iFrame__){\n		self.postMessage(rawData, transfer);\n	}else if(__iFrame__){\n		var data = _db.__codeWord__+JSON.stringify(rawData);\n		window.parent.postMessage(data,"*");\n	}else if(self._noTransferable){\n		self.postMessage(rawData);\n	}\n};\n_db.on = function (eventName, func, scope) {\n	if(eventName.indexOf(" ")>0){\n		return eventName.split(" ").map(function(v){\n			return _db.on(v,func,scope);\n		},_db);\n	}\n	scope = scope || _db;\n	if (!(eventName in listeners)) {\n		listeners[eventName] = [];\n	}\n	listeners[eventName].push(function (a) {\n		func.call(scope, a, _db);\n	});\n};\nfunction _fire(eventName,data){\n	if(eventName.indexOf(" ")>0){\n		eventName.split(" ").forEach(function(v){\n			_fire(v,data);\n		});\n		return;\n	}\n	if (!(eventName in listeners)) {\n		return;\n	}\n	listeners[eventName].forEach(function (v) {\n		v(data);\n	});\n}\n\n_db.fire = function (eventName, data, transfer) {\n	__self__.postMessage([[eventName], data], transfer);\n};\n_db.off=function(eventName,func){\n	if(eventName.indexOf(" ")>0){\n		return eventName.split(" ").map(function(v){\n			return _db.off(v,func);\n		});\n	}\n	if(!(eventName in listeners)){\n		return;\n	}else if(!func){\n		delete listeners[eventName];\n	}else{\n		if(listeners[eventName].indexOf(func)>-1){\n			if(listeners[eventName].length>1){\n				delete listeners[eventName];\n			}else{\n				listeners[eventName].splice(listeners[eventName].indexOf(func),1);\n			}\n		}\n	}\n};\nvar console={};\nfunction makeConsole(method){\n	return function(){\n		var len = arguments.length;\n		var out =[];\n		var i = 0;\n		while (i<len){\n			out.push(arguments[i]);\n			i++;\n		}\n		_db.fire("console",[method,out]);\n	};\n}\n["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){\n	console[v]=makeConsole(v);\n});\nvar regMsg = function(e){\n	var cb=function(data,transfer){\n		__self__.postMessage([e.data[0],data],transfer);\n	};\n	var result;\n	if(__iFrame__){\n		try{\n			result = _db[e.data[1]](e.data[2],cb,_db);\n		}catch(e){\n			_db.fire("error",JSON.stringify(e));\n		}\n	}else{\n		result = _db[e.data[1]](e.data[2],cb,_db);\n	}\n	if(typeof result !== "undefined"){\n		cb(result);\n	}\n};\n_db.initialize(_db);\n'],__codeWord__);
 		worker.onmessage = function (e) {
 			_fire('message', e.data[1]);
 			if (e.data[0][0] === __codeWord__) {
@@ -603,7 +603,7 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 			return clearQueue(cb);
 		}
 	};
-	var workers = new Array(n);
+	var workers = [];
 	var numIdle = 0;
 	var idle = [];
 	var que = [];
@@ -697,9 +697,8 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	}
 
 	function done(num) {
-		var data;
 		if (queueLen) {
-			data = que.shift();
+			var data = que.shift();
 			queueLen--;
 			workers[num][data[0]](data[1], data[2]).then(function (d) {
 				done(num);
@@ -719,10 +718,9 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 		if (dumb) {
 			return workers[~~ (Math.random() * n)][key](data, transfer);
 		}
-		var promise = catiline.deferred(),
-			num;
+		var promise = catiline.deferred();
 		if (!queueLen && numIdle) {
-			num = idle.pop();
+			var num = idle.pop();
 			numIdle--;
 			workers[num][key](data, transfer).then(function (d) {
 				done(num);
@@ -784,5 +782,5 @@ if(typeof define === 'function'){
 } else {
 	module.exports=catiline;
 }
-catiline.version = '2.6.0';
+catiline.version = '2.7.0';
 })(this);}

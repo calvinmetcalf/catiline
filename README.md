@@ -3,7 +3,7 @@ harder and with Catiline.js launching a new worker is as simple as calling a
 function, and it works the same across all (modern) browser. Catiline.js was formerly known as Communist.js, this is the same great library with a less controversial name.
 
 How easy? `var worker = cw(myFunc)` creates a worker, send it data with 
-`var response = worker.data(YOUR DATA);`, response is a
+`worker.data(YOUR DATA).then(success,failure);`, response is a
 [promise](http://blogs.msdn.com/b/ie/archive/2011/09/11/asynchronous-programming-in-javascript-with-promises.aspx).
 It's that easy, for more in depth usage checkout the examples bellow or the 
 <a class='navLink' id='API' href='docs/API.md'>API page</a>.

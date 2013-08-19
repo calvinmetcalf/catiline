@@ -7,7 +7,7 @@ function catiline(object,queueLength,unmanaged){
 }
 
 function initBrowser(catiline){
-	var origCW = global.cw;
+	const origCW = global.cw;
 	catiline.noConflict=function(newName){
 		global.cw = origCW;
 		if(newName){
