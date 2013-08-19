@@ -1,6 +1,14 @@
 Changelog
 ===
 
+##2.7.0
+
+- we now use ES6 `let` and `const` instead of `var`
+
+##2.6.0
+
+- we use [lie](https://github.com/calvinmetcalf/lie) for promises instead of promiscuous
+
 ##2.5.0
 
 - setImmediate uses native version
