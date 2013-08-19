@@ -10,13 +10,16 @@ module.exports = function(grunt) {
 	};
 	var d = function(file){
 		var input = grunt.file.read(file);
-		var defit = defs(input,{	'disallowUnknownReferences':false});
+		var defit = defs(input,{'disallowUnknownReferences':false});
+		if(defit.errors){
+			throw defit.errors;
+		}
 		grunt.file.write(file,defit.src)
 	}
 	var templateThings = function(){
 			var parent =  grunt.file.read('./src/core.js');
-			var child = grunt.file.read('./src/worker.js');
-			var childmin = UglifyJS.minify('./src/worker.js').code;
+			var child = defs(grunt.file.read('./src/worker.js'),{'disallowUnknownReferences':false}).src;
+			var childmin = UglifyJS.minify(child,{fromString:true}).code;
 			replaceStuff(child,'./src/temp.js',parent);
 			replaceStuff(childmin,'./src/temp.min.js',parent);
 	};

@@ -1,9 +1,9 @@
 'use strict';
 
-var _db = $$fObj$$;
-var listeners = {};
-var __iFrame__ = typeof document!=="undefined";
-var __self__={onmessage:function(e){
+const _db = $$fObj$$;
+const listeners = {};
+const __iFrame__ = typeof document!=="undefined";
+const __self__={onmessage:function(e){
 	_fire("messege",e.data[1]);
 	if(e.data[0][0]===_db.__codeWord__){
 		return regMsg(e);
@@ -22,11 +22,10 @@ if(__iFrame__){
 	self.onmessage=__self__.onmessage;
 }
 __self__.postMessage=function(rawData, transfer){
-	var data;
 	if(!self._noTransferable&&!__iFrame__){
 		self.postMessage(rawData, transfer);
 	}else if(__iFrame__){
-		data = _db.__codeWord__+JSON.stringify(rawData);
+		let data = _db.__codeWord__+JSON.stringify(rawData);
 		window.parent.postMessage(data,"*");
 	}else if(self._noTransferable){
 		self.postMessage(rawData);
@@ -84,12 +83,12 @@ _db.off=function(eventName,func){
 		}
 	}
 };
-var console={};
+const console={};
 function makeConsole(method){
 	return function(){
-		var len = arguments.length;
-		var out =[];
-		var i = 0;
+		const len = arguments.length;
+		const out =[];
+		let i = 0;
 		while (i<len){
 			out.push(arguments[i]);
 			i++;
@@ -100,11 +99,11 @@ function makeConsole(method){
 ["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){
 	console[v]=makeConsole(v);
 });
-var regMsg = function(e){
-	var cb=function(data,transfer){
+const regMsg = function(e){
+	const cb=function(data,transfer){
 		__self__.postMessage([e.data[0],data],transfer);
 	};
-	var result;
+	let result;
 	if(__iFrame__){
 		try{
 			result = _db[e.data[1]](e.data[2],cb,_db);

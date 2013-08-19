@@ -1,5 +1,5 @@
 catiline.Queue = function CatilineQueue(obj, n, dumb) {
-	var self = this;
+	const self = this;
 	self.__batchcb__ = {};
 	self.__batchtcb__ = {};
 	self.batch = function (cb) {
@@ -20,11 +20,11 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 			return clearQueue(cb);
 		}
 	};
-	var workers = new Array(n);
-	var numIdle = 0;
-	var idle = [];
-	var que = [];
-	var queueLen = 0;
+	const workers = [];
+	let numIdle = 0;
+	const idle = [];
+	let que = [];
+	let queueLen = 0;
 	while (numIdle < n) {
 		workers[numIdle] = new catiline.Worker(obj);
 		idle.push(numIdle);
@@ -58,7 +58,7 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	function clearQueue(mgs) {
 		mgs = mgs || 'canceled';
 		queueLen = 0;
-		var oQ = que;
+		const oQ = que;
 		que = [];
 		oQ.forEach(function (p) {
 			p[3].reject(mgs);
@@ -82,7 +82,7 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 
 	function keyFuncBatchCB(k) {
 		return function (array) {
-			var self = this;
+			const self = this;
 			return catiline.all(array.map(function (data) {
 				return doStuff(k, data).then(self.__cb__);
 			}));
@@ -99,13 +99,13 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 
 	function keyFuncBatchTransferCB(k) {
 		return function (array) {
-			var self = this;
+			const self = this;
 			return catiline.all(array.map(function (data) {
 				return doStuff(k, data[0], data[1]).then(self.__cb__);
 			}));
 		};
 	}
-	for (var key in obj) {
+	for (let key in obj) {
 		self[key] = keyFunc(key);
 		self.batch[key] = keyFuncBatch(key);
 		self.__batchcb__[key] = keyFuncBatchCB(key);
@@ -114,9 +114,8 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	}
 
 	function done(num) {
-		var data;
 		if (queueLen) {
-			data = que.shift();
+			let data = que.shift();
 			queueLen--;
 			workers[num][data[0]](data[1], data[2]).then(function (d) {
 				done(num);
@@ -136,10 +135,9 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 		if (dumb) {
 			return workers[~~ (Math.random() * n)][key](data, transfer);
 		}
-		var promise = catiline.deferred(),
-			num;
+		const promise = catiline.deferred();
 		if (!queueLen && numIdle) {
-			num = idle.pop();
+			let num = idle.pop();
 			numIdle--;
 			workers[num][key](data, transfer).then(function (d) {
 				done(num);
