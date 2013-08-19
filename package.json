@@ -31,7 +31,8 @@
     "grunt": "~0.4.1",
     "grunt-mocha-phantomjs": "~0.3.0",
     "uglify-js": "~2.3.6",
-    "lie": "~0.6.2"
+    "lie": "~0.6.2",
+    "defs": "~0.4.1"
   },
   "directories": {
     "test": "test"

@@ -1,4 +1,5 @@
 var UglifyJS = require("uglify-js");
+var defs = require('defs');
 module.exports = function(grunt) {
 	var replaceStuff = function(inString,outFile,parent){
 		var replacedChild = "['"+inString.replace(/\'/gm,"\\'").replace(/\$\$(.+?)\$\$/,function(a,b){
@@ -7,6 +8,11 @@ module.exports = function(grunt) {
 		var out = parent.replace(/\$\$fObj\$\$/,replacedChild);
 		grunt.file.write(outFile,out);
 	};
+	var d = function(file){
+		var input = grunt.file.read(file);
+		var defit = defs(input,{	'disallowUnknownReferences':false});
+		grunt.file.write(file,defit.src)
+	}
 	var templateThings = function(){
 			var parent =  grunt.file.read('./src/core.js');
 			var child = grunt.file.read('./src/worker.js');
@@ -175,9 +181,9 @@ module.exports = function(grunt) {
 				]
 			}
 		}
-	},
+	}
 	});
-
+	grunt.loadNpmTasks('grunt-defs');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-connect');
@@ -185,14 +191,20 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-saucelabs');
 	grunt.registerTask('template',templateThings);
+	grunt.registerTask('defsAll',function(){
+		d('dist/catiline.js')
+	})
+	grunt.registerTask('defsUgly',function(){
+		d('dist/catiline.min.js')
+	});
 	grunt.registerTask('sauce',['connect','saucelabs-mocha:big','saucelabs-mocha:shim','saucelabs-mocha:legacy']);
 	grunt.registerTask('server',['connect']);
-	grunt.registerTask('browser',['concat:browser','ugly']);
+	grunt.registerTask('browser',['concat:browser','defsAll','ugly']);
 	grunt.registerTask('lint',['jshint:afterconcat']);
 	grunt.registerTask('testing', ['connect', 'mocha_phantomjs']);
 	grunt.registerTask('test', ['lint','sauce']);
 	grunt.registerTask('build', ['template','browser']);
-    grunt.registerTask('ugly', ['concat:ugly','uglify']);
+    grunt.registerTask('ugly', ['concat:ugly','defsUgly','uglify']);
 	grunt.registerTask('default', ['build','test']);
 	grunt.registerTask('c9', ['build','lint','testing']);
 

@@ -4,9 +4,9 @@ catiline.Worker = function Catiline(obj) {
 				data:obj
 			};
 		}
-		var __codeWord__='com.catilinejs.'+(catiline._hasWorker?'iframe':'worker')+Math.random();
-		var listeners = {};
-		var self = this;
+		const __codeWord__='com.catilinejs.'+(catiline._hasWorker?'iframe':'worker')+Math.random();
+		const listeners = {};
+		const self = this;
 		self.on = function (eventName, func, scope) {
 			scope = scope || self;
 			if (eventName.indexOf(' ') > 0) {
@@ -73,9 +73,9 @@ catiline.Worker = function Catiline(obj) {
 			}
 			return self;
 		};
-		var i = 0;
-		var promises = [];
-		var rejectPromises = function (msg) {
+
+		const promises = [];
+		const rejectPromises = function (msg) {
 			if (typeof msg !== 'string' && 'preventDefault' in msg) {
 				msg.preventDefault();
 				msg = msg.message;
@@ -95,10 +95,10 @@ catiline.Worker = function Catiline(obj) {
 				obj.initialize = function () {};
 			}
 		}
-		var fObj = '{\n\t';
-		var keyFunc = function (key) {
-			var out = function (data, transfer) {
-				var i = promises.length;
+		let fObj = '{\n\t';
+		const keyFunc = function (key) {
+			const out = function (data, transfer) {
+				const i = promises.length;
 				promises[i] = catiline.deferred();
 				if(catiline._noTransferable){
 					worker.postMessage([[__codeWord__, i], key, data]);
@@ -109,7 +109,8 @@ catiline.Worker = function Catiline(obj) {
 			};
 			return out;
 		};
-		for (var key in obj) {
+		let i = 0;
+		for (let key in obj) {
 			if (i !== 0) {
 				fObj = fObj + ',\n\t';
 			}
@@ -120,7 +121,7 @@ catiline.Worker = function Catiline(obj) {
 			self[key] = keyFunc(key);
 		}
 		fObj = fObj + '}';
-		var worker = catiline.makeWorker($$fObj$$,__codeWord__);
+		const worker = catiline.makeWorker($$fObj$$,__codeWord__);
 		worker.onmessage = function (e) {
 			_fire('message', e.data[1]);
 			if (e.data[0][0] === __codeWord__) {
