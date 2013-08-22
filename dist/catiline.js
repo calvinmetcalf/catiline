@@ -1,4 +1,4 @@
-/*! catiline 2.7.0 2013-08-19*/
+/*! catiline 2.7.1 2013-08-22*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */
 if (typeof document === 'undefined') {
 	self._noTransferable=true;
@@ -782,5 +782,5 @@ if(typeof define === 'function'){
 } else {
 	module.exports=catiline;
 }
-catiline.version = '2.7.0';
+catiline.version = '2.7.1';
 })(this);}
