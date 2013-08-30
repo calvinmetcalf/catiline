@@ -1,1 +1,2 @@
-(function (exports,tick) {
+catiline.deferred = (function (tick) {
+var exports;
