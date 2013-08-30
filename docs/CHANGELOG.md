@@ -1,6 +1,10 @@
 Changelog
 ===
 
+##2.7.2
+
+- update to lie which had a breaking change in it
+
 ##2.7.0
 
 - we now use ES6 `let` and `const` instead of `var`
