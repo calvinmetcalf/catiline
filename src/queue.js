@@ -132,13 +132,24 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	}
 
 	function doStuff(key, data, transfer) { //srsly better name!
-		if (dumb) {
-			return workers[~~ (Math.random() * n)][key](data, transfer);
-		}
 		const promise = catiline.deferred();
+		if (dumb) {
+			promise.promise.cancel = function(reason){
+				return promise.reject(reason);
+			};
+			workers[~~ (Math.random() * n)][key](data, transfer).then(function(v){
+				return promise.resolve(v);
+			},function(v){
+				return promise.reject(v);
+			});
+			return promise.promise;
+		}
 		if (!queueLen && numIdle) {
 			let num = idle.pop();
 			numIdle--;
+			promise.promise.cancel = function(reason){
+				return promise.reject(reason);
+			};
 			workers[num][key](data, transfer).then(function (d) {
 				done(num);
 				promise.resolve(d);
@@ -148,7 +159,16 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 			});
 		}
 		else if (queueLen || !numIdle) {
-			queueLen = que.push([key, data, transfer, promise]);
+			const queueItem = [key, data, transfer, promise];
+			promise.promise.cancel = function(reason){
+				const loc = que.indexOf(queueItem);
+				if(loc>-1){
+					que.splice(loc,1);
+					queueLen--;
+				}
+				return promise.reject(reason);
+			};
+			queueLen = que.push(queueItem);
 		}
 		return promise.promise;
 	}
