@@ -26,6 +26,6 @@ and set the path to it in a global variable `SHIM_WORKER_PATH` before you load c
 This grew out of my work with [earlier versions](https://github.com/calvinmetcalf/catiline/tree/6e920be75ab3ed9b2a36d24dd184a9945f6b4000) 
 of this library and my [differences in opinion](https://gist.github.com/calvinmetcalf/6050205) with
 [Parallel.js](https://github.com/adambom/parallel.js)'s direction. There is
-also a library doing very similar things called [operative](https://github.com/padolsey/operative)
+also a library doing very similar things called [operative](https://github.com/padolsey/operative).
 
 [![Selenium Test Status](https://saucelabs.com/browser-matrix/calvinmetcalf.svg)](https://saucelabs.com/u/calvinmetcalf)
