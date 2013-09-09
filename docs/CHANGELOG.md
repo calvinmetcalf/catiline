@@ -1,6 +1,15 @@
 Changelog
 ===
 
+##2.8.0
+
+- promises returned by queues now have a `cancel('reason')` method, calling it rejects
+the promise with reason 'reason' and if it hasn't been sent to the worker yet, removes it from the queue.
+
+##2.7.2
+
+- update to lie which had a breaking change in it
+
 ##2.7.0
 
 - we now use ES6 `let` and `const` instead of `var`

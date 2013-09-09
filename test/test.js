@@ -296,6 +296,28 @@ describe('cw()', function () {
 				});
 			});
 		});
+		it('should work when things are canceled',function(done){
+			var comrade = cw({data:function(data,cb){
+				setTimeout(function(){cb('done');},500);
+			}},2);
+			var i = 0;
+			var onEach = function(){
+				i++;
+				if(i>4){
+					comrade.close();
+					done();
+				}
+			};
+			comrade.data('whatever').then(onEach,onEach);
+			var a = comrade.data('whatever');
+			a.then(onEach,onEach);
+			comrade.data('whatever').then(onEach,onEach);
+			var b = comrade.data('whatever');
+			b.then(onEach,onEach);
+			comrade.data('whatever').then(onEach,onEach);
+			a.cancel();
+			b.cancel();
+		});
 	});
 	describe('no conflict', function () {
 		it('no conflict should work',function(){
@@ -380,6 +402,28 @@ describe('cw()', function () {
 			}
 			var comrade=catiline({initialize:function(){this.a=7},test:function(){return this.a}},2,"dumb");
 			comrade.test().then(function(a){assert.equal(a,7)}).then(wrapUp);
+		});
+		it('should work when things are canceled',function(done){
+			var comrade = cw({data:function(data,cb){
+				setTimeout(function(){cb('done');},500);
+			}},2,true);
+			var i = 0;
+			var onEach = function(){
+				i++;
+				if(i>4){
+					comrade.close();
+					done();
+				}
+			};
+			comrade.data('whatever').then(onEach,onEach);
+			var a = comrade.data('whatever');
+			a.then(onEach,onEach);
+			comrade.data('whatever').then(onEach,onEach);
+			var b = comrade.data('whatever');
+			b.then(onEach,onEach);
+			comrade.data('whatever').then(onEach,onEach);
+			a.cancel();
+			b.cancel();
 		});
 	});
 	describe('Basic Pub-Sub', function () {

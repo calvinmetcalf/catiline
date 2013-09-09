@@ -1,6 +1,6 @@
 {
   "name": "catiline",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "Multi proccessing with workers in the browser.",
   "keywords": [
     "workers",
@@ -18,6 +18,13 @@
   "scripts": {
     "test": "grunt"
   },
+  "jam": {
+    "include": [
+      "README.md",
+      "LICENCE.md",
+      "dist/catiline.js"
+    ]
+  },
   "main": "dist/catiline.js",
   "license": "MIT",
   "devDependencies": {
@@ -31,8 +38,8 @@
     "grunt": "~0.4.1",
     "grunt-mocha-phantomjs": "~0.3.0",
     "uglify-js": "~2.3.6",
-    "lie": "~0.6.2",
-    "defs": "~0.4.1"
+    "defs": "~0.4.1",
+    "lie": "~1.0.0"
   },
   "directories": {
     "test": "test"

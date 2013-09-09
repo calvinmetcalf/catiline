@@ -1,4 +1,4 @@
-/*! catiline 2.7.0 2013-08-19*/
+/*! catiline 2.8.0 2013-09-03*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */
 if (typeof document === 'undefined') {
 	self._noTransferable=true;
@@ -110,8 +110,8 @@ if (typeof document === 'undefined') {
 		};
 	})(catiline,global);
 
-(function (exports,tick) {
-
+catiline.deferred = (function (tick) {
+var exports;
 		var func = 'function';
 		// Creates a deferred: an object with a promise and corresponding resolve/reject methods
 		function Deferred() {
@@ -216,6 +216,7 @@ if (typeof document === 'undefined') {
 				}
 			});
 		}
+		exports = createDeferred;
 		// Returns a resolved promise
 		exports.resolve = function(value) {
 			var promise = {};
@@ -229,10 +230,10 @@ if (typeof document === 'undefined') {
 			return promise;
 		};
 		// Returns a deferred
-		exports.deferred = createDeferred;
+		
 
 		exports.all = function(array) {
-			var promise = exports.deferred();
+			var promise = createDeferred();
 			var len = array.length;
 			var resolved = 0;
 			var out = [];
@@ -252,8 +253,11 @@ if (typeof document === 'undefined') {
 			});
 			return promise.promise;
 		};
-})(catiline,catiline.setImmediate);
-
+return exports;
+})(catiline.setImmediate);
+catiline.all = catiline.deferred.all;
+catiline.resolve = catiline.deferred.resolve;
+catiline.rejected = catiline.deferred.reject;
 catiline._hasWorker = typeof Worker !== 'undefined'&&typeof fakeLegacy === 'undefined';
 catiline.URL = window.URL || window.webkitURL;
 catiline._noTransferable=!catiline.URL;
@@ -715,13 +719,24 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	}
 
 	function doStuff(key, data, transfer) { //srsly better name!
-		if (dumb) {
-			return workers[~~ (Math.random() * n)][key](data, transfer);
-		}
 		var promise = catiline.deferred();
+		if (dumb) {
+			promise.promise.cancel = function(reason){
+				return promise.reject(reason);
+			};
+			workers[~~ (Math.random() * n)][key](data, transfer).then(function(v){
+				return promise.resolve(v);
+			},function(v){
+				return promise.reject(v);
+			});
+			return promise.promise;
+		}
 		if (!queueLen && numIdle) {
 			var num = idle.pop();
 			numIdle--;
+			promise.promise.cancel = function(reason){
+				return promise.reject(reason);
+			};
 			workers[num][key](data, transfer).then(function (d) {
 				done(num);
 				promise.resolve(d);
@@ -731,7 +746,16 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 			});
 		}
 		else if (queueLen || !numIdle) {
-			queueLen = que.push([key, data, transfer, promise]);
+			var queueItem = [key, data, transfer, promise];
+			promise.promise.cancel = function(reason){
+				var loc = que.indexOf(queueItem);
+				if(loc>-1){
+					que.splice(loc,1);
+					queueLen--;
+				}
+				return promise.reject(reason);
+			};
+			queueLen = que.push(queueItem);
 		}
 		return promise.promise;
 	}
@@ -782,5 +806,5 @@ if(typeof define === 'function'){
 } else {
 	module.exports=catiline;
 }
-catiline.version = '2.7.0';
+catiline.version = '2.8.0';
 })(this);}
