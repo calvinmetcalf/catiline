@@ -1,6 +1,10 @@
 Changelog
 ===
 
+##2.8.1
+
+- cleaned up some of the dependencies.
+
 ##2.8.0
 
 - promises returned by queues now have a `cancel('reason')` method, calling it rejects
