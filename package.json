@@ -39,7 +39,6 @@
     "uglify-js": "~2.3.6",
     "defs": "~0.4.1",
     "lie": "~1.0.0",
-    "requirejs": "~2.1.8",
     "mocha": "~1.12.1",
     "grunt-mocha-phantomjs": "~0.3.0"
   },
