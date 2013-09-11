@@ -1,4 +1,4 @@
-curl(['lib/chai.js', 'dist/catiline']).then(
+curl(['lib/chai', 'dist/catiline']).then(
 function   (        chai,   cw) {
 mocha.setup({
     ui: "bdd",
