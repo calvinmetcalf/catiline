@@ -1,6 +1,10 @@
 Changelog
 ===
 
+##2.8.2
+
+- added component.json
+
 ##2.8.1
 
 - cleaned up some of the dependencies.
