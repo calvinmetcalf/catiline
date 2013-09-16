@@ -1,0 +1,14 @@
+{
+  "name": "catiline",
+  "repo": "calvinmetcalf/catiline",
+  "description": "JavaScript library to take the pain out of web workers.",
+  "version": "2.8.1",
+  "keywords": [],
+  "dependencies": {},
+  "development": {},
+  "license": "MIT",
+  "main": "dist/catiline.js",
+  "scripts": [
+    "dist/catiline.js"
+  ]
+}
