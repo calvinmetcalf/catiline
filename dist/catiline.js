@@ -213,10 +213,7 @@ require.register("calvinmetcalf-setImmediate/lib/index.js", function(exports, re
 "use strict";
 var types = [
 require('./realSetImmediate'),
-require('./nextTick'),
 require('./postMessage'),
-require('./messageChannel'),
-require('./stateChange'),
 require('./timeout')];
 
 
@@ -237,27 +234,6 @@ exports.test = function(){
 exports.install = function() {
      setImmediate.clear = clearImmediate;
      return setImmediate;
-};
-});
-require.register("calvinmetcalf-setImmediate/lib/nextTick.js", function(exports, require, module){
-var tasks = require('./tasks');
-exports.test = function() {
-    // Don't get fooled by e.g. browserify environments.
-    return typeof process === "object" && Object.prototype.toString.call(process) === "[object process]";
-};
-
-exports.install = function(attachTo) {
-    var returnFunc = function() {
-        var handle = tasks.addFromSetImmediateArguments(arguments);
-
-        process.nextTick(function() {
-            tasks.runIfPresent(handle);
-        });
-
-        return handle;
-    };
-    returnFunc.clear = tasks.remove;
-    return returnFunc;
 };
 });
 require.register("calvinmetcalf-setImmediate/lib/postMessage.js", function(exports, require, module){
@@ -315,58 +291,6 @@ exports.install = function() {
         // Make `global` post a message to itself with the handle and identifying prefix, thus asynchronously
         // invoking our onGlobalMessage listener above.
         global.postMessage(MESSAGE_PREFIX + handle, "*");
-
-        return handle;
-    };
-    returnFunc.clear = tasks.remove;
-    return returnFunc;
-};
-});
-require.register("calvinmetcalf-setImmediate/lib/messageChannel.js", function(exports, require, module){
-var tasks = require('./tasks');
-var global = require('./global');
-exports.test = function() {
-    return !!global.MessageChannel;
-};
-
-exports.install = function(attachTo) {
-    var channel = new global.MessageChannel();
-    channel.port1.onmessage = function(event) {
-        var handle = event.data;
-        tasks.runIfPresent(handle);
-    };
-    var returnFunc = function() {
-        var handle = tasks.addFromSetImmediateArguments(arguments);
-
-        channel.port2.postMessage(handle);
-
-        return handle;
-    };
-    returnFunc.clear = tasks.remove;
-    return returnFunc;
-};
-});
-require.register("calvinmetcalf-setImmediate/lib/stateChange.js", function(exports, require, module){
-var tasks = require('./tasks');
-exports.test = function() {
-    return "document" in global && "onreadystatechange" in global.document.createElement("script");
-};
-
-exports.install = function() {
-    var returnFunc = function() {
-        var handle = tasks.addFromSetImmediateArguments(arguments);
-
-        // Create a <script> element; its readystatechange event will be fired asynchronously once it is inserted
-        // into the document. Do so, thus queuing up the task. Remember to clean up once it's been called.
-        var scriptEl = global.document.createElement("script");
-        scriptEl.onreadystatechange = function() {
-            tasks.runIfPresent(handle);
-
-            scriptEl.onreadystatechange = null;
-            scriptEl.parentNode.removeChild(scriptEl);
-            scriptEl = null;
-        };
-        global.document.documentElement.appendChild(scriptEl);
 
         return handle;
     };
@@ -602,10 +526,7 @@ module.exports = createDeferred;
 });
 require.alias("calvinmetcalf-setImmediate/lib/index.js", "lie/deps/setImmediate/lib/index.js");
 require.alias("calvinmetcalf-setImmediate/lib/realSetImmediate.js", "lie/deps/setImmediate/lib/realSetImmediate.js");
-require.alias("calvinmetcalf-setImmediate/lib/nextTick.js", "lie/deps/setImmediate/lib/nextTick.js");
 require.alias("calvinmetcalf-setImmediate/lib/postMessage.js", "lie/deps/setImmediate/lib/postMessage.js");
-require.alias("calvinmetcalf-setImmediate/lib/messageChannel.js", "lie/deps/setImmediate/lib/messageChannel.js");
-require.alias("calvinmetcalf-setImmediate/lib/stateChange.js", "lie/deps/setImmediate/lib/stateChange.js");
 require.alias("calvinmetcalf-setImmediate/lib/timeout.js", "lie/deps/setImmediate/lib/timeout.js");
 require.alias("calvinmetcalf-setImmediate/lib/tasks.js", "lie/deps/setImmediate/lib/tasks.js");
 require.alias("calvinmetcalf-setImmediate/lib/global.js", "lie/deps/setImmediate/lib/global.js");

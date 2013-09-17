@@ -46,7 +46,7 @@ module.exports = function(grunt) {
 					seperator:";\n",
 					footer : 'catiline.version = \'<%= pkg.version %>\';\n})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.min.js':['src/IE.js','src/lie.banner.js','node_modules/lie/dist/lie.js','src/lie.footer.js','src/utils.js','src/temp.min.js','src/queue.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.min.js':['src/IE.js','src/lie.banner.js','src/lie.js','src/lie.footer.js','src/utils.js','src/temp.min.js','src/queue.js','src/wrapup.js']}
 			},
 			browser: { 
 				options: {
@@ -54,7 +54,7 @@ module.exports = function(grunt) {
 					seperator:";\n",
 					footer : 'catiline.version = \'<%= pkg.version %>\';\n})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/lie.banner.js','node_modules/lie/dist/lie.js','src/lie.footer.js','src/utils.js','src/temp.js','src/queue.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/lie.banner.js','src/lie.js','src/lie.footer.js','src/utils.js','src/temp.js','src/queue.js','src/wrapup.js']}
 			}
 		},
 		mocha_phantomjs: {
