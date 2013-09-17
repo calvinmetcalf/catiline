@@ -1,6 +1,10 @@
 Changelog
 ===
 
+##2.8.3
+
+- updated lie which has a copy of setImmediate
+
 ##2.8.2
 
 - added component.json

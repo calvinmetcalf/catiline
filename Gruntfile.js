@@ -10,8 +10,9 @@ module.exports = function(grunt) {
 	};
 	var d = function(file){
 		var input = grunt.file.read(file);
-		var defit = defs(input,{'disallowUnknownReferences':false});
+		var defit = defs(input,{'disallowUnknownReferences':false,'disallowDuplicated':false});
 		if(defit.errors){
+			console.warn(defit.errors);
 			throw defit.errors;
 		}
 		grunt.file.write(file,defit.src)
@@ -45,7 +46,7 @@ module.exports = function(grunt) {
 					seperator:";\n",
 					footer : 'catiline.version = \'<%= pkg.version %>\';\n})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.min.js':['src/IE.js','src/setImmediate.js','src/lie.banner.js','node_modules/lie/src/lie.js','node_modules/lie/src/all.js','src/lie.footer.js','src/utils.js','src/temp.min.js','src/queue.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.min.js':['src/IE.js','src/lie.banner.js','src/lie.js','src/lie.footer.js','src/utils.js','src/temp.min.js','src/queue.js','src/wrapup.js']}
 			},
 			browser: { 
 				options: {
@@ -53,7 +54,7 @@ module.exports = function(grunt) {
 					seperator:";\n",
 					footer : 'catiline.version = \'<%= pkg.version %>\';\n})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/setImmediate.js','src/lie.banner.js','node_modules/lie/src/lie.js','node_modules/lie/src/all.js','src/lie.footer.js','src/utils.js','src/temp.js','src/queue.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/lie.banner.js','src/lie.js','src/lie.footer.js','src/utils.js','src/temp.js','src/queue.js','src/wrapup.js']}
 			}
 		},
 		mocha_phantomjs: {
@@ -208,6 +209,6 @@ module.exports = function(grunt) {
 	grunt.registerTask('build', ['template','browser']);
     grunt.registerTask('ugly', ['concat:ugly','defsUgly','uglify']);
 	grunt.registerTask('default', ['build','test']);
-	grunt.registerTask('c9', ['build','lint','testing']);
+	grunt.registerTask('c9', ['build'/*,'lint'*/,'testing']);
 
 };
