@@ -1,2 +1,2 @@
-catiline.deferred = (function (tick) {
-var exports;
+catiline.deferred = (function () {
+var exports = {},module={exports:{}}
