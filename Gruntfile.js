@@ -12,6 +12,7 @@ module.exports = function(grunt) {
 		var input = grunt.file.read(file);
 		var defit = defs(input,{'disallowUnknownReferences':false});
 		if(defit.errors){
+			console.log(defit.errors);
 			throw defit.errors;
 		}
 		grunt.file.write(file,defit.src)
