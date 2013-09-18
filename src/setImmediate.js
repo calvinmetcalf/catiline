@@ -3,8 +3,28 @@
 let nextTick;
 if (typeof setImmediate === 'function') {
     nextTick = setImmediate.bind(global);
-}
-else if (typeof MessageChannel !== 'undefined') {
+}else if(typeof postMessage!== 'undefined' && typeof importScripts === 'undefined'){
+     let MESSAGE_PREFIX = 'com.catiline.setImmediate' + Math.random();
+
+    const onGlobalMessage = function (event) {
+        // This will catch all incoming messages (even from other windows!), so we need to try reasonably hard to
+        // avoid letting anyone else trick us into firing off. We test the origin is still this window, and that a
+        // (randomly generated) unpredictable identifying prefix is present.
+        if (event.source === window && event.data === MESSAGE_PREFIX) {
+            drainQueue();
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener('message', onGlobalMessage, false);
+    }
+    else {
+        window.attachEvent('onmessage', onGlobalMessage);
+    }
+
+    nextTick =  function() {
+        window.postMessage(MESSAGE_PREFIX, '*');
+    };
+}else if (typeof MessageChannel !== 'undefined') {
     const channel = new MessageChannel();
     channel.port1.onmessage = drainQueue;
     nextTick = function() {
