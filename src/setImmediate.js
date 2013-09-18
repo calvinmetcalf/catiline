@@ -1,20 +1,21 @@
 //lifted wholesale from when
 //https://github.com/cujojs/when/
+let nextTick;
 if (typeof setImmediate === 'function') {
-    const nextTick = setImmediate.bind(global);
+    nextTick = setImmediate.bind(global);
 }
 else if (typeof MessageChannel !== 'undefined') {
     const channel = new MessageChannel();
     channel.port1.onmessage = drainQueue;
-    const nextTick = function() {
+    nextTick = function() {
         channel.port2.postMessage(0);
     };
 }
 else if (typeof process === 'object' && process.nextTick) {
-    const nextTick = process.nextTick;
+    nextTick = process.nextTick;
 }
 else {
-    const nextTick = function(t) {
+    nextTick = function(t) {
         setTimeout(t, 0);
     };
 }
@@ -37,12 +38,12 @@ function enqueue(task) {
  * processing until it is truly empty.
  */
 function drainQueue() {
+	/*jslint boss: true */
     let i = 0;
-    let task = handlerQueue[0];
-
-    while (task) {
+    let task;
+	/*jslint boss: true */
+    while (task = handlerQueue[i++]) {
         task();
-        task = handlerQueue[i++];
     }
 
     handlerQueue = [];
