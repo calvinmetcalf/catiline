@@ -16,22 +16,22 @@ Task.prototype.run = function() {
 		this.handler.apply(undefined, this.args);
 	}
 	else {
-		var scriptSource = '' + this.handler;
+		const scriptSource = '' + this.handler;
 		/*jshint evil: true */
 		eval(scriptSource);
 	}
 };
 
-var nextHandle = 1; // Spec says greater than zero
-var tasksByHandle = {};
-var currentlyRunningATask = false;
-var tasks = {};
+let nextHandle = 1; // Spec says greater than zero
+const tasksByHandle = {};
+let currentlyRunningATask = false;
+const tasks = {};
 tasks.addFromSetImmediateArguments = function(args) {
-	var handler = args[0];
-	var argsToHandle = Array.prototype.slice.call(args, 1);
-	var task = new Task(handler, argsToHandle);
+	const handler = args[0];
+	const argsToHandle = Array.prototype.slice.call(args, 1);
+	let task = new Task(handler, argsToHandle);
 
-	var thisHandle = nextHandle++;
+	const thisHandle = nextHandle++;
 	tasksByHandle[thisHandle] = task;
 	return thisHandle;
 };
@@ -39,7 +39,7 @@ tasks.runIfPresent = function(handle) {
 	// From the spec: 'Wait until any invocations of this algorithm started before this one have completed.'
 	// So if we're currently running a task, we'll need to delay this invocation.
 	if (!currentlyRunningATask) {
-		var task = tasksByHandle[handle];
+		const task = tasksByHandle[handle];
 		if (task) {
 			currentlyRunningATask = true;
 			try {
@@ -63,7 +63,7 @@ tasks.runIfPresent = function(handle) {
 // * https://developer.mozilla.org/en/DOM/window.postMessage
 // * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
 
-var MESSAGE_PREFIX = 'com.catilinejs.setImmediate' + Math.random();
+const MESSAGE_PREFIX = 'com.catilinejs.setImmediate' + Math.random();
 
 function isStringAndStartsWith(string, putativeStart) {
 	return typeof string === 'string' && string.substring(0, putativeStart.length) === putativeStart;
@@ -74,7 +74,7 @@ function onGlobalMessage(event) {
 	// avoid letting anyone else trick us into firing off. We test the origin is still this window, and that a
 	// (randomly generated) unpredictable identifying prefix is present.
 	if (event.source === window && isStringAndStartsWith(event.data, MESSAGE_PREFIX)) {
-		var handle = event.data.substring(MESSAGE_PREFIX.length);
+		const handle = event.data.substring(MESSAGE_PREFIX.length);
 		tasks.runIfPresent(handle);
 	}
 }
@@ -86,7 +86,7 @@ else {
 }
 
 catiline.setImmediate = function() {
-	var handle = tasks.addFromSetImmediateArguments(arguments);
+	const handle = tasks.addFromSetImmediateArguments(arguments);
 
 	// Make `global` post a message to itself with the handle and identifying prefix, thus asynchronously
 	// invoking our onGlobalMessage listener above.
