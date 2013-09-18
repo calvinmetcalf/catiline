@@ -9,45 +9,23 @@ if (typeof document === 'undefined') {
 } else {
 (function(global){
 	'use strict';
-//lifted wholesale from when
+//lifted mostly from when
 //https://github.com/cujojs/when/
 var nextTick;
 if (typeof setImmediate === 'function') {
     nextTick = setImmediate.bind(global);
-}else if(typeof postMessage!== 'undefined' && typeof importScripts === 'undefined'){
-     var MESSAGE_PREFIX = 'com.catiline.setImmediate' + Math.random();
-
-    var onGlobalMessage = function (event) {
+}else{
+    var codeWord = 'com.catiline.setImmediate' + Math.random();
+    addEventListener('message', function (event) {
         // This will catch all incoming messages (even from other windows!), so we need to try reasonably hard to
         // avoid letting anyone else trick us into firing off. We test the origin is still this window, and that a
         // (randomly generated) unpredictable identifying prefix is present.
-        if (event.source === window && event.data === MESSAGE_PREFIX) {
+        if (event.source === window && event.data === codeWord) {
             drainQueue();
         }
-    };
-    if (window.addEventListener) {
-        window.addEventListener('message', onGlobalMessage, false);
-    }
-    else {
-        window.attachEvent('onmessage', onGlobalMessage);
-    }
-
+    }, false);
     nextTick =  function() {
-        window.postMessage(MESSAGE_PREFIX, '*');
-    };
-}else if (typeof MessageChannel !== 'undefined') {
-    var channel = new MessageChannel();
-    channel.port1.onmessage = drainQueue;
-    nextTick = function() {
-        channel.port2.postMessage(0);
-    };
-}
-else if (typeof process === 'object' && process.nextTick) {
-    nextTick = process.nextTick;
-}
-else {
-    nextTick = function(t) {
-        setTimeout(t, 0);
+        postMessage(codeWord, '*');
     };
 }
 var handlerQueue = [];
@@ -69,7 +47,6 @@ function enqueue(task) {
  * processing until it is truly empty.
  */
 function drainQueue() {
-	/*jslint boss: true */
     var i = 0;
     var task;
 	/*jslint boss: true */
