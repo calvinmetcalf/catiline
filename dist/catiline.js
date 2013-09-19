@@ -1,4 +1,4 @@
-/*! catiline 2.8.2 2013-09-16*/
+/*! catiline 2.8.3 2013-09-18*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */
 if (typeof document === 'undefined') {
 	self._noTransferable=true;
@@ -9,255 +9,191 @@ if (typeof document === 'undefined') {
 } else {
 (function(global){
 	'use strict';
-/*!From setImmediate Copyright (c) 2012 Barnesandnoble.com,llc, Donavon West, and Domenic Denicola @license MIT https://github.com/NobleJS/setImmediate */
-(function(attachTo,global) {
-    if(global.setImmediate){
-        attachTo.setImmediate = global.setImmediate;
-        return;
+//lifted mostly from when
+//https://github.com/cujojs/when/
+var nextTick;
+if (typeof setImmediate === 'function') {
+    nextTick = setImmediate.bind(global);
+}else{
+    var codeWord = 'com.catiline.setImmediate' + Math.random();
+    addEventListener('message', function (event) {
+        // This will catch all incoming messages (even from other windows!), so we need to try reasonably hard to
+        // avoid letting anyone else trick us into firing off. We test the origin is still this window, and that a
+        // (randomly generated) unpredictable identifying prefix is present.
+        if (event.source === window && event.data === codeWord) {
+            drainQueue();
+        }
+    }, false);
+    nextTick =  function() {
+        postMessage(codeWord, '*');
+    };
+}
+var handlerQueue = [];
+
+/**
+ * Enqueue a task. If the queue is not currently scheduled to be
+ * drained, schedule it.
+ * @param {function} task
+ */
+function enqueue(task) {
+    if (handlerQueue.push(task) === 1) {
+        nextTick(drainQueue);
     }
-	var tasks = (function () {
-		function Task(handler, args) {
-			this.handler = handler;
-			this.args = args;
-		}
-		Task.prototype.run = function () {
-			// See steps in section 5 of the spec.
-			if (typeof this.handler === 'function') {
-				// Choice of `thisArg` is not in the setImmediate spec; `undefined` is in the setTimeout spec though:
-				// http://www.whatwg.org/specs/web-apps/current-work/multipage/timers.html
-				this.handler.apply(undefined, this.args);
-			} else {
-				var scriptSource = '' + this.handler;
-				/*jshint evil: true */
-				eval(scriptSource);
-			}
-		};
+}
 
-		var nextHandle = 1; // Spec says greater than zero
-		var tasksByHandle = {};
-		var currentlyRunningATask = false;
+/**
+ * Drain the handler queue entirely, being careful to allow the
+ * queue to be extended while it is being processed, and to continue
+ * processing until it is truly empty.
+ */
+function drainQueue() {
+    var i = 0;
+    var task;
+	/*jslint boss: true */
+    while (task = handlerQueue[i++]) {
+        task();
+    }
 
-		return {
-			addFromSetImmediateArguments: function (args) {
-				var handler = args[0];
-				var argsToHandle = Array.prototype.slice.call(args, 1);
-				var task = new Task(handler, argsToHandle);
-
-				var thisHandle = nextHandle++;
-				tasksByHandle[thisHandle] = task;
-				return thisHandle;
-			},
-			runIfPresent: function (handle) {
-				// From the spec: 'Wait until any invocations of this algorithm started before this one have completed.'
-				// So if we're currently running a task, we'll need to delay this invocation.
-				if (!currentlyRunningATask) {
-					var task = tasksByHandle[handle];
-					if (task) {
-						currentlyRunningATask = true;
-						try {
-							task.run();
-						} finally {
-							delete tasksByHandle[handle];
-							currentlyRunningATask = false;
-						}
-					}
-				} else {
-					// Delay by doing a setTimeout. setImmediate was tried instead, but in Firefox 7 it generated a
-					// 'too much recursion' error.
-					global.setTimeout(function () {
-						tasks.runIfPresent(handle);
-					}, 0);
-				}
-			},
-			remove: function (handle) {
-				delete tasksByHandle[handle];
-			}
-		};
-	}());
-		// Installs an event handler on `global` for the `message` event: see
-		// * https://developer.mozilla.org/en/DOM/window.postMessage
-		// * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
-
-		var MESSAGE_PREFIX = 'com.catilinejs.setImmediate' + Math.random();
-
-		function isStringAndStartsWith(string, putativeStart) {
-			return typeof string === 'string' && string.substring(0, putativeStart.length) === putativeStart;
-		}
-
-		function onGlobalMessage(event) {
-			// This will catch all incoming messages (even from other windows!), so we need to try reasonably hard to
-			// avoid letting anyone else trick us into firing off. We test the origin is still this window, and that a
-			// (randomly generated) unpredictable identifying prefix is present.
-			if (event.source === global && isStringAndStartsWith(event.data, MESSAGE_PREFIX)) {
-				var handle = event.data.substring(MESSAGE_PREFIX.length);
-				tasks.runIfPresent(handle);
-			}
-		}
-		if (global.addEventListener) {
-			global.addEventListener('message', onGlobalMessage, false);
-		} else {
-			global.attachEvent('onmessage', onGlobalMessage);
-		}
-
-		attachTo.setImmediate = function () {
-			var handle = tasks.addFromSetImmediateArguments(arguments);
-
-			// Make `global` post a message to itself with the handle and identifying prefix, thus asynchronously
-			// invoking our onGlobalMessage listener above.
-			global.postMessage(MESSAGE_PREFIX + handle, '*');
-
-			return handle;
-		};
-	})(catiline,global);
-
-catiline.deferred = (function (tick) {
-var exports;
-		var func = 'function';
-		// Creates a deferred: an object with a promise and corresponding resolve/reject methods
-		function Deferred() {
-			// The `handler` variable points to the function that will
-			// 1) handle a .then(onFulfilled, onRejected) call
-			// 2) handle a .resolve or .reject call (if not fulfilled)
-			// Before 2), `handler` holds a queue of callbacks.
-			// After 2), `handler` is a simple .then handler.
-			// We use only one function to save memory and complexity.
-			var handler = function(onFulfilled, onRejected, value) {
-				// Case 1) handle a .then(onFulfilled, onRejected) call
-				var createdDeffered;
-				if (onFulfilled !== handler) {
-					createdDeffered = createDeferred();
-					handler.queue.push({
-						deferred: createdDeffered,
-						resolve: onFulfilled,
-						reject: onRejected
-					});
-					return createdDeffered.promise;
-				}
-	
-				// Case 2) handle a .resolve or .reject call
-				// (`onFulfilled` acts as a sentinel)
-				// The actual function signature is
-				// .re[ject|solve](sentinel, success, value)
-				var action = onRejected ? 'resolve' : 'reject',
-					queue, deferred, callback;
-				for (var i = 0, l = handler.queue.length; i < l; i++) {
-					queue = handler.queue[i];
-					deferred = queue.deferred;
-					callback = queue[action];
-					if (typeof callback !== func) {
-						deferred[action](value);
-					}
-					else {
-						execute(callback, value, deferred);
-					}
-				}
-				// Replace this handler with a simple resolved or rejected handler
-				handler = createHandler(promise, value, onRejected);
-			};
-	
-			function Promise() {
-				this.then = function(onFulfilled, onRejected) {
-					return handler(onFulfilled, onRejected);
-				};
-			}
-			var promise = new Promise();
-			this.promise = promise;
-			// The queue of deferreds
-			handler.queue = [];
-	
-			this.resolve = function(value) {
-				if(handler.queue){
-					handler(handler, true, value);
-				}
-			};
-			
-			this.fulfill = this.resolve;
-			
-			this.reject = function(reason) {
-				if(handler.queue){
-					handler(handler, false, reason);
-				}
-			};
-		}
-	
-		function createDeferred() {
-			return new Deferred();
-		}
-	
-		// Creates a fulfilled or rejected .then function
-		function createHandler(promise, value, success) {
-			return function(onFulfilled, onRejected) {
-				var callback = success ? onFulfilled : onRejected,
-					result;
-				if (typeof callback !== func) {
-					return promise;
-				}
-				execute(callback, value, result = createDeferred());
-				return result.promise;
-			};
-		}
-	
-		// Executes the callback with the specified value,
-		// resolving or rejecting the deferred
-		function execute(callback, value, deferred) {
-			tick(function() {
-				var result;
-				try {
-					result = callback(value);
-					if (result && typeof result.then === func) {
-						result.then(deferred.resolve, deferred.reject);
-					}
-					else {
-						deferred.resolve(result);
-					}
-				}
-				catch (error) {
-					deferred.reject(error);
-				}
+    handlerQueue = [];
+}
+catiline.setImmediate = enqueue;
+var func = 'function';
+// Creates a deferred: an object with a promise and corresponding resolve/reject methods
+function Deferred() {
+	// The `handler` variable points to the function that will
+	// 1) handle a .then(onFulfilled, onRejected) call
+	// 2) handle a .resolve or .reject call (if not fulfilled)
+	// Before 2), `handler` holds a queue of callbacks.
+	// After 2), `handler` is a simple .then handler.
+	// We use only one function to save memory and complexity.
+	var handler = function(onFulfilled, onRejected, value) {
+		// Case 1) handle a .then(onFulfilled, onRejected) call
+		if (onFulfilled !== handler) {
+			var createdDeffered = createDeferred();
+			handler.queue.push({
+				deferred: createdDeffered,
+				resolve: onFulfilled,
+				reject: onRejected
 			});
+			return createdDeffered.promise;
 		}
-		exports = createDeferred;
-		// Returns a resolved promise
-		exports.resolve = function(value) {
-			var promise = {};
-			promise.then = createHandler(promise, value, true);
-			return promise;
-		};
-		// Returns a rejected promise
-		exports.reject = function(reason) {
-			var promise = {};
-			promise.then = createHandler(promise, reason, false);
-			return promise;
-		};
-		// Returns a deferred
-		
 
-		exports.all = function(array) {
-			var promise = createDeferred();
-			var len = array.length;
-			var resolved = 0;
-			var out = [];
-			var onSuccess = function(n) {
-				return function(v) {
-					out[n] = v;
-					resolved++;
-					if (resolved === len) {
-						promise.resolve(out);
-					}
-				};
-			};
-			array.forEach(function(v, i) {
-				v.then(onSuccess(i), function(a) {
-					promise.reject(a);
-				});
-			});
-			return promise.promise;
+		// Case 2) handle a .resolve or .reject call
+		// (`onFulfilled` acts as a sentinel)
+		// The actual function signature is
+		// .re[ject|solve](sentinel, success, value)
+		var action = onRejected ? 'resolve' : 'reject';
+		for (var i = 0, l = handler.queue.length; i < l; i++) {
+			var queue = handler.queue[i];
+			var deferred = queue.deferred;
+			var callback = queue[action];
+			if (typeof callback !== func) {
+				deferred[action](value);
+			}
+			else {
+				execute(callback, value, deferred);
+			}
+		}
+		// Replace this handler with a simple resolved or rejected handler
+		handler = createHandler(promise, value, onRejected);
+	};
+
+	function Promise() {
+		this.then = function(onFulfilled, onRejected) {
+			return handler(onFulfilled, onRejected);
 		};
-return exports;
-})(catiline.setImmediate);
-catiline.all = catiline.deferred.all;
-catiline.resolve = catiline.deferred.resolve;
-catiline.rejected = catiline.deferred.reject;
+	}
+	var promise = new Promise();
+	this.promise = promise;
+	// The queue of deferreds
+	handler.queue = [];
+
+	this.resolve = function(value) {
+		if (handler.queue) {
+			handler(handler, true, value);
+		}
+	};
+
+	this.fulfill = this.resolve;
+
+	this.reject = function(reason) {
+		if (handler.queue) {
+			handler(handler, false, reason);
+		}
+	};
+}
+
+function createDeferred() {
+	return new Deferred();
+}
+
+// Creates a fulfilled or rejected .then function
+function createHandler(promise, value, success) {
+	return function(onFulfilled, onRejected) {
+		var callback = success ? onFulfilled : onRejected;
+		if (typeof callback !== func) {
+			return promise;
+		}
+		var result = createDeferred();
+		execute(callback, value, result);
+		return result.promise;
+	};
+}
+
+// Executes the callback with the specified value,
+// resolving or rejecting the deferred
+function execute(callback, value, deferred) {
+	catiline.setImmediate(function() {
+		try {
+			var result = callback(value);
+			if (result && typeof result.then === func) {
+				result.then(deferred.resolve, deferred.reject);
+			}
+			else {
+				deferred.resolve(result);
+			}
+		}
+		catch (error) {
+			deferred.reject(error);
+		}
+	});
+}
+catiline.deferred = createDeferred;
+// Returns a resolved promise
+catiline.resolve = function(value) {
+	var promise = {};
+	promise.then = createHandler(promise, value, true);
+	return promise;
+};
+// Returns a rejected promise
+catiline.reject = function(reason) {
+	var promise = {};
+	promise.then = createHandler(promise, reason, false);
+	return promise;
+};
+// Returns a deferred
+
+catiline.all = function(array) {
+	var promise = createDeferred();
+	var len = array.length;
+	var resolved = 0;
+	var out = [];
+	var onSuccess = function(n) {
+		return function(v) {
+			out[n] = v;
+			resolved++;
+			if (resolved === len) {
+				promise.resolve(out);
+			}
+		};
+	};
+	array.forEach(function(v, i) {
+		v.then(onSuccess(i), function(a) {
+			promise.reject(a);
+		});
+	});
+	return promise.promise;
+};
 catiline._hasWorker = typeof Worker !== 'undefined'&&typeof fakeLegacy === 'undefined';
 catiline.URL = window.URL || window.webkitURL;
 catiline._noTransferable=!catiline.URL;
@@ -806,5 +742,5 @@ if(typeof define === 'function'){
 } else {
 	module.exports=catiline;
 }
-catiline.version = '2.8.2';
+catiline.version = '2.8.3';
 })(this);}

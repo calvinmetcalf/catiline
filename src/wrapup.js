@@ -5,7 +5,8 @@ function catiline(object,queueLength,unmanaged){
 		return new catiline.Queue(object,queueLength,unmanaged);
 	}
 }
-
+//will be removed in v3
+catiline.setImmediate = catiline.nextTick;
 function initBrowser(catiline){
 	const origCW = global.cw;
 	catiline.noConflict=function(newName){

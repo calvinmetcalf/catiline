@@ -78,7 +78,7 @@ function appendScript(iDoc,text){
 	}
 }
 //much of the iframe stuff inspired by https://github.com/padolsey/operative
-//mos tthings besides the names have since been changed
+//most things besides the names have since been changed
 function actualMakeI(script,codeword){
 	const iFrame = document.createElement('iframe');
 	iFrame.style.display = 'none';
@@ -119,7 +119,7 @@ catiline.makeIWorker = function (strings,codeword){
 	const worker = {onmessage:function(){}};
 	const ipromise = makeIframe(script,codeword);
 	window.addEventListener('message',function(e){
-		if(typeof e.data ==='string'&&e.data.length>codeword.length&&e.data.slice(0,codeword.length)===codeword){
+		if(e.data.slice && e.data.slice(0,codeword.length) === codeword){
 			worker.onmessage({data:JSON.parse(e.data.slice(codeword.length))});
 		}
 	});
@@ -136,13 +136,14 @@ catiline.makeIWorker = function (strings,codeword){
 	return worker;
 	
 };
-//accepts an array of strings, joins them, and turns them into a worker.
+
 function makeFallbackWorker(script){
 	catiline._noTransferable=true;
 	const worker = new Worker(getPath());
 	worker.postMessage(script);
 	return worker;
 }
+//accepts an array of strings, joins them, and turns them into a worker.
 catiline.makeWorker = function (strings, codeword){
 	if(!catiline._hasWorker){
 		return catiline.makeIWorker(strings,codeword);

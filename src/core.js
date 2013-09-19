@@ -133,7 +133,7 @@ catiline.Worker = function Catiline(obj) {
 			}
 		};
 		self.on('error',rejectPromises);
-		worker.onerror = function (e) {
+		worker.onerror =function (e) {
 			_fire('error', e);
 		};
 		self.on('console', function (msg) {
