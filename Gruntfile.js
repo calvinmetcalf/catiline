@@ -102,7 +102,8 @@ module.exports = function(grunt) {
 					
 					{
 						browserName: 'firefox',
-						platform: 'linux'
+						platform: 'linux',
+						version: '22'
 					},{
 						browserName: 'firefox',
 						platform: 'linux',

@@ -1,4 +1,4 @@
-/*! catiline 2.8.3 2013-09-18*/
+/*! catiline 2.8.3 2013-09-19*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */
 if (typeof document === 'undefined') {
 	self._noTransferable=true;
@@ -13,7 +13,7 @@ if (typeof document === 'undefined') {
 //https://github.com/cujojs/when/
 var nextTick;
 if (typeof setImmediate === 'function') {
-    nextTick = setImmediate.bind(global);
+    nextTick = setImmediate.bind(global,drainQueue);
 }else{
     var codeWord = 'com.catiline.setImmediate' + Math.random();
     addEventListener('message', function (event) {
@@ -28,18 +28,18 @@ if (typeof setImmediate === 'function') {
         postMessage(codeWord, '*');
     };
 }
-var handlerQueue = [];
+var mainQueue = [];
 
 /**
  * Enqueue a task. If the queue is not currently scheduled to be
  * drained, schedule it.
  * @param {function} task
  */
-function enqueue(task) {
-    if (handlerQueue.push(task) === 1) {
-        nextTick(drainQueue);
+catiline.nextTick = function(task) {
+    if (mainQueue.push(task) === 1) {
+        nextTick();
     }
-}
+};
 
 /**
  * Drain the handler queue entirely, being careful to allow the
@@ -49,14 +49,14 @@ function enqueue(task) {
 function drainQueue() {
     var i = 0;
     var task;
+    var innerQueue = mainQueue;
+    mainQueue = [];
 	/*jslint boss: true */
-    while (task = handlerQueue[i++]) {
+    while (task = innerQueue[i++]) {
         task();
     }
 
-    handlerQueue = [];
 }
-catiline.setImmediate = enqueue;
 var func = 'function';
 // Creates a deferred: an object with a promise and corresponding resolve/reject methods
 function Deferred() {
@@ -143,7 +143,7 @@ function createHandler(promise, value, success) {
 // Executes the callback with the specified value,
 // resolving or rejecting the deferred
 function execute(callback, value, deferred) {
-	catiline.setImmediate(function() {
+	catiline.nextTick(function() {
 		try {
 			var result = callback(value);
 			if (result && typeof result.then === func) {
@@ -274,7 +274,7 @@ function appendScript(iDoc,text){
 	}
 }
 //much of the iframe stuff inspired by https://github.com/padolsey/operative
-//mos tthings besides the names have since been changed
+//most things besides the names have since been changed
 function actualMakeI(script,codeword){
 	var iFrame = document.createElement('iframe');
 	iFrame.style.display = 'none';
@@ -315,7 +315,7 @@ catiline.makeIWorker = function (strings,codeword){
 	var worker = {onmessage:function(){}};
 	var ipromise = makeIframe(script,codeword);
 	window.addEventListener('message',function(e){
-		if(typeof e.data ==='string'&&e.data.length>codeword.length&&e.data.slice(0,codeword.length)===codeword){
+		if(e.data.slice && e.data.slice(0,codeword.length) === codeword){
 			worker.onmessage({data:JSON.parse(e.data.slice(codeword.length))});
 		}
 	});
@@ -332,13 +332,14 @@ catiline.makeIWorker = function (strings,codeword){
 	return worker;
 	
 };
-//accepts an array of strings, joins them, and turns them into a worker.
+
 function makeFallbackWorker(script){
 	catiline._noTransferable=true;
 	var worker = new Worker(getPath());
 	worker.postMessage(script);
 	return worker;
 }
+//accepts an array of strings, joins them, and turns them into a worker.
 catiline.makeWorker = function (strings, codeword){
 	if(!catiline._hasWorker){
 		return catiline.makeIWorker(strings,codeword);
@@ -502,7 +503,7 @@ catiline.Worker = function Catiline(obj) {
 			}
 		};
 		self.on('error',rejectPromises);
-		worker.onerror = function (e) {
+		worker.onerror =function (e) {
 			_fire('error', e);
 		};
 		self.on('console', function (msg) {
@@ -715,7 +716,8 @@ function catiline(object,queueLength,unmanaged){
 		return new catiline.Queue(object,queueLength,unmanaged);
 	}
 }
-
+//will be removed in v3
+catiline.setImmediate = catiline.nextTick;
 function initBrowser(catiline){
 	var origCW = global.cw;
 	catiline.noConflict=function(newName){
