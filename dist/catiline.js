@@ -1,4 +1,4 @@
-/*! catiline 2.8.3 2013-09-19*/
+/*! catiline 2.8.4 2013-09-20*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */
 if (typeof document === 'undefined') {
 	self._noTransferable=true;
@@ -12,21 +12,35 @@ if (typeof document === 'undefined') {
 //lifted mostly from when
 //https://github.com/cujojs/when/
 var nextTick;
+var MutationObserver = global.MutationObserver || global.WebKitMutationObserver;
 if (typeof setImmediate === 'function') {
-    nextTick = setImmediate.bind(global,drainQueue);
+	nextTick = setImmediate.bind(global,drainQueue);
+}else if(MutationObserver){
+	var observer = new MutationObserver(drainQueue);
+	var element = document.createElement('div');
+	observer.observe(element, { attributes: true });
+
+	// Chrome Memory Leak: https://bugs.webkit.org/show_bug.cgi?id=93661
+	addEventListener('unload', function () {
+		observer.disconnect();
+		observer = null;
+	}, false);
+	nextTick =   function () {
+		element.setAttribute('drainQueue', 'drainQueue');
+	};
 }else{
-    var codeWord = 'com.catiline.setImmediate' + Math.random();
-    addEventListener('message', function (event) {
-        // This will catch all incoming messages (even from other windows!), so we need to try reasonably hard to
-        // avoid letting anyone else trick us into firing off. We test the origin is still this window, and that a
-        // (randomly generated) unpredictable identifying prefix is present.
-        if (event.source === window && event.data === codeWord) {
-            drainQueue();
-        }
-    }, false);
-    nextTick =  function() {
-        postMessage(codeWord, '*');
-    };
+	var codeWord = 'com.catiline.setImmediate' + Math.random();
+	addEventListener('message', function (event) {
+		// This will catch all incoming messages (even from other windows!), so we need to try reasonably hard to
+		// avoid letting anyone else trick us into firing off. We test the origin is still this window, and that a
+		// (randomly generated) unpredictable identifying prefix is present.
+		if (event.source === window && event.data === codeWord) {
+			drainQueue();
+		}
+	}, false);
+	nextTick =  function() {
+		postMessage(codeWord, '*');
+	};
 }
 var mainQueue = [];
 
@@ -36,9 +50,9 @@ var mainQueue = [];
  * @param {function} task
  */
 catiline.nextTick = function(task) {
-    if (mainQueue.push(task) === 1) {
-        nextTick();
-    }
+	if (mainQueue.push(task) === 1) {
+		nextTick();
+	}
 };
 
 /**
@@ -47,14 +61,14 @@ catiline.nextTick = function(task) {
  * processing until it is truly empty.
  */
 function drainQueue() {
-    var i = 0;
-    var task;
-    var innerQueue = mainQueue;
-    mainQueue = [];
+	var i = 0;
+	var task;
+	var innerQueue = mainQueue;
+	mainQueue = [];
 	/*jslint boss: true */
-    while (task = innerQueue[i++]) {
-        task();
-    }
+	while (task = innerQueue[i++]) {
+		task();
+	}
 
 }
 var func = 'function';
@@ -744,5 +758,5 @@ if(typeof define === 'function'){
 } else {
 	module.exports=catiline;
 }
-catiline.version = '2.8.3';
+catiline.version = '2.8.4';
 })(this);}
