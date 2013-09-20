@@ -15,7 +15,7 @@ For usage in addition to the <a class='navLink' id='API' href='docs/API.md'>API 
 - [RTree Bounding Boxes](http://leaflet-extras.github.io/RTree/examples/worker.html)
 - [Census Visualization](http://data-otp.rhcloud.com/)
 - [Vector Map Tiles](http://calvinmetcalf.github.io/vector-layers/)
-- [Unzipping files and reprojecting maps](http://calvinmetcalf.github.io/shapefile-js/proj.html)
+- [Unzipping files and reprojecting maps](http://calvinmetcalf.github.io/shapefile-js/site/proj.html)
 
 Updates and changes are all in the <a class='navLink' id='CHANGELOG' href='docs/CHANGELOG.md'>changelog</a>.
 
