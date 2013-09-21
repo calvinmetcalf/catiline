@@ -1,6 +1,9 @@
 Changelog
 ===
 
+##2.8.4
+- add mutation observer as an option for events.
+
 ##2.8.3
 - brought lie back in, espetially as we just need a subset of setImmediate this make more sense for now.
 
