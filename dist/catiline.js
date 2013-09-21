@@ -1,4 +1,4 @@
-/*! catiline 2.8.4 2013-09-20*/
+/*! catiline 2.8.4 2013-09-21*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */
 if (typeof document === 'undefined') {
 	self._noTransferable=true;
@@ -9,13 +9,15 @@ if (typeof document === 'undefined') {
 } else {
 (function(global){
 	'use strict';
-//lifted mostly from when
-//https://github.com/cujojs/when/
+//overall structure based on when
+//https://github.com/cujojs/when/blob/master/when.js#L805-L852
 var nextTick;
 var MutationObserver = global.MutationObserver || global.WebKitMutationObserver;
 if (typeof setImmediate === 'function') {
 	nextTick = setImmediate.bind(global,drainQueue);
 }else if(MutationObserver){
+	//based on RSVP
+	//https://github.com/tildeio/rsvp.js/blob/master/lib/rsvp/async.js
 	var observer = new MutationObserver(drainQueue);
 	var element = document.createElement('div');
 	observer.observe(element, { attributes: true });
@@ -71,6 +73,7 @@ function drainQueue() {
 	}
 
 }
+
 var func = 'function';
 // Creates a deferred: an object with a promise and corresponding resolve/reject methods
 function Deferred() {
