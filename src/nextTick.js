@@ -1,10 +1,12 @@
-//lifted mostly from when
-//https://github.com/cujojs/when/
+//overall structure based on when
+//https://github.com/cujojs/when/blob/master/when.js#L805-L852
 let nextTick;
 const MutationObserver = global.MutationObserver || global.WebKitMutationObserver;
 if (typeof setImmediate === 'function') {
 	nextTick = setImmediate.bind(global,drainQueue);
 }else if(MutationObserver){
+	//based on RSVP
+	//https://github.com/tildeio/rsvp.js/blob/master/lib/rsvp/async.js
 	let observer = new MutationObserver(drainQueue);
 	const element = document.createElement('div');
 	observer.observe(element, { attributes: true });
