@@ -77,7 +77,7 @@ function(data,callback,scope){
 ```
 
 the worker object and the scope object both have 3 additional methods
-`on`, `off`, and `fire` for working with events. For these 3 methods the following definitions a being used
+`on`, `one`, `off`, and `fire` for working with events. For these 3 methods the following definitions a being used
 
 'event name' can be any JavaScript string that does not include a space.
 
@@ -86,9 +86,11 @@ the worker object and the scope object both have 3 additional methods
 ```javascript
 workerORscope.on('event string', listnener:Function[,contect:Object])
 	->workerORscope
+workerORscope.one('event string', listnener:Function[,contect:Object])
+	->workerORscope
 ```
 
-the listner function is called with the signatrue
+the listner function is called with the signatrue, on and one are identical except one is onle called once.
 
 ```
 listnener(data,scope);

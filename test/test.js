@@ -504,6 +504,37 @@ describe('cw()', function () {
 			comrade.fire('double',21);
 			comrade.fire('quad',2);
 		});
-		
+		it('should be able to run a one off event',function(done){
+		    var comrade = cw({
+			    init:function(){
+			        var a = 1;
+			        this.on('notTwice',function(things,self){
+			            self.fire('YOLO',a++);
+			        });
+			    }
+			});
+			comrade.one('YOLO',function(a){
+				assert.equal(a,1);
+				done();
+			});
+			comrade.fire('notTwice');
+			comrade.fire('notTwice');
+		});
+		it('should be able to run a one off event in the worker',function(done){
+		    var comrade = cw({
+			    init:function(){
+			        var a = 1;
+			        this.one('notTwice',function(things,self){
+			            self.fire('YOLO',a++);
+			        });
+			    }
+			});
+			comrade.on('YOLO',function(a){
+				assert.equal(a,1);
+				done();
+			});
+			comrade.fire('notTwice');
+			comrade.fire('notTwice');
+		});
 	});
 });

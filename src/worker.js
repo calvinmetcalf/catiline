@@ -44,7 +44,15 @@ _db.on = function (eventName, func, scope) {
 	listeners[eventName].push(function (a) {
 		func.call(scope, a, _db);
 	});
+	_db;
 };
+_db.one = function (eventName, func, scope) {
+	scope = scope || _db;
+	return _db.on(eventName,function(a){
+		_db.off(eventName);
+		func.call(scope, a, _db);
+	});
+}
 function _fire(eventName,data){
 	if(eventName.indexOf(" ")>0){
 		eventName.split(" ").forEach(function(v){
@@ -62,26 +70,20 @@ function _fire(eventName,data){
 
 _db.fire = function (eventName, data, transfer) {
 	__self__.postMessage([[eventName], data], transfer);
+	return _db;
 };
-_db.off=function(eventName,func){
+_db.off=function(eventName){
 	if(eventName.indexOf(" ")>0){
 		return eventName.split(" ").map(function(v){
-			return _db.off(v,func);
+			return _db.off(v);
 		});
 	}
 	if(!(eventName in listeners)){
 		return;
-	}else if(!func){
-		delete listeners[eventName];
 	}else{
-		if(listeners[eventName].indexOf(func)>-1){
-			if(listeners[eventName].length>1){
-				delete listeners[eventName];
-			}else{
-				listeners[eventName].splice(listeners[eventName].indexOf(func),1);
-			}
-		}
+		delete listeners[eventName];
 	}
+	return _db;
 };
 const console={};
 function makeConsole(method){

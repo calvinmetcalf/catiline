@@ -37,7 +37,7 @@ worker.data([2,5]).then(function(a){
 worker.close();//close it up
 ```
 
-For slightly more complex communication patterns you can fire events between the the two contexts with 'on', 'fire', and 'off' events.
+For slightly more complex communication patterns you can fire events between the the two contexts with 'on', 'one', 'fire', and 'off' events.
 
 ```javascript
 var worker = cw(function(text){
@@ -64,8 +64,8 @@ call
 */
 ```
 
-The event system was inspired by [Leaflet's](http://leafletjs.com/reference.html#events) but with a similar set of methods. Multiple space separated words can
-but sent to the 'on' and 'off' methods and `off` accepts a function if you only want to delete one of many functions, `on` takes a scope argument in its 3rd spot.
+The event system was inspired by [Leaflet's](http://leafletjs.com/reference.html#events). 'one' is the same as 'on' but only called once. Multiple space separated words can
+but sent to the 'on' and 'off' methods, `on` takes a scope argument in its 3rd spot.
 
 ###Importing Scripts
 If you create a worker and the function imports a script like
