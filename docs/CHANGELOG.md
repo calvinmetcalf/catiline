@@ -1,6 +1,10 @@
 Changelog
 ===
 
+##2.9.0
+- Add 'one' method for events.
+- The function parameter to the off method actually works now.
+
 ##2.8.4
 - add mutation observer as an option for events.
 

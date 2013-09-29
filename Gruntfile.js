@@ -33,7 +33,8 @@ module.exports = function(grunt) {
 					banner:'/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!(c)2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */\n/*!Includes Promiscuous (c)2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/\n/*!Includes Material from setImmediate Copyright (c) 2012 Barnesandnoble.com, llc, Donavon West, and Domenic Denicola @license MIT https://github.com/NobleJS/setImmediate */\n',
 					mangle: {
 						except: ['Catiline','CatilineQueue','FakeCatiline','Promise','Deferred']
-					}
+					},
+					 report: 'gzip'
 				},
 				src: 'dist/<%= pkg.name %>.min.js',
 				dest: 'dist/<%= pkg.name %>.min.js'

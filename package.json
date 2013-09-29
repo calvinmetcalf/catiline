@@ -1,6 +1,6 @@
 {
   "name": "catiline",
-  "version": "2.8.4",
+  "version": "2.9.0",
   "description": "Multi proccessing with workers in the browser.",
   "keywords": [
     "workers",
