@@ -18,17 +18,20 @@ catiline.Worker = function Catiline(obj) {
 			if (!(eventName in listeners)) {
 				listeners[eventName] = [];
 			}
-			listeners[eventName].push(function (a) {
+			const newFunc = function (a) {
 				func.call(scope, a);
-			});
+			};
+			newFunc.orig = func;
+			listeners[eventName].push(newFunc);
 			return self;
 		};
 		self.one = function (eventName, func, scope) {
 			scope = scope || self;
-			return self.on(eventName,function(a){
-				self.off(eventName);
+			function ourFunc(a){
+				self.off(eventName, ourFunc);
 				func.call(scope, a);
-			});
+			}
+			return self.on(eventName, ourFunc);
 		};
 		function _fire(eventName, data) {
 			if (eventName.indexOf(' ') > 0) {
@@ -54,17 +57,29 @@ catiline.Worker = function Catiline(obj) {
 			
 			return self;
 		};
-		self.off = function (eventName) {
+		self.off = function (eventName, func) {
 			if (eventName.indexOf(' ') > 0) {
 				eventName.split(' ').map(function (v) {
-					return self.off(v);
+					return self.off(v, func);
 				});
 				return self;
 			}
 			if (!(eventName in listeners)) {
 				return self;
 			}else{
-				delete listeners[eventName];
+				if(func){
+					listeners[eventName] = listeners[eventName].map(function(a){
+						if(a.orig===func){
+							return false;
+						}else{
+							return a;
+						}
+					}).filter(function(a){
+						return a;
+					});
+				} else {
+					delete listeners[eventName];
+				}
 			}
 			return self;
 		};

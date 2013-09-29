@@ -101,11 +101,11 @@ and be aware changing context does not change scope (the scope object is always 
 even if `this` is changed).
 
 ```javascript
-workerORscope.off('event string')
+workerORscope.off('event string'[, func]);
 	->workerORscope
 ```
 
-removes the listener or listeners in the event string
+removes the listener or listeners in the event string, if func is provided removes only that function.
 
 ```javascript
 workerORscope.fire('event string'[,data,transfer:Array])

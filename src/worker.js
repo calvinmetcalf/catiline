@@ -41,17 +41,20 @@ _db.on = function (eventName, func, scope) {
 	if (!(eventName in listeners)) {
 		listeners[eventName] = [];
 	}
-	listeners[eventName].push(function (a) {
+	const newFunc = function (a) {
 		func.call(scope, a, _db);
-	});
+	};
+	newFunc.orig = func;
+	listeners[eventName].push(newFunc);
 	_db;
 };
 _db.one = function (eventName, func, scope) {
 	scope = scope || _db;
-	return _db.on(eventName,function(a){
-		_db.off(eventName);
+	function ourFunc(a){
+		_db.off(eventName, ourFunc);
 		func.call(scope, a, _db);
-	});
+	}
+	return _db.on(eventName,ourFunc);
 }
 function _fire(eventName,data){
 	if(eventName.indexOf(" ")>0){
@@ -72,16 +75,28 @@ _db.fire = function (eventName, data, transfer) {
 	__self__.postMessage([[eventName], data], transfer);
 	return _db;
 };
-_db.off=function(eventName){
+_db.off=function(eventName, func){
 	if(eventName.indexOf(" ")>0){
 		return eventName.split(" ").map(function(v){
-			return _db.off(v);
+			return _db.off(v, func);
 		});
 	}
 	if(!(eventName in listeners)){
 		return;
 	}else{
-		delete listeners[eventName];
+		if(func){
+			listeners[eventName] = listeners[eventName].map(function(a){
+				if(a.orig===func){
+					return false;
+				}else{
+					return a;
+				}
+			}).filter(function(a){
+				return a;
+			});
+		} else {
+			delete listeners[eventName];
+		}
 	}
 	return _db;
 };
