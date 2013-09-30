@@ -34,10 +34,7 @@ module.exports = function(grunt) {
 					mangle: {
 						except: ['Catiline','CatilineQueue','FakeCatiline','Promise','Deferred']
 					},
-					 report: 'gzip',
-					 sourceMap: 'dist/<%= pkg.name %>.map',
-					 sourceMapRoot:'..',
-					 sourceMappingURL:'<%= pkg.name %>.map'
+					 report: 'gzip'
 				},
 				src: 'dist/<%= pkg.name %>.js',
 				dest: 'dist/<%= pkg.name %>.min.js'
