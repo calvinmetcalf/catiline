@@ -562,9 +562,18 @@ function runTests(chai,cw,global){
 			            });
 			        }
 			    });
+			    var i = 1;
+			    comrade.on('YOLO',function(a){
+				    assert.equal(a,i++);
+				    if(i===3){
+				    	done();
+				    	setTimeout(function() {
+				    		comrade.close();
+				    	}, 5);
+				    }
+			    });
 			    comrade.one('YOLO',function(a){
 				    assert.equal(a,1);
-				    done();
 			    });
 			    comrade.fire('notTwice');
 			    comrade.fire('notTwice');
@@ -573,14 +582,25 @@ function runTests(chai,cw,global){
 		        var comrade = cw({
 			        init:function(){
 			            var a = 1;
+			            var b =1;
+			            this.on('notTwice',function(things,self){
+			            	self.fire('check',b);
+			                if(b++===2){
+			                	self.close();
+			                }
+			            });
 			            this.one('notTwice',function(things,self){
 			                self.fire('YOLO',a++);
 			            });
+			            
 			        }
 			    });
+			    var i = 1;
 			    comrade.on('YOLO',function(a){
 				    assert.equal(a,1);
-				    done();
+			    });
+			    comrade.on('check',function(a){
+				    assert.equal(a,i++);
 			    });
 			    comrade.fire('notTwice');
 			    comrade.fire('notTwice');
