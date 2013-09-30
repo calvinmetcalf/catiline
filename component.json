@@ -2,7 +2,7 @@
   "name": "catiline",
   "repo": "calvinmetcalf/catiline",
   "description": "JavaScript library to take the pain out of web workers.",
-  "version": "2.9.0",
+  "version": "2.9.0-dev.1",
   "keywords": [],
   "dependencies": {},
   "development": {},
