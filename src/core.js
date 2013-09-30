@@ -31,12 +31,10 @@ function Catiline(obj) {
 	if (!('initialize' in obj)) {
 		if ('init' in obj) {
 			obj.__initialize__.push(obj.init);
-			delete obj.init;
 		}
 	}
 	else {
 		obj.__initialize__.push(obj.initialize);
-		//delete obj.initialize;
 	}
 
 	if (!('events' in obj)) {
@@ -46,7 +44,6 @@ function Catiline(obj) {
 		for (let key in obj.listners) {
 			self.on(key, obj.listners[key]);
 		}
-		delete obj.listners;
 	}
 	let fObj = 'var _db = {\n\t';
 	const keyFunc = function(key) {
@@ -67,6 +64,9 @@ function Catiline(obj) {
 	};
 	let i = false;
 	for (let key in obj) {
+		if(['listners','initialize','init'].indexOf(key)>-1){
+			continue;
+		}
 		if (i) {
 			fObj += ',\n\t';
 		}
