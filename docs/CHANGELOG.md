@@ -10,7 +10,8 @@ Note that functions within arrays and objects can't be called the same way as fu
 - You may now pass two new keys when you create an object, 'events' and 'listners' both of which should contian
 an object of string keys and function values. The functions are set as linsteners for the event named by the key,
 the only difference is that 'events' sets the listner in the worker and 'listners' sets it up in the main thread.
-- Internal structure is somewhat more moduler.
+- Instead of a large block of code that is regexed and transformed as text we now define all of that as code
+- events are only defined once for both workers and the catiline object.
 
 ##2.8.4
 - add mutation observer as an option for events.
