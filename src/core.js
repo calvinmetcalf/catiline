@@ -1,10 +1,4 @@
 function Catiline(obj) {
-	if(arguments.length > 1 && arguments[1] && arguments[1] > 1){
-		return new Catiline.Queue(obj,arguments[1],arguments[2]);
-	}
-	if (!(this instanceof Catiline)) {
-		return new Catiline(obj);
-	}
 	if (typeof obj === 'function') {
 		obj = {
 			data: obj
@@ -58,8 +52,8 @@ function Catiline(obj) {
 	const keyFunc = function(key) {
 		const out = function(data, transfer) {
 			const i = promises.length;
-			promises[i] = Catiline.deferred();
-			if (Catiline._noTransferable) {
+			promises[i] = catiline.deferred();
+			if (catiline._noTransferable) {
 				worker.postMessage([
 					[codeWord, i], key, data]);
 			}
@@ -84,14 +78,14 @@ function Catiline(obj) {
 			self[key] = keyFunc(key);
 		}
 		else {
-			const outThing = Catiline.stringify(obj[key]);
+			const outThing = catiline.stringify(obj[key]);
 			if (typeof outThing !== 'undefined') {
 				fObj = fObj + key + ':' + outThing;
 			}
 		}
 	}
 	fObj = fObj + '};';
-	const worker = Catiline.makeWorker(['\'use strict\';', '',
+	const worker = catiline.makeWorker(['\'use strict\';', '',
 	fObj, '_db.__initialize__.forEach(function(f){', '	f.call(_db,_db);', '});', 'for(var key in _db.events){', '	_db.on(key,_db.events[key]);', '}'], codeWord);
 	worker.onmessage = function(e) {
 		self.trigger('message', e.data[1]);
@@ -113,10 +107,14 @@ function Catiline(obj) {
 	self._close = function() {
 		worker.terminate();
 		rejectPromises('closed');
-		return Catiline.resolve();
+		return catiline.resolve();
 	};
 	if (!('close' in self)) {
 		self.close = self._close;
 	}
 }
-Catiline.Worker = Catiline.worker = Catiline;
+catiline.Worker = Catiline;
+
+catiline.worker = function(obj){
+    return new Catiline(obj);
+};

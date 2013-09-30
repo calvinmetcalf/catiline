@@ -40,7 +40,7 @@ let mainQueue = [];
  * drained, schedule it.
  * @param {function} task
  */
-Catiline.nextTick = function(task) {
+catiline.nextTick = function(task) {
 	if (mainQueue.push(task) === 1) {
 		nextTick();
 	}

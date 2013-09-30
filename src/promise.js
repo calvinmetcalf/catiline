@@ -84,7 +84,7 @@ function createHandler(promise, value, success) {
 // Executes the callback with the specified value,
 // resolving or rejecting the deferred
 function execute(callback, value, deferred) {
-	Catiline.nextTick(function() {
+	catiline.nextTick(function() {
 		try {
 			const result = callback(value);
 			if (result && typeof result.then === func) {
@@ -99,22 +99,22 @@ function execute(callback, value, deferred) {
 		}
 	});
 }
-Catiline.deferred = createDeferred;
+catiline.deferred = createDeferred;
 // Returns a resolved promise
-Catiline.resolve = function(value) {
+catiline.resolve = function(value) {
 	const promise = {};
 	promise.then = createHandler(promise, value, true);
 	return promise;
 };
 // Returns a rejected promise
-Catiline.reject = function(reason) {
+catiline.reject = function(reason) {
 	const promise = {};
 	promise.then = createHandler(promise, reason, false);
 	return promise;
 };
 // Returns a deferred
 
-Catiline.all = function(array) {
+catiline.all = function(array) {
 	const promise = createDeferred();
 	const len = array.length;
 	let resolved = 0;

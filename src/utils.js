@@ -1,6 +1,6 @@
-Catiline._hasWorker = typeof Worker !== 'undefined'&&typeof fakeLegacy === 'undefined';
-Catiline.URL = window.URL || window.webkitURL;
-Catiline._noTransferable=!Catiline.URL;
+catiline._hasWorker = typeof Worker !== 'undefined'&&typeof fakeLegacy === 'undefined';
+catiline.URL = window.URL || window.webkitURL;
+catiline._noTransferable=!catiline.URL;
 //regex out the importScript call and move it up to the top out of the function.
 function regexImports(string){
 	let rest=string;
@@ -9,7 +9,7 @@ function regexImports(string){
 	const loopFunc = function(a,b){
 		if(b){
 			'importScripts('+b.split(',').forEach(function(cc){
-				matches[Catiline.makeUrl(cc.match(/\s*[\'\"](\S*)[\'\"]\s*/)[1])]=true; // trim whitespace, add to matches
+				matches[catiline.makeUrl(cc.match(/\s*[\'\"](\S*)[\'\"]\s*/)[1])]=true; // trim whitespace, add to matches
 			})+');\n';
 		}
 	};
@@ -47,14 +47,14 @@ function moveIimports(string){
 function getPath(){
 	if(typeof SHIM_WORKER_PATH !== 'undefined'){
 		return SHIM_WORKER_PATH;
-	}else if('SHIM_WORKER_PATH' in Catiline){
-		return Catiline.SHIM_WORKER_PATH;
+	}else if('SHIM_WORKER_PATH' in catiline){
+		return catiline.SHIM_WORKER_PATH;
 	}
 	var scripts = document.getElementsByTagName('script');
 	const len = scripts.length;
 	let i = 0;
 	while(i<len){
-		if(/Catiline(\.min)?\.js/.test(scripts[i].src)){
+		if(/catiline(\.min)?\.js/.test(scripts[i].src)){
 			return scripts[i].src;
 		}
 		i++;
@@ -103,7 +103,7 @@ function actualMakeI(script,codeword){
 	return iFrame;
 }
 function makeIframe(script,codeword){
-	const promise = Catiline.deferred();
+	const promise = catiline.deferred();
 	if(document.readyState==='complete'){
 		promise.resolve(actualMakeI(script,codeword));
 	}else{
@@ -113,7 +113,7 @@ function makeIframe(script,codeword){
 	}
 	return promise.promise;
 }
-Catiline.makeIWorker = function (strings,codeword){
+catiline.makeIWorker = function (strings,codeword){
 	const script =moveIimports(strings.join(''));
 	const worker = {onmessage:function(){}};
 	const ipromise = makeIframe(script,codeword);
@@ -137,35 +137,35 @@ Catiline.makeIWorker = function (strings,codeword){
 };
 
 function makeFallbackWorker(script){
-	Catiline._noTransferable=true;
+	catiline._noTransferable=true;
 	const worker = new Worker(getPath());
 	worker.postMessage(script);
 	return worker;
 }
 //accepts an array of strings, joins them, and turns them into a worker.
-Catiline.makeWorker = function (strings, codeword){
-	if(!Catiline._hasWorker){
-		return Catiline.makeIWorker(strings,codeword);
+catiline.makeWorker = function (strings, codeword){
+	if(!catiline._hasWorker){
+		return catiline.makeIWorker(strings,codeword);
 	}
 	let worker;
 	const script = moveImports(strings.join('\n'));
-	if(Catiline._noTransferable){
+	if(catiline._noTransferable){
 		return makeFallbackWorker(script);
 	}
 	try{
-		worker= new Worker(Catiline.URL.createObjectURL(new Blob([script],{type: 'text/javascript'})));
+		worker= new Worker(catiline.URL.createObjectURL(new Blob([script],{type: 'text/javascript'})));
 	}catch(e){
 		try{
 			worker=makeFallbackWorker(script);
 		}catch(ee){
-			worker = Catiline.makeIWorker(strings,codeword);
+			worker = catiline.makeIWorker(strings,codeword);
 		}
 	}finally{
 		return worker;
 	}
 };
 
-Catiline.makeUrl = function (fileName) {
+catiline.makeUrl = function (fileName) {
 	const link = document.createElement('link');
 	link.href = fileName;
 	return link.href;
@@ -182,7 +182,7 @@ function stringifyObject(obj){
 		}
 		out += key;
 		out += ':';
-		out += Catiline.stringify(obj[key]);
+		out += catiline.stringify(obj[key]);
 	}
 	out += '}';
 	return out;
@@ -190,12 +190,12 @@ function stringifyObject(obj){
 function stringifyArray(array){
 	if(array.length){
 		let out = '[';
-		out += Catiline.stringify(array[0]);
+		out += catiline.stringify(array[0]);
 		let i = 0;
 		const len = array.length;
 		while(++i<len){
 			out += ',';
-			out += Catiline.stringify(array[i]);
+			out += catiline.stringify(array[i]);
 		}
 		out += ']';
 		return out;
@@ -203,7 +203,7 @@ function stringifyArray(array){
 		return '[]';
 	}
 }
-Catiline.stringify = function(thing){
+catiline.stringify = function(thing){
 	if(Array.isArray(thing)){
 		return stringifyArray(thing);
 	}else if(typeof thing === 'function'||typeof thing === 'number'||typeof thing === 'boolean'){

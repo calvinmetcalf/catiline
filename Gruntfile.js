@@ -45,7 +45,7 @@ module.exports = function(grunt) {
 				options: {
 					banner: '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */\n',
 					seperator:";\n",
-					footer : 'Catiline.version = \'<%= pkg.version %>\';\n})(this);}'
+					footer : 'catiline.version = \'<%= pkg.version %>\';\n})(this);}'
 				},
 				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/nextTick.js','src/promise.js','src/utils.js','src/worker.js','src/events.js','src/core.js','src/queue.js','src/wrapup.js']}
 			}
