@@ -83,8 +83,7 @@ function actualMakeI(script,codeword){
 	const iFrame = document.createElement('iframe');
 	iFrame.style.display = 'none';
 	document.body.appendChild(iFrame);
-	const iWin = iFrame.contentWindow;
-	const iDoc = iWin.document;
+	const iDoc = iFrame.contentWindow.document;
 	const text=['try{ ',
 	'var __scripts__=\'\';function importScripts(scripts){',
 	'	if(Array.isArray(scripts)&&scripts.length>0){',
@@ -149,7 +148,7 @@ catiline.makeWorker = function (strings, codeword){
 		return catiline.makeIWorker(strings,codeword);
 	}
 	let worker;
-	const script = moveImports(strings.join(''));
+	const script = moveImports(strings.join('\n'));
 	if(catiline._noTransferable){
 		return makeFallbackWorker(script);
 	}
@@ -170,4 +169,48 @@ catiline.makeUrl = function (fileName) {
 	const link = document.createElement('link');
 	link.href = fileName;
 	return link.href;
+};
+
+function stringifyObject(obj){
+	let out = '{';
+	let first = true;
+	for(let key in obj){
+		if(first){
+			first = false;
+		}else{
+			out+=',';
+		}
+		out += key;
+		out += ':';
+		out += catiline.stringify(obj[key]);
+	}
+	out += '}';
+	return out;
+}
+function stringifyArray(array){
+	if(array.length){
+		let out = '[';
+		out += catiline.stringify(array[0]);
+		let i = 0;
+		const len = array.length;
+		while(++i<len){
+			out += ',';
+			out += catiline.stringify(array[i]);
+		}
+		out += ']';
+		return out;
+	}else{
+		return '[]';
+	}
+}
+catiline.stringify = function(thing){
+	if(Array.isArray(thing)){
+		return stringifyArray(thing);
+	}else if(typeof thing === 'function'||typeof thing === 'number'||typeof thing === 'boolean'){
+		return thing.toString();
+	}else if(typeof thing === 'string'){
+		return '"' + thing + '"';
+	}else if(thing.toString() === '[object Object]'){
+		return stringifyObject(thing);
+	}
 };
