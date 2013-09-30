@@ -1,35 +1,27 @@
-function catiline(object,queueLength,unmanaged){
-	if(arguments.length === 1 || !queueLength || queueLength <= 1){
-		return new catiline.Worker(object);
-	}else{
-		return new catiline.Queue(object,queueLength,unmanaged);
-	}
-}
-//will be removed in v3
-catiline.setImmediate = catiline.nextTick;
-function initBrowser(catiline){
+Catiline.setImmediate = Catiline.nextTick;
+function initBrowser(Catiline){
 	const origCW = global.cw;
-	catiline.noConflict=function(newName){
+	Catiline.noConflict=function(newName){
 		global.cw = origCW;
 		if(newName){
-			global[newName]=catiline;
+			global[newName]=Catiline;
 		}
 	};
-	global.catiline = catiline;
-	global.cw = catiline;
+	global.catiline = Catiline;
+	global.cw = Catiline;
 	if(!('communist' in global)){
-		global.communist=catiline;
+		global.communist=Catiline;
 	}
 	
 }
 
 if(typeof define === 'function'){
 	define(function(require){
-		catiline.SHIM_WORKER_PATH=require.toUrl('./catiline.js');
-		return catiline;
+		Catiline.SHIM_WORKER_PATH=require.toUrl('./catiline.js');
+		return Catiline;
 	});
 }else if(typeof module === 'undefined' || !('exports' in module)){
-	initBrowser(catiline);
+	initBrowser(Catiline);
 } else {
-	module.exports=catiline;
+	module.exports=Catiline;
 }

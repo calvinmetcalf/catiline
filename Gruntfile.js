@@ -29,43 +29,38 @@ module.exports = function(grunt) {
 		pkg: grunt.file.readJSON('package.json'),
 		uglify: {
 			all: {
-    			options:{
+				options:{
 					banner:'/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!(c)2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */\n/*!Includes Promiscuous (c)2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/\n/*!Includes Material from setImmediate Copyright (c) 2012 Barnesandnoble.com, llc, Donavon West, and Domenic Denicola @license MIT https://github.com/NobleJS/setImmediate */\n',
 					mangle: {
 						except: ['Catiline','CatilineQueue','FakeCatiline','Promise','Deferred']
 					},
-					 report: 'gzip'
+					 report: 'gzip',
+					 sourceMap: 'dist/<%= pkg.name %>.map',
+					 sourceMapRoot:'..',
+					 sourceMappingURL:'<%= pkg.name %>.map'
 				},
-				src: 'dist/<%= pkg.name %>.min.js',
+				src: 'dist/<%= pkg.name %>.js',
 				dest: 'dist/<%= pkg.name %>.min.js'
 			}
 		},
 		concat: {
-		    ugly: { 
-    			options: {
-					banner: '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */\n',
-					seperator:";\n",
-					footer : 'catiline.version = \'<%= pkg.version %>\';\n})(this);}'
-				},
-				files: {'dist/<%= pkg.name %>.min.js':['src/IE.js','src/nextTick.js','src/promise.js','src/utils.js','src/temp.min.js','src/queue.js','src/wrapup.js']}
-			},
 			browser: { 
 				options: {
 					banner: '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */\n',
 					seperator:";\n",
 					footer : 'catiline.version = \'<%= pkg.version %>\';\n})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/nextTick.js','src/promise.js','src/utils.js','src/temp.js','src/queue.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/nextTick.js','src/promise.js','src/utils.js','src/worker.js','src/events.js','src/core.js','src/queue.js','src/wrapup.js']}
 			}
 		},
 		mocha_phantomjs: {
 			all: {
 				options: {
 					urls: [
-						"http://"+process.env.IP+":8080/test/index.html",
-						"http://"+process.env.IP+":8080/test/index.min.html",
-						"http://"+process.env.IP+":8080/test/index.leg.html",
-						"http://"+process.env.IP+":8080/test/index.amd.html"
+						"http://"+process.env.IP+":"+process.env.PORT+"/test/index.html",
+						"http://"+process.env.IP+":"+process.env.PORT+"/test/index.min.html",
+						"http://"+process.env.IP+":"+process.env.PORT+"/test/index.leg.html",
+						"http://"+process.env.IP+":"+process.env.PORT+"/test/index.amd.html"
 					]
 				}
 			}
@@ -73,7 +68,7 @@ module.exports = function(grunt) {
 		connect: {
 			server: {
 				options: {
-					port: 8080,
+					port: process.env.PORT,
 					base: '.'
 				}
 			}
@@ -197,10 +192,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-saucelabs');
 	grunt.registerTask('template',templateThings);
 	grunt.registerTask('defsAll',function(){
-		d('dist/catiline.js')
-	})
-	grunt.registerTask('defsUgly',function(){
-		d('dist/catiline.min.js')
+		d('dist/catiline.js');
 	});
 	grunt.registerTask('sauce',['connect','saucelabs-mocha:big','saucelabs-mocha:shim','saucelabs-mocha:legacy']);
 	grunt.registerTask('server',['connect']);
@@ -208,8 +200,8 @@ module.exports = function(grunt) {
 	grunt.registerTask('lint',['jshint:afterconcat']);
 	grunt.registerTask('testing', ['connect', 'mocha_phantomjs']);
 	grunt.registerTask('test', ['lint','sauce']);
-	grunt.registerTask('build', ['template','browser']);
-    grunt.registerTask('ugly', ['concat:ugly','defsUgly','uglify']);
+	grunt.registerTask('build', ['browser']);
+    grunt.registerTask('ugly', ['uglify']);
 	grunt.registerTask('default', ['build','test']);
 	grunt.registerTask('c9', ['build','lint','testing']);
 

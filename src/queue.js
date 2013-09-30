@@ -1,4 +1,4 @@
-catiline.Queue = function CatilineQueue(obj, n, dumb) {
+Catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	const self = this;
 	self.__batchcb__ = {};
 	self.__batchtcb__ = {};
@@ -26,7 +26,7 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	let que = [];
 	let queueLen = 0;
 	while (numIdle < n) {
-		workers[numIdle] = new catiline.Worker(obj);
+		workers[numIdle] = new Catiline.Worker(obj);
 		idle.push(numIdle);
 		numIdle++;
 	}
@@ -74,7 +74,7 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 
 	function keyFuncBatch(k) {
 		return function (array) {
-			return catiline.all(array.map(function (data) {
+			return Catiline.all(array.map(function (data) {
 				return doStuff(k, data);
 			}));
 		};
@@ -83,7 +83,7 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	function keyFuncBatchCB(k) {
 		return function (array) {
 			const self = this;
-			return catiline.all(array.map(function (data) {
+			return Catiline.all(array.map(function (data) {
 				return doStuff(k, data).then(self.__cb__);
 			}));
 		};
@@ -91,7 +91,7 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 
 	function keyFuncBatchTransfer(k) {
 		return function (array) {
-			return catiline.all(array.map(function (data) {
+			return Catiline.all(array.map(function (data) {
 				return doStuff(k, data[0], data[1]);
 			}));
 		};
@@ -100,7 +100,7 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	function keyFuncBatchTransferCB(k) {
 		return function (array) {
 			const self = this;
-			return catiline.all(array.map(function (data) {
+			return Catiline.all(array.map(function (data) {
 				return doStuff(k, data[0], data[1]).then(self.__cb__);
 			}));
 		};
@@ -132,7 +132,7 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	}
 
 	function doStuff(key, data, transfer) { //srsly better name!
-		const promise = catiline.deferred();
+		const promise = Catiline.deferred();
 		if (dumb) {
 			promise.promise.cancel = function(reason){
 				return promise.reject(reason);
@@ -173,7 +173,7 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 		return promise.promise;
 	}
 	self._close = function () {
-		return catiline.all(workers.map(function (w) {
+		return Catiline.all(workers.map(function (w) {
 			return w._close();
 		}));
 	};
@@ -181,6 +181,6 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 		self.close = self._close;
 	}
 };
-catiline.queue = function (obj, n, dumb) {
-	return new catiline.Queue(obj, n, dumb);
+Catiline.queue = function (obj, n, dumb) {
+	return new Catiline.Queue(obj, n, dumb);
 };

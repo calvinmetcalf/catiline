@@ -37,7 +37,7 @@ function runTests(chai,cw,global){
 	    });
     };
     //cw.URL=true;
-    describe('cw()', function () {
+    describe('Catiline', function () {
 	    describe('Basic', function () {
 		    it('should work when given a function and data directly' , function (done) {
 			    single(square, 9).then(function (a) { assert.equal(a,81); }).then(done, done);
@@ -582,18 +582,25 @@ function runTests(chai,cw,global){
 		        var comrade = cw({
 			        init:function(){
 			            var a = 1;
-			            var b =1;
-			            this.on('notTwice',function(things,self){
-			            	self.fire('check',b);
-			                if(b++===2){
-			                	self.fire('closeWorker');
-			                }
-			            });
 			            this.one('notTwice',function(things,self){
 			                self.fire('YOLO',a++);
 			            });
 			            
-			        }
+			        }, events:{
+			    		notTwice:function(things,self){
+			            	self.fire('check',self.b);
+			                if(self.b++===2){
+			                	self.fire('closeWorker');
+			                }
+			            }
+			    	},
+			    	b:1,
+			    	listners:{
+			    		closeWorker:function(a){
+				    		this.close();
+				    		done();
+			    		}
+			    	}
 			    });
 			    var i = 1;
 			    comrade.on('YOLO',function(a){
@@ -601,10 +608,6 @@ function runTests(chai,cw,global){
 			    });
 			    comrade.on('check',function(a){
 				    assert.equal(a,i++);
-			    });
-			    comrade.on('closeWorker',function(a){
-				    comrade.close();
-				    done();
 			    });
 			    comrade.fire('notTwice');
 			    comrade.fire('notTwice');

@@ -1,137 +1,76 @@
-'use strict';
-
-const _db = $$fObj$$;
-const listeners = {};
-const __iFrame__ = typeof document!=="undefined";
-const __self__={onmessage:function(e){
-	_fire("messege",e.data[1]);
-	if(e.data[0][0]===_db.__codeWord__){
-		return regMsg(e);
-	}else{
-		_fire(e.data[0][0],e.data[1]);
-	}
-}};
-if(__iFrame__){
-	window.onmessage=function(e){
-		if(typeof e.data === "string"){
-			e ={data: JSON.parse(e.data)};
+const workerSetup = function(context) {
+	self.__iFrame__ = typeof document !== 'undefined';
+	self.__self__ = {
+		onmessage: function(e) {
+			context.trigger('messege', e.data[1]);
+			if (e.data[0][0] === context.__codeWord__) {
+				return regMsg(e);
+			}
+			else {
+				context.trigger(e.data[0][0], e.data[1]);
+			}
 		}
-		__self__.onmessage(e);
 	};
-}else{
-	self.onmessage=__self__.onmessage;
-}
-__self__.postMessage=function(rawData, transfer){
-	if(!self._noTransferable&&!__iFrame__){
-		self.postMessage(rawData, transfer);
-	}else if(__iFrame__){
-		let data = _db.__codeWord__+JSON.stringify(rawData);
-		window.parent.postMessage(data,"*");
-	}else if(self._noTransferable){
-		self.postMessage(rawData);
+	if (__iFrame__) {
+		window.onmessage = function(e) {
+			if (typeof e.data === 'string') {
+				e = {
+					data: JSON.parse(e.data)
+				};
+			}
+			__self__.onmessage(e);
+		};
 	}
-};
-_db.on = function (eventName, func, scope) {
-	if(eventName.indexOf(" ")>0){
-		return eventName.split(" ").map(function(v){
-			return _db.on(v,func,scope);
-		},_db);
+	else {
+		self.onmessage = __self__.onmessage;
 	}
-	scope = scope || _db;
-	if (!(eventName in listeners)) {
-		listeners[eventName] = [];
-	}
-	const newFunc = function (a) {
-		func.call(scope, a, _db);
+	__self__.postMessage = function(rawData, transfer) {
+		if (!self._noTransferable && !__iFrame__) {
+			self.postMessage(rawData, transfer);
+		}
+		else if (__iFrame__) {
+			let data = context.__codeWord__ + JSON.stringify(rawData);
+			window.parent.postMessage(data, '*');
+		}
+		else if (self._noTransferable) {
+			self.postMessage(rawData);
+		}
 	};
-	newFunc.orig = func;
-	listeners[eventName].push(newFunc);
-	_db;
-};
-_db.one = function (eventName, func, scope) {
-	scope = scope || _db;
-	function ourFunc(a){
-		_db.off(eventName, ourFunc);
-		func.call(scope, a, _db);
+	const console = {};
+
+	function makeConsole(method) {
+		return function() {
+			const len = arguments.length;
+			const out = [];
+			let i = 0;
+			while (i < len) {
+				out.push(arguments[i]);
+				i++;
+			}
+			context.fire('console', [method, out]);
+		};
 	}
-	return _db.on(eventName,ourFunc);
-}
-function _fire(eventName,data){
-	if(eventName.indexOf(" ")>0){
-		eventName.split(" ").forEach(function(v){
-			_fire(v,data);
-		});
-		return;
-	}
-	if (!(eventName in listeners)) {
-		return;
-	}
-	listeners[eventName].forEach(function (v) {
-		v(data);
+	['log', 'debug', 'error', 'info', 'warn', 'time', 'timeEnd'].forEach(function(v) {
+		console[v] = makeConsole(v);
 	});
-}
-
-_db.fire = function (eventName, data, transfer) {
-	__self__.postMessage([[eventName], data], transfer);
-	return _db;
-};
-_db.off=function(eventName, func){
-	if(eventName.indexOf(" ")>0){
-		return eventName.split(" ").map(function(v){
-			return _db.off(v, func);
-		});
-	}
-	if(!(eventName in listeners)){
-		return;
-	}else{
-		if(func){
-			listeners[eventName] = listeners[eventName].map(function(a){
-				if(a.orig===func){
-					return false;
-				}else{
-					return a;
-				}
-			}).filter(function(a){
-				return a;
-			});
-		} else {
-			delete listeners[eventName];
+	const regMsg = function(e) {
+		const cb = function(data, transfer) {
+			__self__.postMessage([e.data[0], data], transfer);
+		};
+		let result;
+		if (__iFrame__) {
+			try {
+				result = context[e.data[1]](e.data[2], cb, context);
+			}
+			catch (ee) {
+				context.fire('error', JSON.stringify(ee));
+			}
 		}
-	}
-	return _db;
-};
-const console={};
-function makeConsole(method){
-	return function(){
-		const len = arguments.length;
-		const out =[];
-		let i = 0;
-		while (i<len){
-			out.push(arguments[i]);
-			i++;
+		else {
+			result = context[e.data[1]](e.data[2], cb, context);
 		}
-		_db.fire("console",[method,out]);
+		if (typeof result !== 'undefined') {
+			cb(result);
+		}
 	};
-}
-["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){
-	console[v]=makeConsole(v);
-});
-const regMsg = function(e){
-	const cb=function(data,transfer){
-		__self__.postMessage([e.data[0],data],transfer);
-	};
-	let result;
-	if(__iFrame__){
-		try{
-			result = _db[e.data[1]](e.data[2],cb,_db);
-		}catch(e){
-			_db.fire("error",JSON.stringify(e));
-		}
-	}else{
-		result = _db[e.data[1]](e.data[2],cb,_db);
-	}
-	if(typeof result !== "undefined"){
-		cb(result);
-	}
 };
-_db.initialize(_db);
