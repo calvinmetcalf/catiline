@@ -57,10 +57,10 @@ module.exports = function(grunt) {
 			all: {
 				options: {
 					urls: [
-						"http://"+process.env.IP+":"+process.env.PORT+"/test/index.html",
-						"http://"+process.env.IP+":"+process.env.PORT+"/test/index.min.html",
-						"http://"+process.env.IP+":"+process.env.PORT+"/test/index.leg.html",
-						"http://"+process.env.IP+":"+process.env.PORT+"/test/index.amd.html"
+						"http://"+process.env.IP+":8080/test/index.html",
+						"http://"+process.env.IP+":8080/test/index.min.html",
+						"http://"+process.env.IP+":8080/test/index.leg.html",
+						"http://"+process.env.IP+":8080/test/index.amd.html"
 					]
 				}
 			}
@@ -68,7 +68,7 @@ module.exports = function(grunt) {
 		connect: {
 			server: {
 				options: {
-					port: process.env.PORT,
+					port: 8080,
 					base: '.'
 				}
 			}
