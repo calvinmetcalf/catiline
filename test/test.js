@@ -586,7 +586,7 @@ function runTests(chai,cw,global){
 			            this.on('notTwice',function(things,self){
 			            	self.fire('check',b);
 			                if(b++===2){
-			                	self.close();
+			                	self.fire('closeWorker');
 			                }
 			            });
 			            this.one('notTwice',function(things,self){
@@ -601,6 +601,10 @@ function runTests(chai,cw,global){
 			    });
 			    comrade.on('check',function(a){
 				    assert.equal(a,i++);
+			    });
+			    comrade.on('closeWorker',function(a){
+				    comrade.close();
+				    done();
 			    });
 			    comrade.fire('notTwice');
 			    comrade.fire('notTwice');
