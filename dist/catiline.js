@@ -599,7 +599,7 @@ function Catiline(obj) {
 	var self = this;
 	var promises = [];
 	addEvents(self, function(data, transfer) {
-		if (Catiline._noTransferable) {
+		if (catiline._noTransferable) {
 			worker.postMessage(data);
 		}
 		else {
