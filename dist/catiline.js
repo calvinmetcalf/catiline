@@ -51,7 +51,7 @@ var mainQueue = [];
  * drained, schedule it.
  * @param {function} task
  */
-Catiline.nextTick = function(task) {
+catiline.nextTick = function(task) {
 	if (mainQueue.push(task) === 1) {
 		nextTick();
 	}
@@ -160,7 +160,7 @@ function createHandler(promise, value, success) {
 // Executes the callback with the specified value,
 // resolving or rejecting the deferred
 function execute(callback, value, deferred) {
-	Catiline.nextTick(function() {
+	catiline.nextTick(function() {
 		try {
 			var result = callback(value);
 			if (result && typeof result.then === func) {
@@ -175,22 +175,22 @@ function execute(callback, value, deferred) {
 		}
 	});
 }
-Catiline.deferred = createDeferred;
+catiline.deferred = createDeferred;
 // Returns a resolved promise
-Catiline.resolve = function(value) {
+catiline.resolve = function(value) {
 	var promise = {};
 	promise.then = createHandler(promise, value, true);
 	return promise;
 };
 // Returns a rejected promise
-Catiline.reject = function(reason) {
+catiline.reject = function(reason) {
 	var promise = {};
 	promise.then = createHandler(promise, reason, false);
 	return promise;
 };
 // Returns a deferred
 
-Catiline.all = function(array) {
+catiline.all = function(array) {
 	var promise = createDeferred();
 	var len = array.length;
 	var resolved = 0;
@@ -211,9 +211,9 @@ Catiline.all = function(array) {
 	});
 	return promise.promise;
 };
-Catiline._hasWorker = typeof Worker !== 'undefined'&&typeof fakeLegacy === 'undefined';
-Catiline.URL = window.URL || window.webkitURL;
-Catiline._noTransferable=!Catiline.URL;
+catiline._hasWorker = typeof Worker !== 'undefined'&&typeof fakeLegacy === 'undefined';
+catiline.URL = window.URL || window.webkitURL;
+catiline._noTransferable=!catiline.URL;
 //regex out the importScript call and move it up to the top out of the function.
 function regexImports(string){
 	var rest=string;
@@ -222,7 +222,7 @@ function regexImports(string){
 	var loopFunc = function(a,b){
 		if(b){
 			'importScripts('+b.split(',').forEach(function(cc){
-				matches[Catiline.makeUrl(cc.match(/\s*[\'\"](\S*)[\'\"]\s*/)[1])]=true; // trim whitespace, add to matches
+				matches[catiline.makeUrl(cc.match(/\s*[\'\"](\S*)[\'\"]\s*/)[1])]=true; // trim whitespace, add to matches
 			})+');\n';
 		}
 	};
@@ -260,14 +260,14 @@ function moveIimports(string){
 function getPath(){
 	if(typeof SHIM_WORKER_PATH !== 'undefined'){
 		return SHIM_WORKER_PATH;
-	}else if('SHIM_WORKER_PATH' in Catiline){
-		return Catiline.SHIM_WORKER_PATH;
+	}else if('SHIM_WORKER_PATH' in catiline){
+		return catiline.SHIM_WORKER_PATH;
 	}
 	var scripts = document.getElementsByTagName('script');
 	var len = scripts.length;
 	var i = 0;
 	while(i<len){
-		if(/Catiline(\.min)?\.js/.test(scripts[i].src)){
+		if(/catiline(\.min)?\.js/.test(scripts[i].src)){
 			return scripts[i].src;
 		}
 		i++;
@@ -316,7 +316,7 @@ function actualMakeI(script,codeword){
 	return iFrame;
 }
 function makeIframe(script,codeword){
-	var promise = Catiline.deferred();
+	var promise = catiline.deferred();
 	if(document.readyState==='complete'){
 		promise.resolve(actualMakeI(script,codeword));
 	}else{
@@ -326,7 +326,7 @@ function makeIframe(script,codeword){
 	}
 	return promise.promise;
 }
-Catiline.makeIWorker = function (strings,codeword){
+catiline.makeIWorker = function (strings,codeword){
 	var script =moveIimports(strings.join(''));
 	var worker = {onmessage:function(){}};
 	var ipromise = makeIframe(script,codeword);
@@ -350,35 +350,35 @@ Catiline.makeIWorker = function (strings,codeword){
 };
 
 function makeFallbackWorker(script){
-	Catiline._noTransferable=true;
+	catiline._noTransferable=true;
 	var worker = new Worker(getPath());
 	worker.postMessage(script);
 	return worker;
 }
 //accepts an array of strings, joins them, and turns them into a worker.
-Catiline.makeWorker = function (strings, codeword){
-	if(!Catiline._hasWorker){
-		return Catiline.makeIWorker(strings,codeword);
+catiline.makeWorker = function (strings, codeword){
+	if(!catiline._hasWorker){
+		return catiline.makeIWorker(strings,codeword);
 	}
 	var worker;
 	var script = moveImports(strings.join('\n'));
-	if(Catiline._noTransferable){
+	if(catiline._noTransferable){
 		return makeFallbackWorker(script);
 	}
 	try{
-		worker= new Worker(Catiline.URL.createObjectURL(new Blob([script],{type: 'text/javascript'})));
+		worker= new Worker(catiline.URL.createObjectURL(new Blob([script],{type: 'text/javascript'})));
 	}catch(e){
 		try{
 			worker=makeFallbackWorker(script);
 		}catch(ee){
-			worker = Catiline.makeIWorker(strings,codeword);
+			worker = catiline.makeIWorker(strings,codeword);
 		}
 	}finally{
 		return worker;
 	}
 };
 
-Catiline.makeUrl = function (fileName) {
+catiline.makeUrl = function (fileName) {
 	var link = document.createElement('link');
 	link.href = fileName;
 	return link.href;
@@ -395,7 +395,7 @@ function stringifyObject(obj){
 		}
 		out += key;
 		out += ':';
-		out += Catiline.stringify(obj[key]);
+		out += catiline.stringify(obj[key]);
 	}
 	out += '}';
 	return out;
@@ -403,12 +403,12 @@ function stringifyObject(obj){
 function stringifyArray(array){
 	if(array.length){
 		var out = '[';
-		out += Catiline.stringify(array[0]);
+		out += catiline.stringify(array[0]);
 		var i = 0;
 		var len = array.length;
 		while(++i<len){
 			out += ',';
-			out += Catiline.stringify(array[i]);
+			out += catiline.stringify(array[i]);
 		}
 		out += ']';
 		return out;
@@ -416,7 +416,7 @@ function stringifyArray(array){
 		return '[]';
 	}
 }
-Catiline.stringify = function(thing){
+catiline.stringify = function(thing){
 	if(Array.isArray(thing)){
 		return stringifyArray(thing);
 	}else if(typeof thing === 'function'||typeof thing === 'number'||typeof thing === 'boolean'){
@@ -590,12 +590,6 @@ var addEvents = function(context, msg) {
 	};
 };
 function Catiline(obj) {
-	if(arguments.length > 1 && arguments[1] && arguments[1] > 1){
-		return new Catiline.Queue(obj,arguments[1],arguments[2]);
-	}
-	if (!(this instanceof Catiline)) {
-		return new Catiline(obj);
-	}
 	if (typeof obj === 'function') {
 		obj = {
 			data: obj
@@ -649,8 +643,8 @@ function Catiline(obj) {
 	var keyFunc = function(key) {
 		var out = function(data, transfer) {
 			var i = promises.length;
-			promises[i] = Catiline.deferred();
-			if (Catiline._noTransferable) {
+			promises[i] = catiline.deferred();
+			if (catiline._noTransferable) {
 				worker.postMessage([
 					[codeWord, i], key, data]);
 			}
@@ -675,14 +669,14 @@ function Catiline(obj) {
 			self[key$0] = keyFunc(key$0);
 		}
 		else {
-			var outThing = Catiline.stringify(obj[key$0]);
+			var outThing = catiline.stringify(obj[key$0]);
 			if (typeof outThing !== 'undefined') {
 				fObj = fObj + key$0 + ':' + outThing;
 			}
 		}
 	}
 	fObj = fObj + '};';
-	var worker = Catiline.makeWorker(['\'use strict\';', '',
+	var worker = catiline.makeWorker(['\'use strict\';', '',
 	fObj, '_db.__initialize__.forEach(function(f){', '	f.call(_db,_db);', '});', 'for(var key in _db.events){', '	_db.on(key,_db.events[key]);', '}'], codeWord);
 	worker.onmessage = function(e) {
 		self.trigger('message', e.data[1]);
@@ -704,15 +698,18 @@ function Catiline(obj) {
 	self._close = function() {
 		worker.terminate();
 		rejectPromises('closed');
-		return Catiline.resolve();
+		return catiline.resolve();
 	};
 	if (!('close' in self)) {
 		self.close = self._close;
 	}
 }
-Catiline.Worker = Catiline.worker = Catiline;
+catiline.Worker = Catiline;
 
-Catiline.Queue = function CatilineQueue(obj, n, dumb) {
+catiline.worker = function(obj){
+    return new Catiline(obj);
+};
+catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	var self = this;
 	self.__batchcb__ = {};
 	self.__batchtcb__ = {};
@@ -740,7 +737,7 @@ Catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	var que = [];
 	var queueLen = 0;
 	while (numIdle < n) {
-		workers[numIdle] = new Catiline.Worker(obj);
+		workers[numIdle] = new catiline.Worker(obj);
 		idle.push(numIdle);
 		numIdle++;
 	}
@@ -788,7 +785,7 @@ Catiline.Queue = function CatilineQueue(obj, n, dumb) {
 
 	function keyFuncBatch(k) {
 		return function (array) {
-			return Catiline.all(array.map(function (data) {
+			return catiline.all(array.map(function (data) {
 				return doStuff(k, data);
 			}));
 		};
@@ -797,7 +794,7 @@ Catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	function keyFuncBatchCB(k) {
 		return function (array) {
 			var self = this;
-			return Catiline.all(array.map(function (data) {
+			return catiline.all(array.map(function (data) {
 				return doStuff(k, data).then(self.__cb__);
 			}));
 		};
@@ -805,7 +802,7 @@ Catiline.Queue = function CatilineQueue(obj, n, dumb) {
 
 	function keyFuncBatchTransfer(k) {
 		return function (array) {
-			return Catiline.all(array.map(function (data) {
+			return catiline.all(array.map(function (data) {
 				return doStuff(k, data[0], data[1]);
 			}));
 		};
@@ -814,7 +811,7 @@ Catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	function keyFuncBatchTransferCB(k) {
 		return function (array) {
 			var self = this;
-			return Catiline.all(array.map(function (data) {
+			return catiline.all(array.map(function (data) {
 				return doStuff(k, data[0], data[1]).then(self.__cb__);
 			}));
 		};
@@ -846,7 +843,7 @@ Catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	}
 
 	function doStuff(key, data, transfer) { //srsly better name!
-		var promise = Catiline.deferred();
+		var promise = catiline.deferred();
 		if (dumb) {
 			promise.promise.cancel = function(reason){
 				return promise.reject(reason);
@@ -887,7 +884,7 @@ Catiline.Queue = function CatilineQueue(obj, n, dumb) {
 		return promise.promise;
 	}
 	self._close = function () {
-		return Catiline.all(workers.map(function (w) {
+		return catiline.all(workers.map(function (w) {
 			return w._close();
 		}));
 	};
@@ -895,36 +892,43 @@ Catiline.Queue = function CatilineQueue(obj, n, dumb) {
 		self.close = self._close;
 	}
 };
-Catiline.queue = function (obj, n, dumb) {
-	return new Catiline.Queue(obj, n, dumb);
+catiline.queue = function (obj, n, dumb) {
+	return new catiline.Queue(obj, n, dumb);
 };
 
-Catiline.setImmediate = Catiline.nextTick;
-function initBrowser(Catiline){
+function catiline(object,queueLength,unmanaged){
+	if(arguments.length === 1 || !queueLength || queueLength <= 1){
+		return new catiline.Worker(object);
+	}else{
+		return new catiline.Queue(object,queueLength,unmanaged);
+	}
+}
+//will be removed in v3
+catiline.setImmediate = catiline.nextTick;
+function initBrowser(catiline){
 	var origCW = global.cw;
-	Catiline.noConflict=function(newName){
+	catiline.noConflict=function(newName){
 		global.cw = origCW;
 		if(newName){
-			global[newName]=Catiline;
+			global[newName]=catiline;
 		}
 	};
-	global.catiline = Catiline;
-	global.cw = Catiline;
+	global.catiline = catiline;
+	global.cw = catiline;
 	if(!('communist' in global)){
-		global.communist=Catiline;
+		global.communist=catiline;
 	}
-	
+
 }
 
 if(typeof define === 'function'){
 	define(function(require){
-		Catiline.SHIM_WORKER_PATH=require.toUrl('./catiline.js');
-		return Catiline;
+		catiline.SHIM_WORKER_PATH=require.toUrl('./catiline.js');
+		return catiline;
 	});
 }else if(typeof module === 'undefined' || !('exports' in module)){
-	initBrowser(Catiline);
+	initBrowser(catiline);
 } else {
-	module.exports=Catiline;
-}
-catiline.version = '2.9.0-dev.2';
+	module.exports=catiline;
+}catiline.version = '2.9.0-dev.2';
 })(this);}
