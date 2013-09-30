@@ -8,7 +8,7 @@ function Catiline(obj) {
 	const self = this;
 	const promises = [];
 	addEvents(self, function(data, transfer) {
-		if (Catiline._noTransferable) {
+		if (catiline._noTransferable) {
 			worker.postMessage(data);
 		}
 		else {
