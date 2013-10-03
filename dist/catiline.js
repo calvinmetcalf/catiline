@@ -1,4 +1,4 @@
-/*! catiline 2.9.0-dev.2 2013-09-30*/
+/*! catiline 2.9.0-dev.3 2013-10-03*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */
 if (typeof document === 'undefined') {
 	self._noTransferable=true;
@@ -622,12 +622,10 @@ function Catiline(obj) {
 	if (!('initialize' in obj)) {
 		if ('init' in obj) {
 			obj.__initialize__.push(obj.init);
-			delete obj.init;
 		}
 	}
 	else {
 		obj.__initialize__.push(obj.initialize);
-		//delete obj.initialize;
 	}
 
 	if (!('events' in obj)) {
@@ -637,7 +635,6 @@ function Catiline(obj) {
 		for (var key in obj.listners) {
 			self.on(key, obj.listners[key]);
 		}
-		delete obj.listners;
 	}
 	var fObj = 'var _db = {\n\t';
 	var keyFunc = function(key) {
@@ -658,6 +655,9 @@ function Catiline(obj) {
 	};
 	var i = false;
 	for (var key$0 in obj) {
+		if(['listners','initialize','init'].indexOf(key$0)>-1){
+			continue;
+		}
 		if (i) {
 			fObj += ',\n\t';
 		}
@@ -930,5 +930,5 @@ if(typeof define === 'function'){
 	initBrowser(catiline);
 } else {
 	module.exports=catiline;
-}catiline.version = '2.9.0-dev.2';
+}catiline.version = '2.9.0-dev.3';
 })(this);}
