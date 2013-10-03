@@ -36,7 +36,7 @@ const workerSetup = function(context) {
 			self.postMessage(rawData);
 		}
 	};
-	const console = {};
+	self.console = {};
 
 	function makeConsole(method) {
 		return function() {
