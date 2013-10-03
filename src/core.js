@@ -102,7 +102,12 @@ function Catiline(obj) {
 		self.trigger('error', e);
 	};
 	self.on('console', function(msg) {
-		console[msg[0]].apply(console, msg[1]);
+		let method = console[msg[0]]?msg[0]:'log';
+		if(typeof console[method].apply === 'undefined'){
+			console[method](msg[1].join(' '));
+		}else{
+			console[method].apply(console, msg[1]);
+		}
 	});
 	self._close = function() {
 		worker.terminate();

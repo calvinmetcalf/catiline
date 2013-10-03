@@ -613,5 +613,84 @@ function runTests(chai,cw,global){
 			    comrade.fire('notTwice');
 		    });
 	    });
+	    describe('console', function () {
+	    	it('console.log should work',function(done){
+	    		var comrade = cw({init:function(){
+	    			console.log(1234,"hello");
+	    		},listners:{
+	    			console:function(d){
+	    				assert.deepEqual(d,["log",[1234,"hello"]]);
+	    				comrade.close();
+	    				done();
+	    			}
+	    		}});
+	    	});
+	    	it('console.debug should work',function(done){
+	    		var comrade = cw({init:function(){
+	    			console.debug(1234,"hello");
+	    		},listners:{
+	    			console:function(d){
+	    				assert.deepEqual(d,["debug",[1234,"hello"]]);
+	    				comrade.close();
+	    				done();
+	    			}
+	    		}});
+	    	});
+	    	it('console.error should work',function(done){
+	    		var comrade = cw({init:function(){
+	    			console.error(1234,"hello");
+	    		},listners:{
+	    			console:function(d){
+	    				assert.deepEqual(d,["error",[1234,"hello"]]);
+	    				comrade.close();
+	    				done();
+	    			}
+	    		}});
+	    	});
+	    	it('console.info should work',function(done){
+	    		var comrade = cw({init:function(){
+	    			console.info(1234,"hello");
+	    		},listners:{
+	    			console:function(d){
+	    				assert.deepEqual(d,["info",[1234,"hello"]]);
+	    				comrade.close();
+	    				done();
+	    			}
+	    		}});
+	    	});
+	    	it('console.warn should work',function(done){
+	    		var comrade = cw({init:function(){
+	    			console.warn(1234,"hello");
+	    		},listners:{
+	    			console:function(d){
+	    				assert.deepEqual(d,["warn",[1234,"hello"]]);
+	    				comrade.close();
+	    				done();
+	    			}
+	    		}});
+	    	});
+	    	it('console.time should work',function(done){
+	    		var comrade = cw({init:function(){
+	    			console.time(1234,"hello");
+	    		},listners:{
+	    			console:function(d){
+	    				assert.deepEqual(d,["time",[1234,"hello"]]);
+	    				comrade.close();
+	    				done();
+	    			}
+	    		}});
+	    	});
+	    	it('console.timeEnd should work',function(done){
+	    		var comrade = cw({init:function(){
+	    			console.timeEnd(1234,"hello");
+	    		},listners:{
+	    			console:function(d){
+	    				assert.deepEqual(d,["timeEnd",[1234,"hello"]]);
+	    				comrade.close();
+	    				done();
+	    			}
+	    		}});
+	    	});
+	    });
     });
 }
