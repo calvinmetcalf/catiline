@@ -58,12 +58,7 @@ module.exports = function(grunt) {
 		},
 	jshint: {
 		options:{
-			latedef:"nofunc",
-			expr:true,
-			trailing:true,
-			eqeqeq:true,
-			curly:true,
-			quotmark:'single'
+			jshintrc: "./.jshintrc"
 		},
 		beforeconcat: ['src/*.js'],
 		afterconcat: ['dist/catiline.js']
