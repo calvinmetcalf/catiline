@@ -1,5 +1,10 @@
 Changelog
 ===
+##2.9.2
+- make sure console is defined before calling it
+
+##2.9.1
+- same as 2.9.0 but built correctly
 
 ##2.9.0
 - Add 'one' method for events.

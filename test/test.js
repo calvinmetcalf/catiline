@@ -613,7 +613,6 @@ function runTests(chai,cw,global){
 			    comrade.fire('notTwice');
 		    });
 	    });
-	    if(typeof console !== 'undefined'){
 	        describe('console', function () {
 	        	it('console.log should work',function(done){
 	        		var comrade = cw({init:function(){
@@ -693,6 +692,5 @@ function runTests(chai,cw,global){
 	        		}});
 	        	});
 	        });
-	    }
     });
 }
