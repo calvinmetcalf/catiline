@@ -1,60 +1,39 @@
 var UglifyJS = require("uglify-js");
 var defs = require('defs');
 module.exports = function(grunt) {
-	var replaceStuff = function(inString,outFile,parent){
-		var replacedChild = "['"+inString.replace(/\'/gm,"\\'").replace(/\$\$(.+?)\$\$/,function(a,b){
-				return "',"+b+",'";
-		}).replace(/\n/gm,'\\n')+"']";
-		var out = parent.replace(/\$\$fObj\$\$/,replacedChild);
-		grunt.file.write(outFile,out);
-	};
-	var d = function(file){
+	function runDefs(file){
 		var input = grunt.file.read(file);
 		var defit = defs(input,{'disallowUnknownReferences':false});
 		if(defit.errors){
 			console.log(defit.errors);
 			throw defit.errors;
 		}
-		grunt.file.write(file,defit.src)
-	}
-	var templateThings = function(){
-			var parent =  grunt.file.read('./src/core.js');
-			var child = defs(grunt.file.read('./src/worker.js'),{'disallowUnknownReferences':false}).src;
-			var childmin = UglifyJS.minify(child,{fromString:true}).code;
-			replaceStuff(child,'./src/temp.js',parent);
-			replaceStuff(childmin,'./src/temp.min.js',parent);
+		grunt.file.write(file,defit.src);
 	};
 	// Project configuration.
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		uglify: {
 			all: {
-    			options:{
+				options:{
 					banner:'/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!(c)2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */\n/*!Includes Promiscuous (c)2013 Ruben Verborgh @license MIT https://github.com/RubenVerborgh/promiscuous*/\n/*!Includes Material from setImmediate Copyright (c) 2012 Barnesandnoble.com, llc, Donavon West, and Domenic Denicola @license MIT https://github.com/NobleJS/setImmediate */\n',
 					mangle: {
 						except: ['Catiline','CatilineQueue','FakeCatiline','Promise','Deferred']
-					}
+					},
+					 report: 'gzip'
 				},
-				src: 'dist/<%= pkg.name %>.min.js',
+				src: 'dist/<%= pkg.name %>.js',
 				dest: 'dist/<%= pkg.name %>.min.js'
 			}
 		},
 		concat: {
-		    ugly: { 
-    			options: {
-					banner: '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */\n',
-					seperator:";\n",
-					footer : 'catiline.version = \'<%= pkg.version %>\';\n})(this);}'
-				},
-				files: {'dist/<%= pkg.name %>.min.js':['src/IE.js','src/nextTick.js','src/promise.js','src/utils.js','src/temp.min.js','src/queue.js','src/wrapup.js']}
-			},
 			browser: { 
 				options: {
 					banner: '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>*/\n/*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */\n',
 					seperator:";\n",
 					footer : 'catiline.version = \'<%= pkg.version %>\';\n})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/nextTick.js','src/promise.js','src/utils.js','src/temp.js','src/queue.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/nextTick.js','src/promise.js','src/utils.js','src/worker.js','src/events.js','src/core.js','src/queue.js','src/wrapup.js']}
 			}
 		},
 		mocha_phantomjs: {
@@ -79,12 +58,7 @@ module.exports = function(grunt) {
 		},
 	jshint: {
 		options:{
-			latedef:"nofunc",
-			expr:true,
-			trailing:true,
-			eqeqeq:true,
-			curly:true,
-			quotmark:'single'
+			jshintrc: "./.jshintrc"
 		},
 		beforeconcat: ['src/*.js'],
 		afterconcat: ['dist/catiline.js']
@@ -194,12 +168,8 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-mocha-phantomjs');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-saucelabs');
-	grunt.registerTask('template',templateThings);
 	grunt.registerTask('defsAll',function(){
-		d('dist/catiline.js')
-	})
-	grunt.registerTask('defsUgly',function(){
-		d('dist/catiline.min.js')
+		runDefs('dist/catiline.js');
 	});
 	grunt.registerTask('sauce',['connect','saucelabs-mocha:big','saucelabs-mocha:shim','saucelabs-mocha:legacy']);
 	grunt.registerTask('server',['connect']);
@@ -207,8 +177,8 @@ module.exports = function(grunt) {
 	grunt.registerTask('lint',['jshint:afterconcat']);
 	grunt.registerTask('testing', ['connect', 'mocha_phantomjs']);
 	grunt.registerTask('test', ['lint','sauce']);
-	grunt.registerTask('build', ['template','browser']);
-    grunt.registerTask('ugly', ['concat:ugly','defsUgly','uglify']);
+	grunt.registerTask('build', ['browser']);
+    grunt.registerTask('ugly', ['uglify']);
 	grunt.registerTask('default', ['build','test']);
 	grunt.registerTask('c9', ['build','lint','testing']);
 

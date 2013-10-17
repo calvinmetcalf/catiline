@@ -17,6 +17,14 @@
     };
   </script>
   <script src="lib/curl.js"></script>
- <script src="testamd.js"></script>
+  <script src="test.js"></script>
+ <script>
+ curl(['lib/chai', 'dist/catiline']).then(runTests).then(function(){
+
+if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
+      else { mocha.run(); }
+},function(a){console.log(a)}
+);
+ </script>
 </body>
 </html>

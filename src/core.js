@@ -1,153 +1,125 @@
-catiline.Worker = function Catiline(obj) {
-		if(typeof obj === 'function'){
-			obj = {
-				data:obj
-			};
+function Catiline(obj) {
+	if (typeof obj === 'function') {
+		obj = {
+			data: obj
+		};
+	}
+	const codeWord = 'com.catilinejs.' + (Catiline._hasWorker ? 'iframe' : 'worker') + Math.random();
+	const self = this;
+	const promises = [];
+	addEvents(self, function(data, transfer) {
+		if (catiline._noTransferable) {
+			worker.postMessage(data);
 		}
-		const __codeWord__='com.catilinejs.'+(catiline._hasWorker?'iframe':'worker')+Math.random();
-		const listeners = {};
-		const self = this;
-		self.on = function (eventName, func, scope) {
-			scope = scope || self;
-			if (eventName.indexOf(' ') > 0) {
-				eventName.split(' ').map(function (v) {
-					return self.on(v, func, scope);
-				}, this);
-				return self;
-			}
-			if (!(eventName in listeners)) {
-				listeners[eventName] = [];
-			}
-			listeners[eventName].push(function (a) {
-				func.call(scope, a);
-			});
-			return self;
-		};
-	
-		function _fire(eventName, data) {
-			if (eventName.indexOf(' ') > 0) {
-				eventName.split(' ').forEach(function (v) {
-					_fire(v, data);
-				});
-				return self;
-			}
-			if (!(eventName in listeners)) {
-				return self;
-			}
-			listeners[eventName].forEach(function (v) {
-				v(data);
-			});
-			return self;
+		else {
+			worker.postMessage(data, transfer);
 		}
-		self.fire = function (eventName, data, transfer) {
-			if(catiline._noTransferable){
-				worker.postMessage([[eventName], data]);
-			}else{
-				worker.postMessage([[eventName], data], transfer);
+	});
+	const rejectPromises = function(msg) {
+		if (typeof msg !== 'string' && 'preventDefault' in msg) {
+			msg.preventDefault();
+			msg = msg.message;
+		}
+		promises.forEach(function(p) {
+			if (p) {
+				p.reject(msg);
 			}
-			
-			return self;
-		};
-		self.off = function (eventName, func) {
-			if (eventName.indexOf(' ') > 0) {
-				eventName.split(' ').map(function (v) {
-					return self.off(v, func);
-				});
-				return self;
-			}
-			if (!(eventName in listeners)) {
-				return self;
-			}
-			else if (!func) {
-				delete listeners[eventName];
-			}
-			else {
-				if (listeners[eventName].indexOf(func) > -1) {
-					if (listeners[eventName].length > 1) {
-						delete listeners[eventName];
-					}
-					else {
-						listeners[eventName].splice(listeners[eventName].indexOf(func), 1);
-					}
-				}
-			}
-			return self;
-		};
+		});
+	};
+	obj.__codeWord__ = codeWord;
+	obj.__initialize__ = [workerSetup, addEvents];
+	if (!('initialize' in obj)) {
+		if ('init' in obj) {
+			obj.__initialize__.push(obj.init);
+		}
+	}
+	else {
+		obj.__initialize__.push(obj.initialize);
+	}
 
-		const promises = [];
-		const rejectPromises = function (msg) {
-			if (typeof msg !== 'string' && 'preventDefault' in msg) {
-				msg.preventDefault();
-				msg = msg.message;
-			}
-			promises.forEach(function (p) {
-				if (p) {
-					p.reject(msg);
-				}
-			});
-		};
-		obj.__codeWord__='"'+__codeWord__+'"';
-		if (!('initialize' in obj)) {
-			if ('init' in obj) {
-				obj.initialize = obj.init;
-			}
-			else {
-				obj.initialize = function () {};
-			}
+	if (!('events' in obj)) {
+		obj.events = {};
+	}
+	if ('listners' in obj && typeof obj.listners !== 'function') {
+		for (let key in obj.listners) {
+			self.on(key, obj.listners[key]);
 		}
-		let fObj = '{\n\t';
-		const keyFunc = function (key) {
-			const out = function (data, transfer) {
-				const i = promises.length;
-				promises[i] = catiline.deferred();
-				if(catiline._noTransferable){
-					worker.postMessage([[__codeWord__, i], key, data]);
-				}else{
-					worker.postMessage([[__codeWord__, i], key, data], transfer);
-				}
-				return promises[i].promise;
-			};
-			return out;
-		};
-		let i = 0;
-		for (let key in obj) {
-			if (i !== 0) {
-				fObj = fObj + ',\n\t';
+	}
+	let fObj = 'var _db = {\n\t';
+	const keyFunc = function(key) {
+		const out = function(data, transfer) {
+			const i = promises.length;
+			promises[i] = catiline.deferred();
+			if (catiline._noTransferable) {
+				worker.postMessage([
+					[codeWord, i], key, data]);
 			}
 			else {
-				i++;
+				worker.postMessage([
+					[codeWord, i], key, data], transfer);
 			}
+			return promises[i].promise;
+		};
+		return out;
+	};
+	let i = false;
+	for (let key in obj) {
+		if(['listners','initialize','init'].indexOf(key)>-1){
+			continue;
+		}
+		if (i) {
+			fObj += ',\n\t';
+		}
+		else {
+			i = true;
+		}
+		if (typeof obj[key] === 'function') {
 			fObj = fObj + key + ':' + obj[key].toString();
 			self[key] = keyFunc(key);
 		}
-		fObj = fObj + '}';
-		const worker = catiline.makeWorker($$fObj$$,__codeWord__);
-		worker.onmessage = function (e) {
-			_fire('message', e.data[1]);
-			if (e.data[0][0] === __codeWord__) {
-				promises[e.data[0][1]].resolve(e.data[1]);
-				promises[e.data[0][1]] = 0;
+		else {
+			const outThing = catiline.stringify(obj[key]);
+			if (typeof outThing !== 'undefined') {
+				fObj = fObj + key + ':' + outThing;
 			}
-			else {
-				_fire(e.data[0][0], e.data[1]);
-			}
-		};
-		self.on('error',rejectPromises);
-		worker.onerror =function (e) {
-			_fire('error', e);
-		};
-		self.on('console', function (msg) {
-			console[msg[0]].apply(console, msg[1]);
-		});
-		self._close = function () {
-			worker.terminate();
-			rejectPromises('closed');
-			return catiline.resolve();
-		};
-		if (!('close' in self)) {
-			self.close = self._close;
+		}
+	}
+	fObj = fObj + '};';
+	const worker = catiline.makeWorker(['\'use strict\';', '',
+	fObj, '_db.__initialize__.forEach(function(f){', '	f.call(_db,_db);', '});', 'for(var key in _db.events){', '	_db.on(key,_db.events[key]);', '}'], codeWord);
+	worker.onmessage = function(e) {
+		self.trigger('message', e.data[1]);
+		if (e.data[0][0] === codeWord) {
+			promises[e.data[0][1]].resolve(e.data[1]);
+			promises[e.data[0][1]] = 0;
+		}
+		else {
+			self.trigger(e.data[0][0], e.data[1]);
 		}
 	};
-catiline.worker = function (obj){
-	return new catiline.Worker(obj);
+	self.on('error', rejectPromises);
+	worker.onerror = function(e) {
+		self.trigger('error', e);
+	};
+	self.on('console', function(msg) {
+		let method = console[msg[0]]?msg[0]:'log';
+		if(typeof console[method].apply === 'undefined'){
+			console[method](msg[1].join(' '));
+		}else{
+			console[method].apply(console, msg[1]);
+		}
+	});
+	self._close = function() {
+		worker.terminate();
+		rejectPromises('closed');
+		return catiline.resolve();
+	};
+	if (!('close' in self)) {
+		self.close = self._close;
+	}
+}
+catiline.Worker = Catiline;
+
+catiline.worker = function(obj){
+    return new Catiline(obj);
 };

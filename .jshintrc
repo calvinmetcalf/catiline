@@ -1,0 +1,8 @@
+{
+	"latedef":"nofunc",
+	"expr":true,
+	"trailing":true,
+	"eqeqeq":true,
+	"curly":true,
+	"quotmark":"single"
+}

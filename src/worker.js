@@ -1,120 +1,76 @@
-'use strict';
-
-const _db = $$fObj$$;
-const listeners = {};
-const __iFrame__ = typeof document!=="undefined";
-const __self__={onmessage:function(e){
-	_fire("messege",e.data[1]);
-	if(e.data[0][0]===_db.__codeWord__){
-		return regMsg(e);
-	}else{
-		_fire(e.data[0][0],e.data[1]);
-	}
-}};
-if(__iFrame__){
-	window.onmessage=function(e){
-		if(typeof e.data === "string"){
-			e ={data: JSON.parse(e.data)};
-		}
-		__self__.onmessage(e);
-	};
-}else{
-	self.onmessage=__self__.onmessage;
-}
-__self__.postMessage=function(rawData, transfer){
-	if(!self._noTransferable&&!__iFrame__){
-		self.postMessage(rawData, transfer);
-	}else if(__iFrame__){
-		let data = _db.__codeWord__+JSON.stringify(rawData);
-		window.parent.postMessage(data,"*");
-	}else if(self._noTransferable){
-		self.postMessage(rawData);
-	}
-};
-_db.on = function (eventName, func, scope) {
-	if(eventName.indexOf(" ")>0){
-		return eventName.split(" ").map(function(v){
-			return _db.on(v,func,scope);
-		},_db);
-	}
-	scope = scope || _db;
-	if (!(eventName in listeners)) {
-		listeners[eventName] = [];
-	}
-	listeners[eventName].push(function (a) {
-		func.call(scope, a, _db);
-	});
-};
-function _fire(eventName,data){
-	if(eventName.indexOf(" ")>0){
-		eventName.split(" ").forEach(function(v){
-			_fire(v,data);
-		});
-		return;
-	}
-	if (!(eventName in listeners)) {
-		return;
-	}
-	listeners[eventName].forEach(function (v) {
-		v(data);
-	});
-}
-
-_db.fire = function (eventName, data, transfer) {
-	__self__.postMessage([[eventName], data], transfer);
-};
-_db.off=function(eventName,func){
-	if(eventName.indexOf(" ")>0){
-		return eventName.split(" ").map(function(v){
-			return _db.off(v,func);
-		});
-	}
-	if(!(eventName in listeners)){
-		return;
-	}else if(!func){
-		delete listeners[eventName];
-	}else{
-		if(listeners[eventName].indexOf(func)>-1){
-			if(listeners[eventName].length>1){
-				delete listeners[eventName];
-			}else{
-				listeners[eventName].splice(listeners[eventName].indexOf(func),1);
+const workerSetup = function(context) {
+	self.__iFrame__ = typeof document !== 'undefined';
+	self.__self__ = {
+		onmessage: function(e) {
+			context.trigger('messege', e.data[1]);
+			if (e.data[0][0] === context.__codeWord__) {
+				return regMsg(e);
+			}
+			else {
+				context.trigger(e.data[0][0], e.data[1]);
 			}
 		}
-	}
-};
-const console={};
-function makeConsole(method){
-	return function(){
-		const len = arguments.length;
-		const out =[];
-		let i = 0;
-		while (i<len){
-			out.push(arguments[i]);
-			i++;
-		}
-		_db.fire("console",[method,out]);
 	};
-}
-["log", "debug", "error", "info", "warn", "time", "timeEnd"].forEach(function(v){
-	console[v]=makeConsole(v);
-});
-const regMsg = function(e){
-	const cb=function(data,transfer){
-		__self__.postMessage([e.data[0],data],transfer);
-	};
-	let result;
-	if(__iFrame__){
-		try{
-			result = _db[e.data[1]](e.data[2],cb,_db);
-		}catch(e){
-			_db.fire("error",JSON.stringify(e));
+	if (__iFrame__) {
+		window.onmessage = function(e) {
+			if (typeof e.data === 'string') {
+				e = {
+					data: JSON.parse(e.data)
+				};
+			}
+			__self__.onmessage(e);
+		};
+	}
+	else {
+		self.onmessage = __self__.onmessage;
+	}
+	__self__.postMessage = function(rawData, transfer) {
+		if (!self._noTransferable && !__iFrame__) {
+			self.postMessage(rawData, transfer);
 		}
-	}else{
-		result = _db[e.data[1]](e.data[2],cb,_db);
+		else if (__iFrame__) {
+			let data = context.__codeWord__ + JSON.stringify(rawData);
+			window.parent.postMessage(data, '*');
+		}
+		else if (self._noTransferable) {
+			self.postMessage(rawData);
+		}
+	};
+	self.console = {};
+
+	function makeConsole(method) {
+		return function() {
+			const len = arguments.length;
+			const out = [];
+			let i = 0;
+			while (i < len) {
+				out.push(arguments[i]);
+				i++;
+			}
+			context.fire('console', [method, out]);
+		};
 	}
-	if(typeof result !== "undefined"){
-		cb(result);
-	}
+	['log', 'debug', 'error', 'info', 'warn', 'time', 'timeEnd'].forEach(function(v) {
+		console[v] = makeConsole(v);
+	});
+	const regMsg = function(e) {
+		const cb = function(data, transfer) {
+			__self__.postMessage([e.data[0], data], transfer);
+		};
+		let result;
+		if (__iFrame__) {
+			try {
+				result = context[e.data[1]](e.data[2], cb, context);
+			}
+			catch (ee) {
+				context.fire('error', JSON.stringify(ee));
+			}
+		}
+		else {
+			result = context[e.data[1]](e.data[2], cb, context);
+		}
+		if (typeof result !== 'undefined') {
+			cb(result);
+		}
+	};
 };
-_db.initialize(_db);

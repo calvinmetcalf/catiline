@@ -20,7 +20,7 @@ function initBrowser(catiline){
 	if(!('communist' in global)){
 		global.communist=catiline;
 	}
-	
+
 }
 
 if(typeof define === 'function'){
