@@ -1,4 +1,4 @@
-/*! catiline 2.9.2 2013-10-25*/
+/*! catiline 2.9.3 2013-10-25*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */
 if (typeof document === 'undefined') {
 	self._noTransferable=true;
@@ -237,22 +237,12 @@ function regexImports(string){
 	return [matches,rest];
 }
 
-function moveImports(string){
+function moveImports(string,after){
 	var str = regexImports(string);
 	var matches = str[0];
 	var rest = str[1];
 	if(matches.length>0){
-		return 'importScripts(\''+matches.join('\',\'')+'\');\n'+rest;
-	}else{
-		return rest;
-	}
-}
-function moveIimports(string){
-	var str = regexImports(string);
-	var matches = str[0];
-	var rest = str[1];
-	if(matches.length>0){
-		return 'importScripts(\''+matches.join('\',\'')+'\');eval(__scripts__);\n'+rest;
+		return 'importScripts(\''+matches.join('\',\'')+after+rest;
 	}else{
 		return rest;
 	}
@@ -327,7 +317,7 @@ function makeIframe(script,codeword){
 	return promise.promise;
 }
 catiline.makeIWorker = function (strings,codeword){
-	var script =moveIimports(strings.join(''));
+	var script =moveImports(strings.join(''),'\');eval(__scripts__);\n');
 	var worker = {onmessage:function(){}};
 	var ipromise = makeIframe(script,codeword);
 	window.addEventListener('message',function(e){
@@ -361,7 +351,7 @@ catiline.makeWorker = function (strings, codeword){
 		return catiline.makeIWorker(strings,codeword);
 	}
 	var worker;
-	var script = moveImports(strings.join('\n'));
+	var script = moveImports(strings.join('\n'),'\');\n');
 	if(catiline._noTransferable){
 		return makeFallbackWorker(script);
 	}
@@ -467,22 +457,6 @@ var workerSetup = function(context) {
 		}
 	};
 	self.console = {};
-
-	function makeConsole(method) {
-		return function() {
-			var len = arguments.length;
-			var out = [];
-			var i = 0;
-			while (i < len) {
-				out.push(arguments[i]);
-				i++;
-			}
-			context.fire('console', [method, out]);
-		};
-	}
-	['log', 'debug', 'error', 'info', 'warn', 'time', 'timeEnd'].forEach(function(v) {
-		console[v] = makeConsole(v);
-	});
 	var regMsg = function(e) {
 		var cb = function(data, transfer) {
 			__self__.postMessage([e.data[0], data], transfer);
@@ -504,7 +478,7 @@ var workerSetup = function(context) {
 		}
 	};
 };
-var addEvents = function(context, msg) {
+function addEvents(context, msg) {
 	var listeners = {};
 	var sendMessage;
 	if(typeof __self__ !== 'undefined'){
@@ -588,7 +562,35 @@ var addEvents = function(context, msg) {
 		}
 		return context;
 	};
-};
+}
+function makeConsole(msg) {
+	if (typeof console !== 'undefined') {
+		var method = console[msg[0]] ? msg[0] : 'log';
+		if (typeof console[method].apply === 'undefined') {
+			console[method](msg[1].join(' '));
+		}
+		else {
+			console[method].apply(console, msg[1]);
+		}
+	}
+}
+function makeWorkerConsole(context){
+	function makeConsole(method) {
+		return function() {
+			var len = arguments.length;
+			var out = [];
+			var i = 0;
+			while (i < len) {
+				out.push(arguments[i]);
+				i++;
+			}
+			context.fire('console', [method, out]);
+		};
+	}
+	['log', 'debug', 'error', 'info', 'warn', 'time', 'timeEnd'].forEach(function(v) {
+		console[v] = makeConsole(v);
+	});
+}
 function Catiline(obj) {
 	if (typeof obj === 'function') {
 		obj = {
@@ -618,7 +620,7 @@ function Catiline(obj) {
 		});
 	};
 	obj.__codeWord__ = codeWord;
-	obj.__initialize__ = [workerSetup, addEvents];
+	obj.__initialize__ = [workerSetup, addEvents, makeWorkerConsole];
 	if (!('initialize' in obj)) {
 		if ('init' in obj) {
 			obj.__initialize__.push(obj.init);
@@ -692,16 +694,7 @@ function Catiline(obj) {
 	worker.onerror = function(e) {
 		self.trigger('error', e);
 	};
-	self.on('console', function(msg) {
-		if(typeof console !== 'undefined'){
-			var method = console[msg[0]]?msg[0]:'log';
-			if(typeof console[method].apply === 'undefined'){
-				console[method](msg[1].join(' '));
-			}else{
-				console[method].apply(console, msg[1]);
-			}
-		}
-	});
+	self.on('console', makeConsole);
 	self._close = function() {
 		worker.terminate();
 		rejectPromises('closed');
@@ -716,38 +709,54 @@ catiline.Worker = Catiline;
 catiline.worker = function(obj){
     return new Catiline(obj);
 };
-catiline.Queue = function CatilineQueue(obj, n, dumb) {
-	var self = this;
-	self.__batchcb__ = {};
-	self.__batchtcb__ = {};
-	self.batch = function (cb) {
-		if (typeof cb === 'function') {
-			self.__batchcb__.__cb__ = cb;
-			return self.__batchcb__;
-		}
-		else {
-			return clearQueue(cb);
+function makeKeyFuncs(doStuff, self, obj) {
+	var funcs = {
+		keyFunc: function(k) {
+			return function(data, transfer) {
+				return doStuff(k, data, transfer);
+			};
+		},
+		keyFuncBatch: function(k) {
+			return function(array) {
+				return catiline.all(array.map(function(data) {
+					return doStuff(k, data);
+				}));
+			};
+		},
+
+		keyFuncBatchCB: function(k) {
+			return function(array) {
+				return catiline.all(array.map(function(data) {
+					return doStuff(k, data).then(self.__cb__);
+				}));
+			};
+		},
+
+		keyFuncBatchTransfer: function(k) {
+			return function(array) {
+				return catiline.all(array.map(function(data) {
+					return doStuff(k, data[0], data[1]);
+				}));
+			};
+		},
+
+		keyFuncBatchTransferCB: function(k) {
+			return function(array) {
+				return catiline.all(array.map(function(data) {
+					return doStuff(k, data[0], data[1]).then(self.__cb__);
+				}));
+			};
 		}
 	};
-	self.batchTransfer = function (cb) {
-		if (typeof cb === 'function') {
-			self.__batchtcb__.__cb__ = cb;
-			return self.__batchtcb__;
-		}
-		else {
-			return clearQueue(cb);
-		}
-	};
-	var workers = [];
-	var numIdle = 0;
-	var idle = [];
-	var que = [];
-	var queueLen = 0;
-	while (numIdle < n) {
-		workers[numIdle] = new catiline.Worker(obj);
-		idle.push(numIdle);
-		numIdle++;
+	for (var key in obj) {
+		self[key] = funcs.keyFunc(key);
+		self.batch[key] = funcs.keyFuncBatch(key);
+		self.__batchcb__[key] = funcs.keyFuncBatchCB(key);
+		self.batchTransfer[key] = funcs.keyFuncBatchTransfer(key);
+		self.__batchtcb__[key] = funcs.keyFuncBatchTransferCB(key);
 	}
+}
+function addBatchEvents(self, workers, n){
 	self.on = function (eventName, func, context) {
 		workers.forEach(function (worker) {
 			worker.on(eventName, func, context);
@@ -760,16 +769,35 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 		});
 		return self;
 	};
+	self.fire = function (eventName, data) {
+		workers[~~ (Math.random() * n)].fire(eventName, data);
+		return self;
+	};
+}
+function makeQueueWorkers(n,idle,obj){
+	var workers = [];
+	var numIdle = -1;
+	while (++numIdle < n) {
+		workers[numIdle] = new catiline.Worker(obj);
+		idle.push(numIdle);
+	}
+	return workers;
+}
+function CatilineQueue(obj, n, dumb) {
+	var self = this;
+	var numIdle = n;
+	var idle = [];
+	var que = [];
+	var queueLen = 0;
+	var workers = makeQueueWorkers(n,idle,obj);
+	addBatchEvents(self, workers, n);
 	var batchFire = function (eventName, data) {
 		workers.forEach(function (worker) {
 			worker.fire(eventName, data);
 		});
 		return self;
 	};
-	self.fire = function (eventName, data) {
-		workers[~~ (Math.random() * n)].fire(eventName, data);
-		return self;
-	};
+	
 	self.batch.fire = batchFire;
 	self.batchTransfer.fire = batchFire;
 
@@ -783,53 +811,9 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 		});
 		return self;
 	}
-
-	function keyFunc(k) {
-		return function (data, transfer) {
-			return doStuff(k, data, transfer);
-		};
-	}
-
-	function keyFuncBatch(k) {
-		return function (array) {
-			return catiline.all(array.map(function (data) {
-				return doStuff(k, data);
-			}));
-		};
-	}
-
-	function keyFuncBatchCB(k) {
-		return function (array) {
-			var self = this;
-			return catiline.all(array.map(function (data) {
-				return doStuff(k, data).then(self.__cb__);
-			}));
-		};
-	}
-
-	function keyFuncBatchTransfer(k) {
-		return function (array) {
-			return catiline.all(array.map(function (data) {
-				return doStuff(k, data[0], data[1]);
-			}));
-		};
-	}
-
-	function keyFuncBatchTransferCB(k) {
-		return function (array) {
-			var self = this;
-			return catiline.all(array.map(function (data) {
-				return doStuff(k, data[0], data[1]).then(self.__cb__);
-			}));
-		};
-	}
-	for (var key in obj) {
-		self[key] = keyFunc(key);
-		self.batch[key] = keyFuncBatch(key);
-		self.__batchcb__[key] = keyFuncBatchCB(key);
-		self.batchTransfer[key] = keyFuncBatchTransfer(key);
-		self.__batchtcb__[key] = keyFuncBatchTransferCB(key);
-	}
+	self.clearQueue = clearQueue;
+	makeKeyFuncs(doStuff, self, obj);
+	
 
 	function done(num) {
 		if (queueLen) {
@@ -848,19 +832,21 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 			idle.push(num);
 		}
 	}
-
+	function doDumbStuff(key, data, transfer,promise){
+		promise.promise.cancel = function(reason){
+			return promise.reject(reason);
+		};
+		workers[~~ (Math.random() * n)][key](data, transfer).then(function(v){
+			return promise.resolve(v);
+		},function(v){
+			return promise.reject(v);
+		});
+		return promise.promise;
+	}
 	function doStuff(key, data, transfer) { //srsly better name!
 		var promise = catiline.deferred();
 		if (dumb) {
-			promise.promise.cancel = function(reason){
-				return promise.reject(reason);
-			};
-			workers[~~ (Math.random() * n)][key](data, transfer).then(function(v){
-				return promise.resolve(v);
-			},function(v){
-				return promise.reject(v);
-			});
-			return promise.promise;
+			return doDumbStuff(key, data, transfer,promise);
 		}
 		if (!queueLen && numIdle) {
 			var num = idle.pop();
@@ -898,7 +884,28 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	if (!('close' in self)) {
 		self.close = self._close;
 	}
+}
+CatilineQueue.prototype.__batchcb__ = {};
+CatilineQueue.prototype.__batchtcb__ = {};
+CatilineQueue.prototype.batch = function (cb) {
+	if (typeof cb === 'function') {
+		this.__cb__ = cb;
+		return this.__batchcb__;
+	}
+	else {
+		return this.clearQueue(cb);
+	}
 };
+CatilineQueue.prototype.batchTransfer = function (cb) {
+	if (typeof cb === 'function') {
+		this.__batchtcb__.__cb__ = cb;
+		return this.__batchtcb__;
+	}
+	else {
+		return this.clearQueue(cb);
+	}
+};
+catiline.Queue = CatilineQueue;
 catiline.queue = function (obj, n, dumb) {
 	return new catiline.Queue(obj, n, dumb);
 };
@@ -937,5 +944,5 @@ if(typeof define === 'function'){
 	initBrowser(catiline);
 } else {
 	module.exports=catiline;
-}catiline.version = '2.9.2';
+}catiline.version = '2.9.3';
 })(this);}
