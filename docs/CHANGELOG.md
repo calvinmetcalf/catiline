@@ -1,5 +1,9 @@
 Changelog
 ===
+
+##2.9.3
+- cleanup complexity
+
 ##2.9.2
 - make sure console is defined before calling it
 
