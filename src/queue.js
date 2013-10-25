@@ -1,5 +1,5 @@
-function makeKeyFuncs(doStuff, self) {
-	return {
+function makeKeyFuncs(doStuff, self, obj) {
+	const funcs = {
 		keyFunc: function(k) {
 			return function(data, transfer) {
 				return doStuff(k, data, transfer);
@@ -37,6 +37,13 @@ function makeKeyFuncs(doStuff, self) {
 			};
 		}
 	};
+	for (let key in obj) {
+		self[key] = funcs.keyFunc(key);
+		self.batch[key] = funcs.keyFuncBatch(key);
+		self.__batchcb__[key] = funcs.keyFuncBatchCB(key);
+		self.batchTransfer[key] = funcs.keyFuncBatchTransfer(key);
+		self.__batchtcb__[key] = funcs.keyFuncBatchTransferCB(key);
+	}
 }
 function addBatchEvents(self, workers, n){
 	self.on = function (eventName, func, context) {
@@ -94,14 +101,8 @@ function CatilineQueue(obj, n, dumb) {
 		return self;
 	}
 	self.clearQueue = clearQueue;
-	const keyFuncs = makeKeyFuncs(doStuff,self);
-	for (let key in obj) {
-		self[key] = keyFuncs.keyFunc(key);
-		self.batch[key] = keyFuncs.keyFuncBatch(key);
-		self.__batchcb__[key] = keyFuncs.keyFuncBatchCB(key);
-		self.batchTransfer[key] = keyFuncs.keyFuncBatchTransfer(key);
-		self.__batchtcb__[key] = keyFuncs.keyFuncBatchTransferCB(key);
-	}
+	makeKeyFuncs(doStuff, self, obj);
+	
 
 	function done(num) {
 		if (queueLen) {
