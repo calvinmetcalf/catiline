@@ -1,4 +1,4 @@
-/*! catiline 2.9.2 2013-10-22*/
+/*! catiline 2.9.2 2013-10-25*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */
 if (typeof document === 'undefined') {
 	self._noTransferable=true;
