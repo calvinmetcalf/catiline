@@ -709,45 +709,45 @@ catiline.Worker = Catiline;
 catiline.worker = function(obj){
     return new Catiline(obj);
 };
-function makeKeyFuncs(doStuff, self, obj) {
-	var funcs = {
+function makeActualKeyFuncs(resolvePromises, self) {
+	return {
 		keyFunc: function(k) {
 			return function(data, transfer) {
-				return doStuff(k, data, transfer);
+				return resolvePromises(k, data, transfer);
 			};
 		},
 		keyFuncBatch: function(k) {
 			return function(array) {
 				return catiline.all(array.map(function(data) {
-					return doStuff(k, data);
+					return resolvePromises(k, data);
 				}));
 			};
 		},
-
 		keyFuncBatchCB: function(k) {
 			return function(array) {
 				return catiline.all(array.map(function(data) {
-					return doStuff(k, data).then(self.__cb__);
+					return resolvePromises(k, data).then(self.__cb__);
 				}));
 			};
 		},
-
 		keyFuncBatchTransfer: function(k) {
 			return function(array) {
 				return catiline.all(array.map(function(data) {
-					return doStuff(k, data[0], data[1]);
+					return resolvePromises(k, data[0], data[1]);
 				}));
 			};
 		},
-
 		keyFuncBatchTransferCB: function(k) {
 			return function(array) {
 				return catiline.all(array.map(function(data) {
-					return doStuff(k, data[0], data[1]).then(self.__cb__);
+					return resolvePromises(k, data[0], data[1]).then(self.__cb__);
 				}));
 			};
 		}
 	};
+}
+function makeKeyFuncs(resolvePromises, self, obj){
+	var funcs = makeActualKeyFuncs(resolvePromises, self);
 	for (var key in obj) {
 		self[key] = funcs.keyFunc(key);
 		self.batch[key] = funcs.keyFuncBatch(key);
@@ -772,6 +772,19 @@ function addBatchEvents(self, workers, n){
 	self.fire = function (eventName, data) {
 		workers[~~ (Math.random() * n)].fire(eventName, data);
 		return self;
+	};
+}
+function makeUnmanaged(workers, n){
+	return function(key, data, transfer, promise){
+		promise.promise.cancel = function(reason){
+			return promise.reject(reason);
+		};
+		workers[~~ (Math.random() * n)][key](data, transfer).then(function(v){
+			return promise.resolve(v);
+		},function(v){
+			return promise.reject(v);
+		});
+		return promise.promise;
 	};
 }
 function makeQueueWorkers(n,idle,obj){
@@ -812,7 +825,7 @@ function CatilineQueue(obj, n, dumb) {
 		return self;
 	}
 	self.clearQueue = clearQueue;
-	makeKeyFuncs(doStuff, self, obj);
+	makeKeyFuncs(resolvePromises, self, obj);
 	
 
 	function done(num) {
@@ -832,21 +845,14 @@ function CatilineQueue(obj, n, dumb) {
 			idle.push(num);
 		}
 	}
-	function doDumbStuff(key, data, transfer,promise){
-		promise.promise.cancel = function(reason){
-			return promise.reject(reason);
-		};
-		workers[~~ (Math.random() * n)][key](data, transfer).then(function(v){
-			return promise.resolve(v);
-		},function(v){
-			return promise.reject(v);
-		});
-		return promise.promise;
+	var resolveUnmanagedPromises;
+	if(dumb){
+		resolveUnmanagedPromises = makeUnmanaged(workers, n);
 	}
-	function doStuff(key, data, transfer) { //srsly better name!
+	function resolvePromises(key, data, transfer) { //srsly better name!
 		var promise = catiline.deferred();
 		if (dumb) {
-			return doDumbStuff(key, data, transfer,promise);
+			return resolveUnmanagedPromises(key, data, transfer,promise);
 		}
 		if (!queueLen && numIdle) {
 			var num = idle.pop();
@@ -861,8 +867,7 @@ function CatilineQueue(obj, n, dumb) {
 				done(num);
 				promise.reject(d);
 			});
-		}
-		else if (queueLen || !numIdle) {
+		} else if (queueLen || !numIdle) {
 			var queueItem = [key, data, transfer, promise];
 			promise.promise.cancel = function(reason){
 				var loc = que.indexOf(queueItem);
