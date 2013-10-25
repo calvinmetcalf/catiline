@@ -1,4 +1,4 @@
-const addEvents = function(context, msg) {
+function addEvents(context, msg) {
 	const listeners = {};
 	let sendMessage;
 	if(typeof __self__ !== 'undefined'){
@@ -82,4 +82,4 @@ const addEvents = function(context, msg) {
 		}
 		return context;
 	};
-};
+}

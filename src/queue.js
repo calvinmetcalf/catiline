@@ -38,18 +38,7 @@ function makeKeyFuncs(doStuff, self) {
 		}
 	};
 }
-function CatilineQueue(obj, n, dumb) {
-	const self = this;
-	const workers = [];
-	let numIdle = 0;
-	const idle = [];
-	let que = [];
-	let queueLen = 0;
-	while (numIdle < n) {
-		workers[numIdle] = new catiline.Worker(obj);
-		idle.push(numIdle);
-		numIdle++;
-	}
+function addBatchEvents(self, workers, n){
 	self.on = function (eventName, func, context) {
 		workers.forEach(function (worker) {
 			worker.on(eventName, func, context);
@@ -62,16 +51,35 @@ function CatilineQueue(obj, n, dumb) {
 		});
 		return self;
 	};
+	self.fire = function (eventName, data) {
+		workers[~~ (Math.random() * n)].fire(eventName, data);
+		return self;
+	};
+}
+function makeQueueWorkers(n,idle,obj){
+	const workers = [];
+	let numIdle = -1;
+	while (++numIdle < n) {
+		workers[numIdle] = new catiline.Worker(obj);
+		idle.push(numIdle);
+	}
+	return workers;
+}
+function CatilineQueue(obj, n, dumb) {
+	const self = this;
+	let numIdle = n;
+	const idle = [];
+	let que = [];
+	let queueLen = 0;
+	const workers = makeQueueWorkers(n,idle,obj);
+	addBatchEvents(self, workers, n);
 	var batchFire = function (eventName, data) {
 		workers.forEach(function (worker) {
 			worker.fire(eventName, data);
 		});
 		return self;
 	};
-	self.fire = function (eventName, data) {
-		workers[~~ (Math.random() * n)].fire(eventName, data);
-		return self;
-	};
+	
 	self.batch.fire = batchFire;
 	self.batchTransfer.fire = batchFire;
 
