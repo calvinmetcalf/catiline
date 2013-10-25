@@ -37,22 +37,6 @@ const workerSetup = function(context) {
 		}
 	};
 	self.console = {};
-
-	function makeConsole(method) {
-		return function() {
-			const len = arguments.length;
-			const out = [];
-			let i = 0;
-			while (i < len) {
-				out.push(arguments[i]);
-				i++;
-			}
-			context.fire('console', [method, out]);
-		};
-	}
-	['log', 'debug', 'error', 'info', 'warn', 'time', 'timeEnd'].forEach(function(v) {
-		console[v] = makeConsole(v);
-	});
 	const regMsg = function(e) {
 		const cb = function(data, transfer) {
 			__self__.postMessage([e.data[0], data], transfer);
