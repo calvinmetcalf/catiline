@@ -1,25 +1,45 @@
-catiline.Queue = function CatilineQueue(obj, n, dumb) {
+function makeKeyFuncs(doStuff, self) {
+	return {
+		keyFunc: function(k) {
+			return function(data, transfer) {
+				return doStuff(k, data, transfer);
+			};
+		},
+		keyFuncBatch: function(k) {
+			return function(array) {
+				return catiline.all(array.map(function(data) {
+					return doStuff(k, data);
+				}));
+			};
+		},
+
+		keyFuncBatchCB: function(k) {
+			return function(array) {
+				return catiline.all(array.map(function(data) {
+					return doStuff(k, data).then(self.__cb__);
+				}));
+			};
+		},
+
+		keyFuncBatchTransfer: function(k) {
+			return function(array) {
+				return catiline.all(array.map(function(data) {
+					return doStuff(k, data[0], data[1]);
+				}));
+			};
+		},
+
+		keyFuncBatchTransferCB: function(k) {
+			return function(array) {
+				return catiline.all(array.map(function(data) {
+					return doStuff(k, data[0], data[1]).then(self.__cb__);
+				}));
+			};
+		}
+	};
+}
+function CatilineQueue(obj, n, dumb) {
 	const self = this;
-	self.__batchcb__ = {};
-	self.__batchtcb__ = {};
-	self.batch = function (cb) {
-		if (typeof cb === 'function') {
-			self.__batchcb__.__cb__ = cb;
-			return self.__batchcb__;
-		}
-		else {
-			return clearQueue(cb);
-		}
-	};
-	self.batchTransfer = function (cb) {
-		if (typeof cb === 'function') {
-			self.__batchtcb__.__cb__ = cb;
-			return self.__batchtcb__;
-		}
-		else {
-			return clearQueue(cb);
-		}
-	};
 	const workers = [];
 	let numIdle = 0;
 	const idle = [];
@@ -65,52 +85,14 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 		});
 		return self;
 	}
-
-	function keyFunc(k) {
-		return function (data, transfer) {
-			return doStuff(k, data, transfer);
-		};
-	}
-
-	function keyFuncBatch(k) {
-		return function (array) {
-			return catiline.all(array.map(function (data) {
-				return doStuff(k, data);
-			}));
-		};
-	}
-
-	function keyFuncBatchCB(k) {
-		return function (array) {
-			const self = this;
-			return catiline.all(array.map(function (data) {
-				return doStuff(k, data).then(self.__cb__);
-			}));
-		};
-	}
-
-	function keyFuncBatchTransfer(k) {
-		return function (array) {
-			return catiline.all(array.map(function (data) {
-				return doStuff(k, data[0], data[1]);
-			}));
-		};
-	}
-
-	function keyFuncBatchTransferCB(k) {
-		return function (array) {
-			const self = this;
-			return catiline.all(array.map(function (data) {
-				return doStuff(k, data[0], data[1]).then(self.__cb__);
-			}));
-		};
-	}
+	self.clearQueue = clearQueue;
+	const keyFuncs = makeKeyFuncs(doStuff,self);
 	for (let key in obj) {
-		self[key] = keyFunc(key);
-		self.batch[key] = keyFuncBatch(key);
-		self.__batchcb__[key] = keyFuncBatchCB(key);
-		self.batchTransfer[key] = keyFuncBatchTransfer(key);
-		self.__batchtcb__[key] = keyFuncBatchTransferCB(key);
+		self[key] = keyFuncs.keyFunc(key);
+		self.batch[key] = keyFuncs.keyFuncBatch(key);
+		self.__batchcb__[key] = keyFuncs.keyFuncBatchCB(key);
+		self.batchTransfer[key] = keyFuncs.keyFuncBatchTransfer(key);
+		self.__batchtcb__[key] = keyFuncs.keyFuncBatchTransferCB(key);
 	}
 
 	function done(num) {
@@ -130,19 +112,21 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 			idle.push(num);
 		}
 	}
-
+	function doDumbStuff(key, data, transfer,promise){
+		promise.promise.cancel = function(reason){
+			return promise.reject(reason);
+		};
+		workers[~~ (Math.random() * n)][key](data, transfer).then(function(v){
+			return promise.resolve(v);
+		},function(v){
+			return promise.reject(v);
+		});
+		return promise.promise;
+	}
 	function doStuff(key, data, transfer) { //srsly better name!
 		const promise = catiline.deferred();
 		if (dumb) {
-			promise.promise.cancel = function(reason){
-				return promise.reject(reason);
-			};
-			workers[~~ (Math.random() * n)][key](data, transfer).then(function(v){
-				return promise.resolve(v);
-			},function(v){
-				return promise.reject(v);
-			});
-			return promise.promise;
+			return doDumbStuff(key, data, transfer,promise);
 		}
 		if (!queueLen && numIdle) {
 			let num = idle.pop();
@@ -180,7 +164,28 @@ catiline.Queue = function CatilineQueue(obj, n, dumb) {
 	if (!('close' in self)) {
 		self.close = self._close;
 	}
+}
+CatilineQueue.prototype.__batchcb__ = {};
+CatilineQueue.prototype.__batchtcb__ = {};
+CatilineQueue.prototype.batch = function (cb) {
+	if (typeof cb === 'function') {
+		this.__cb__ = cb;
+		return this.__batchcb__;
+	}
+	else {
+		return this.clearQueue(cb);
+	}
 };
+CatilineQueue.prototype.batchTransfer = function (cb) {
+	if (typeof cb === 'function') {
+		this.__batchtcb__.__cb__ = cb;
+		return this.__batchtcb__;
+	}
+	else {
+		return this.clearQueue(cb);
+	}
+};
+catiline.Queue = CatilineQueue;
 catiline.queue = function (obj, n, dumb) {
 	return new catiline.Queue(obj, n, dumb);
 };
