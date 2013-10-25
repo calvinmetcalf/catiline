@@ -24,22 +24,12 @@ function regexImports(string){
 	return [matches,rest];
 }
 
-function moveImports(string){
+function moveImports(string,after){
 	const str = regexImports(string);
 	const matches = str[0];
 	const rest = str[1];
 	if(matches.length>0){
-		return 'importScripts(\''+matches.join('\',\'')+'\');\n'+rest;
-	}else{
-		return rest;
-	}
-}
-function moveIimports(string){
-	const str = regexImports(string);
-	const matches = str[0];
-	const rest = str[1];
-	if(matches.length>0){
-		return 'importScripts(\''+matches.join('\',\'')+'\');eval(__scripts__);\n'+rest;
+		return 'importScripts(\''+matches.join('\',\'')+after+rest;
 	}else{
 		return rest;
 	}
@@ -114,7 +104,7 @@ function makeIframe(script,codeword){
 	return promise.promise;
 }
 catiline.makeIWorker = function (strings,codeword){
-	const script =moveIimports(strings.join(''));
+	const script =moveImports(strings.join(''),'\');eval(__scripts__);\n');
 	const worker = {onmessage:function(){}};
 	const ipromise = makeIframe(script,codeword);
 	window.addEventListener('message',function(e){
@@ -148,7 +138,7 @@ catiline.makeWorker = function (strings, codeword){
 		return catiline.makeIWorker(strings,codeword);
 	}
 	let worker;
-	const script = moveImports(strings.join('\n'));
+	const script = moveImports(strings.join('\n'),'\');\n');
 	if(catiline._noTransferable){
 		return makeFallbackWorker(script);
 	}

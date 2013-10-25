@@ -27,7 +27,7 @@ function Catiline(obj) {
 		});
 	};
 	obj.__codeWord__ = codeWord;
-	obj.__initialize__ = [workerSetup, addEvents];
+	obj.__initialize__ = [workerSetup, addEvents, makeWorkerConsole];
 	if (!('initialize' in obj)) {
 		if ('init' in obj) {
 			obj.__initialize__.push(obj.init);
@@ -101,16 +101,7 @@ function Catiline(obj) {
 	worker.onerror = function(e) {
 		self.trigger('error', e);
 	};
-	self.on('console', function(msg) {
-		if(typeof console !== 'undefined'){
-			let method = console[msg[0]]?msg[0]:'log';
-			if(typeof console[method].apply === 'undefined'){
-				console[method](msg[1].join(' '));
-			}else{
-				console[method].apply(console, msg[1]);
-			}
-		}
-	});
+	self.on('console', makeConsole);
 	self._close = function() {
 		worker.terminate();
 		rejectPromises('closed');
