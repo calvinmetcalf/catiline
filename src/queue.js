@@ -1,5 +1,5 @@
-function makeKeyFuncs(doStuff, self, obj) {
-	const funcs = {
+function makeActualKeyFuncs(doStuff, self) {
+	return {
 		keyFunc: function(k) {
 			return function(data, transfer) {
 				return doStuff(k, data, transfer);
@@ -12,7 +12,6 @@ function makeKeyFuncs(doStuff, self, obj) {
 				}));
 			};
 		},
-
 		keyFuncBatchCB: function(k) {
 			return function(array) {
 				return catiline.all(array.map(function(data) {
@@ -20,7 +19,6 @@ function makeKeyFuncs(doStuff, self, obj) {
 				}));
 			};
 		},
-
 		keyFuncBatchTransfer: function(k) {
 			return function(array) {
 				return catiline.all(array.map(function(data) {
@@ -28,7 +26,6 @@ function makeKeyFuncs(doStuff, self, obj) {
 				}));
 			};
 		},
-
 		keyFuncBatchTransferCB: function(k) {
 			return function(array) {
 				return catiline.all(array.map(function(data) {
@@ -37,6 +34,9 @@ function makeKeyFuncs(doStuff, self, obj) {
 			};
 		}
 	};
+}
+function makeKeyFuncs(doStuff, self, obj){
+	const funcs = makeActualKeyFuncs(doStuff, self);
 	for (let key in obj) {
 		self[key] = funcs.keyFunc(key);
 		self.batch[key] = funcs.keyFuncBatch(key);
