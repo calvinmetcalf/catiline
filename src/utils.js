@@ -14,10 +14,10 @@ function regexImports(string){
 		}
 	};
 	while(match){
-		match = rest.match(/(importScripts\(.*?\);?)/);
-		rest = rest.replace(/(importScripts\(\s*(?:[\'\"].*?[\'\"])?\s*\);?)/,'\n');
+		match = rest.match(/(importScripts\(.*?\)[;|,]?)/);
+		rest = rest.replace(/(importScripts\(\s*(?:[\'\"].*?[\'\"])?\s*\)[;|,]?)/,'\n');
 		if(match){
-			match[0].replace(/importScripts\(\s*([\'\"].*?[\'\"])?\s*\);?/g,loopFunc);
+			match[0].replace(/importScripts\(\s*([\'\"].*?[\'\"])?\s*\)[;|,]?/g,loopFunc);
 		}
 	}
 	matches = Object.keys(matches);
