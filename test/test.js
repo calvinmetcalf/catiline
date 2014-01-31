@@ -58,10 +58,10 @@ function runTests(chai, cw, global) {
                         done();
                     }
                     var comrade = cw(function (data, cb) {
-                        cb(data)
+                        cb(data);
                     });
                     comrade.data((new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])).buffer).then(function (a) {
-                        assert.equal(a.byteLength, 8)
+                        assert.equal(a.byteLength, 8);
                     }).then(wrapUp, wrapUp);
                 });
                 it('should be able to handle an array buffer as a transferable object', function (done) {
@@ -70,10 +70,10 @@ function runTests(chai, cw, global) {
                         done();
                     }
                     var comrade = cw(function (data, cb) {
-                        cb(data, [data])
+                        cb(data, [data]);
                     });
                     comrade.data(buf, [buf]).then(function (a) {
-                        assert.equal(a.byteLength, 8)
+                        assert.equal(a.byteLength, 8);
                     }).then(wrapUp, wrapUp);
                 });
             }
@@ -111,7 +111,7 @@ function runTests(chai, cw, global) {
                     comrade.close();
                     done();
                 }
-                var comrade = cw(square)
+                var comrade = cw(square);
                 comrade.data(9).then(function (a) {
                     assert.equal(a, 81);
                     comrade.data(62).then(function (a) {
@@ -124,7 +124,7 @@ function runTests(chai, cw, global) {
                     comrade.close();
                     done();
                 }
-                var comrade = cw(aSquare)
+                var comrade = cw(aSquare);
                 comrade.data(9).then(function (a) {
                     assert.equal(a, 81);
                     comrade.data(62).then(function (a) {
@@ -155,6 +155,7 @@ function runTests(chai, cw, global) {
             it('should be able to import scripts with double quotes', function (done) {
                 self.imported = false;
                 single(function (a) {
+                    /*jslint quotmark: false*/
                     importScripts("fakeLib.js");
                     return a;
                 }, 9).then(function (a) {
@@ -165,7 +166,7 @@ function runTests(chai, cw, global) {
                 self.imported = false;
                 single(function (a) {
                     importScripts('fakeLib.js'),
-                    this.foo="bar";
+                    this.foo='bar';
                     return a;
                 }, 9).then(function (a) {
                     assert.equal(a, 9);
@@ -186,7 +187,7 @@ function runTests(chai, cw, global) {
                     importScripts('fakeLib.js', '../test/fakerLib.js');
                     return a;
                 }, 9).then(function () {}, function (a) {
-                    assert.include(a, 'tried to import twice')
+                    assert.include(a, 'tried to import twice');
                 }).then(done, done);
             });
             it('should be able to import 2 scripts that are the same', function (done) {
@@ -195,7 +196,7 @@ function runTests(chai, cw, global) {
                     importScripts('fakeLib.js', '../test/fakeLib.js');
                     return a;
                 }, 9).then(function () {}, function (a) {
-                    assert.include(a, 'tried to import twice')
+                    assert.include(a, 'tried to import twice');
                 }).then(done, done);
             });
             it('should be able to import 2 scripts in two import scripts', function (done) {
@@ -205,7 +206,7 @@ function runTests(chai, cw, global) {
                     importScripts('../test/fakerLib.js');
                     return a;
                 }, 9).then(function () {}, function (a) {
-                    assert.include(a, 'tried to import twice')
+                    assert.include(a, 'tried to import twice');
                 }).then(done, done);
             });
             it('should be able to import no scripts', function (done) {
@@ -246,7 +247,7 @@ function runTests(chai, cw, global) {
                 comrade.data(9).then(function (a) {
                     assert.equal(a, 9);
                     comrade.data(7).then(function (aa) {
-                        assert.equal(aa, 7)
+                        assert.equal(aa, 7);
                     }).then(wrapUp, wrapUp);
                 });
             });
@@ -281,11 +282,11 @@ function runTests(chai, cw, global) {
                 }).then(function () {
                     return comrade.product([20, 100]);
                 }).then(function (a) {
-                    assert.equal(a, 2000)
+                    assert.equal(a, 2000);
                 }).then(function () {
                     return comrade.square(5);
                 }).then(function (a) {
-                    assert.equal(a, 25)
+                    assert.equal(a, 25);
                 }).then(done, done);
             });
             it('and catch an error in it', function (done) {
@@ -297,7 +298,7 @@ function runTests(chai, cw, global) {
                 comrade.square('explode').then(function () {}, function (a) {
                     assert.include(a, 'explode');
                     comrade.square(9).then(function (a) {
-                        assert.equal(a, 81)
+                        assert.equal(a, 81);
                     }).then(done, done);
                 });
             });
@@ -310,14 +311,14 @@ function runTests(chai, cw, global) {
                 }
                 var comrade = cw({
                     initialize: function () {
-                        this.a = 7
+                        this.a = 7;
                     },
                     test: function () {
-                        return this.a
+                        return this.a;
                     }
                 });
                 comrade.test().then(function (a) {
-                    assert.equal(a, 7)
+                    assert.equal(a, 7);
                 }).then(wrapUp, wrapUp);
             });
         });
@@ -334,27 +335,27 @@ function runTests(chai, cw, global) {
                 }).then(function () {
                     return comrade.product([20, 100]);
                 }).then(function (a) {
-                    assert.equal(a, 2000)
+                    assert.equal(a, 2000);
                 }).then(function () {
                     return comrade.square(5);
                 }).then(function (a) {
-                    assert.equal(a, 25)
+                    assert.equal(a, 25);
                 }).then(function () {
-                    done()
+                    done();
                 }, function () {
-                    done()
+                    done();
                 });
             });
             it('and catch an error in it', function (done) {
                 comrade.square('explode').then(function () {}, function (a) {
-                    assert.include(a, 'explode');;
+                    assert.include(a, 'explode');
                 }).then(done, done);
             });
             it('and then do more stuff', function (done) {
                 comrade.square('explode').then(function () {}, function (a) {
                     assert.include(a, 'explode');
                     comrade.square(9).then(function (a) {
-                        assert.equal(a, 81)
+                        assert.equal(a, 81);
                     }).then(done, done);
                 });
             });
@@ -379,9 +380,9 @@ function runTests(chai, cw, global) {
                             return b + c;
                         }), 120);
                     }).then(function () {
-                        done()
+                        done();
                     }, function () {
-                        done()
+                        done();
                     });
             });
             it('should work if batch has an error', function (done) {
@@ -394,52 +395,52 @@ function runTests(chai, cw, global) {
                             assert.include(a, 'explode');
                         }
                 ).then(function () {
-                    done()
+                    done();
                 }, function () {
-                    done()
+                    done();
                 });
             });
             it('and close it', function (done) {
                 comrade.close().then(function () {
-                    done()
+                    done();
                 }, function () {
-                    done()
+                    done();
                 });
             });
             it('should work with an initializer function', function (done) {
                 function wrapUp() {
                     comrade.close().then(function () {
-                        done()
+                        done();
                     }, function () {
-                        done()
+                        done();
                     });
                 }
                 var comrade = cw({
                     initialize: function () {
-                        this.a = 7
+                        this.a = 7;
                     },
                     test: function () {
-                        return this.a
+                        return this.a;
                     }
                 });
                 comrade.test().then(function (a) {
-                    assert.equal(a, 7)
+                    assert.equal(a, 7);
                 }).then(wrapUp, wrapUp);
             });
             it('cancel it', function (done) {
                 var worker = cw({
                     waitForever: function (num, cb) {
                         setTimeout(function () {
-                            cb(num)
-                        }, 2000)
+                            cb(num);
+                        }, 2000);
                     }
                 }, 3);
                 worker.batch.waitForever([1, 2, 3, 4, 5, 6, 7, 8]).then(done, function (a) {
                     assert.equal(a, 'no');
                     worker.close().then(function () {
-                        done()
+                        done();
                     }, function () {
-                        done()
+                        done();
                     });
                 });
                 worker.batch('no');
@@ -448,8 +449,8 @@ function runTests(chai, cw, global) {
                 var worker = cw({
                     waitForever: function (num, cb) {
                         setTimeout(function () {
-                            cb(num)
-                        }, 200)
+                            cb(num);
+                        }, 200);
                     }
                 }, 2);
                 var yes = 0;
@@ -458,9 +459,9 @@ function runTests(chai, cw, global) {
                     if ((yes + no) === 8) {
                         assert(no > 1);
                         worker.close().then(function () {
-                            done()
+                            done();
                         }, function () {
-                            done()
+                            done();
                         });
                     }
                 };
@@ -529,11 +530,11 @@ function runTests(chai, cw, global) {
                 }).then(function () {
                     return comrade.product([20, 100]);
                 }).then(function (a) {
-                    assert.equal(a, 2000)
+                    assert.equal(a, 2000);
                 }).then(function () {
                     return comrade.square(5);
                 }).then(function (a) {
-                    assert.equal(a, 25)
+                    assert.equal(a, 25);
                 }).then(done, done);
             });
             it('and catch an error in it', function (done) {
@@ -545,23 +546,23 @@ function runTests(chai, cw, global) {
                 comrade.square('explode').then(function () {}, function (a) {
                     assert.include(a, 'explode');
                     comrade.square(9).then(function (a) {
-                        assert.equal(a, 81)
+                        assert.equal(a, 81);
                     }).then(done, done);
                 });
             });
             it('and close it', function (done) {
                 comrade._close().then(function () {
-                    done()
+                    done();
                 }, function () {
-                    done()
+                    done();
                 });
             });
             it('should work batch', function (done) {
                 function wrapUp() {
                     comrade.close().then(function () {
-                        done()
+                        done();
                     }, function () {
-                        done()
+                        done();
                     });
                 }
                 var comrade = catiline({
@@ -580,9 +581,9 @@ function runTests(chai, cw, global) {
             it('should work if batch has an error', function (done) {
                 function wrapUp() {
                     comrade.close().then(function () {
-                        done()
+                        done();
                     }, function () {
-                        done()
+                        done();
                     });
                 }
                 var comrade = catiline({
@@ -602,9 +603,9 @@ function runTests(chai, cw, global) {
             it('should work batch with a callback', function (done) {
                 function wrapUp() {
                     comrade.close().then(function () {
-                        done()
+                        done();
                     }, function () {
-                        done()
+                        done();
                     });
                 }
                 var i = 4;
@@ -627,21 +628,21 @@ function runTests(chai, cw, global) {
             it('should work with an initializer function', function (done) {
                 function wrapUp() {
                     comrade.close().then(function () {
-                        done()
+                        done();
                     }, function () {
-                        done()
+                        done();
                     });
                 }
                 var comrade = catiline({
                     initialize: function () {
-                        this.a = 7
+                        this.a = 7;
                     },
                     test: function () {
-                        return this.a
+                        return this.a;
                     }
                 }, 2, 'dumb');
                 comrade.test().then(function (a) {
-                    assert.equal(a, 7)
+                    assert.equal(a, 7);
                 }).then(wrapUp);
             });
             it('should work when things are canceled', function (done) {
@@ -764,10 +765,10 @@ function runTests(chai, cw, global) {
                     assert.equal(data, 'how are you');
                     comrade.close();
                     done();
-                }
+                };
                 var dontGetCalled = function (data) {
                     done('bad');
-                }
+                };
                 comrade.on('heyYourself', getsCalled);
                 comrade.on('heyYourself', dontGetCalled);
                 comrade.off('heyYourself', dontGetCalled);
@@ -792,10 +793,10 @@ function runTests(chai, cw, global) {
                     assert.equal(data, 'how are you');
                     comrade.close();
                     done();
-                }
+                };
                 var dontGetCalled = function (data) {
                     done('bad');
-                }
+                };
                 comrade.on('hey1', getsCalled);
                 comrade.on('hey2', dontGetCalled);
                 comrade.fire('hey', 'how are you');
