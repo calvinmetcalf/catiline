@@ -174,14 +174,14 @@ queue.batch('stopit');
 
 ##Utility functions
 
-'''javascript
+```javascript
 cw.makeUrl(reletiveUrl:String)
 	->absoluteUrl
 ```
 
 Takes a reletive url and returns an absolute one, handy as reletive urls will resolve badly inside a blob worker.
 
-'''javascript
+```javascript
 cw.setImmediate(func)
 ```
 
