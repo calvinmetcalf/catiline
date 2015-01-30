@@ -1,0 +1,12 @@
+2015-01-30 14:44:48,017 - sauce_connect:558 - INFO - / Starting \
+2015-01-30 14:44:48,022 - sauce_connect:559 - INFO - Please wait for "You may start your tests" to start your tests.
+2015-01-30 14:44:48,026 - sauce_connect:571 - DEBUG - System is -4.0 hours off UTC
+2015-01-30 14:44:48,028 - sauce_connect:573 - DEBUG - options: {'user': 'calvinmetcalf', 'ports': ['50465'], 'domains': None, 'debug_ssh': False, 'tunnel_ports': ['80'], 'allow_unclean_exit': False, 'rest_url': 'https://saucelabs.com/rest/v1', 'logfile': 'sauce_connect.log', 'squid_opts': '', 'ssh': False, 'se_port': '4445', 'readyfile': None, 'shared_tunnel': False, 'boost_mode': True, 'tunnel_identifier': '191879077', 'ssh_port': 443, 'fast_fail_regexps': '', 'direct_domains': '', 'host': '127.0.0.1', 'quiet': False, 'latency_log': 150, 'use_ssh_config': False}
+2015-01-30 14:44:48,029 - sauce_connect:574 - DEBUG - metadata: {'PythonVersion': '2.5.1', 'OwnerHost': '127.0.0.1', 'Release': '3.0-r27', 'OwnerPorts': ['50465'], 'Ports': ['80'], 'Platform': 'Java-1.6.0_45-Java_HotSpot-TM-_64-Bit_Server_VM,_20.45-b01-451,_Apple_Inc.-on-Mac_OS_X-10.10-x86_64', 'Build': '42', 'ScriptRelease': 42, 'ScriptName': 'sauce_connect'}
+2015-01-30 14:44:48,030 - sauce_connect:576 - INFO - Forwarding: None:['80'] -> 127.0.0.1:['50465']
+2015-01-30 14:44:48,043 - sauce_connect:375 - INFO - Succesfully connected to local server 127.0.0.1:50465 in 6ms
+2015-01-30 14:44:48,796 - sauce_connect:160 - WARNING - Problem connecting to Sauce Labs REST API (HTTP server responded with 'javax.net.ssl.SSLException: java.lang.RuntimeException: Unexpected error: java.security.InvalidAlgorithmParameterException: the trustAnchors parameter must be non-empty' (expected 'OK'))
+2015-01-30 14:44:48,796 - sauce_connect:168 - DEBUG - Retrying in 5s
+2015-01-30 14:44:54,529 - sauce_connect:160 - WARNING - Problem connecting to Sauce Labs REST API (HTTP server responded with 'javax.net.ssl.SSLException: java.lang.RuntimeException: Unexpected error: java.security.InvalidAlgorithmParameterException: the trustAnchors parameter must be non-empty' (expected 'OK'))
+2015-01-30 14:44:54,532 - sauce_connect:168 - DEBUG - Retrying in 5s
+2015-01-30 14:44:59,226 - sauce_connect:0 - INFO - received SIGINT
