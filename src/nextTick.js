@@ -12,7 +12,7 @@ const MutationObserver = global.MutationObserver || global.WebKitMutationObserve
 	observer.observe(element, { attributes: true });
 
 	// Chrome Memory Leak: https://bugs.webkit.org/show_bug.cgi?id=93661
-	addEventListener('unload', function () {
+	window.addEventListener('unload', function () {
 		observer.disconnect();
 		observer = null;
 	}, false);
@@ -21,7 +21,7 @@ const MutationObserver = global.MutationObserver || global.WebKitMutationObserve
 	};
 }else{
 	const codeWord = 'com.catiline.setImmediate' + Math.random();
-	addEventListener('message', function (event) {
+	window.addEventListener('message', function (event) {
 		// This will catch all incoming messages (even from other windows!), so we need to try reasonably hard to
 		// avoid letting anyone else trick us into firing off. We test the origin is still this window, and that a
 		// (randomly generated) unpredictable identifying prefix is present.
