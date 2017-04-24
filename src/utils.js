@@ -135,7 +135,7 @@ function makeFallbackWorker(script){
 //accepts an array of strings, joins them, and turns them into a worker.
 catiline.makeWorker = function (strings, codeword){
 	if(!catiline._hasWorker){
-		return catiline.makeIWorker(strings,codeword);
+		return catiline.makeIWorker(strings, codeword);
 	}
 	let worker;
 	const script = moveImports(strings.join('\n'),'\');\n');
@@ -148,7 +148,7 @@ catiline.makeWorker = function (strings, codeword){
 		try{
 			worker=makeFallbackWorker(script);
 		}catch(ee){
-			worker = catiline.makeIWorker(strings,codeword);
+			worker = catiline.makeIWorker(strings, codeword);
 		}
 	}finally{
 		return worker;

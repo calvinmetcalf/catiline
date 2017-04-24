@@ -4,5 +4,6 @@
 	"trailing":true,
 	"eqeqeq":true,
 	"curly":true,
-	"quotmark":"single"
+	"quotmark":"single",
+  "esnext": true
 }

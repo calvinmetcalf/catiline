@@ -33,7 +33,7 @@ module.exports = function(grunt) {
 					seperator:";\n",
 					footer : 'catiline.version = \'<%= pkg.version %>\';\n})(this);}'
 				},
-				files: {'dist/<%= pkg.name %>.js':['src/IE.js','src/nextTick.js','src/promise.js','src/utils.js','src/worker.js','src/events.js','src/console.js','src/core.js','src/queue.js','src/wrapup.js']}
+				files: {'dist/<%= pkg.name %>.js':['IE.js','nextTick.js','src/promise.js','src/utils.js','src/worker.js','src/events.js','src/console.js','src/core.js','src/queue.js','src/wrapup.js']}
 			}
 		},
 		mocha_phantomjs: {
@@ -60,8 +60,7 @@ module.exports = function(grunt) {
 		options:{
 			jshintrc: "./.jshintrc"
 		},
-		beforeconcat: ['src/*.js'],
-		afterconcat: ['dist/catiline.js']
+		beforeconcat: ['src/*.js']
 	},
 	"saucelabs-mocha":{
 		options:{
@@ -174,7 +173,7 @@ module.exports = function(grunt) {
 	grunt.registerTask('sauce',['connect','saucelabs-mocha:big','saucelabs-mocha:shim','saucelabs-mocha:legacy']);
 	grunt.registerTask('server',['connect']);
 	grunt.registerTask('browser',['concat:browser','defsAll','ugly']);
-	grunt.registerTask('lint',['jshint:afterconcat']);
+	grunt.registerTask('lint',['jshint:beforeconcat']);
 	grunt.registerTask('testing', ['connect', 'mocha_phantomjs']);
 	grunt.registerTask('test', ['lint','sauce']);
 	grunt.registerTask('build', ['browser']);
