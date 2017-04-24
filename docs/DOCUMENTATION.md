@@ -67,7 +67,7 @@ call
 The event system was inspired by [Leaflet's](http://leafletjs.com/reference.html#events). 'one' is the same as 'on' but only called once. Multiple space separated words can
 but sent to the 'on' and 'off' methods, `on` takes a scope argument in its 3rd spot.
 
-###Importing Scripts
+### Importing Scripts
 If you create a worker and the function imports a script like
 
 ```javascript
@@ -88,7 +88,7 @@ function(base,cb){
 
 In other words it will be hoisted out of the function so it will only be called once, and it will rewrite all the URLs to be absolute.
 
-###Queues
+### Queues
 
 ```javascript
 var workers = cw({
@@ -183,7 +183,7 @@ workers.batch(function(a){
 */
 ```
 
-###Misc
+### Misc
 
 we have a few utility functions you can use
 
