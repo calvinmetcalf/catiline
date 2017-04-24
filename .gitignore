@@ -3,3 +3,4 @@ node_modules
 .c9revisions
 src/temp.*.js
 src/temp.js
+/sauce_connect.log

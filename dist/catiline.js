@@ -1,4 +1,4 @@
-/*! catiline 2.9.3 2013-10-25*/
+/*! catiline 2.9.3 2015-01-30*/
 /*!©2013 Calvin Metcalf @license MIT https://github.com/calvinmetcalf/catiline */
 if (typeof document === 'undefined') {
 	self._noTransferable=true;
@@ -23,7 +23,7 @@ var MutationObserver = global.MutationObserver || global.WebKitMutationObserver;
 	observer.observe(element, { attributes: true });
 
 	// Chrome Memory Leak: https://bugs.webkit.org/show_bug.cgi?id=93661
-	addEventListener('unload', function () {
+	window.addEventListener('unload', function () {
 		observer.disconnect();
 		observer = null;
 	}, false);
@@ -32,7 +32,7 @@ var MutationObserver = global.MutationObserver || global.WebKitMutationObserver;
 	};
 }else{
 	var codeWord = 'com.catiline.setImmediate' + Math.random();
-	addEventListener('message', function (event) {
+	window.addEventListener('message', function (event) {
 		// This will catch all incoming messages (even from other windows!), so we need to try reasonably hard to
 		// avoid letting anyone else trick us into firing off. We test the origin is still this window, and that a
 		// (randomly generated) unpredictable identifying prefix is present.
@@ -227,10 +227,10 @@ function regexImports(string){
 		}
 	};
 	while(match){
-		match = rest.match(/(importScripts\(.*?\);?)/);
-		rest = rest.replace(/(importScripts\(\s*(?:[\'\"].*?[\'\"])?\s*\);?)/,'\n');
+		match = rest.match(/(importScripts\(.*?\)[;|,]?)/);
+		rest = rest.replace(/(importScripts\(\s*(?:[\'\"].*?[\'\"])?\s*\)[;|,]?)/,'\n');
 		if(match){
-			match[0].replace(/importScripts\(\s*([\'\"].*?[\'\"])?\s*\);?/g,loopFunc);
+			match[0].replace(/importScripts\(\s*([\'\"].*?[\'\"])?\s*\)[;|,]?/g,loopFunc);
 		}
 	}
 	matches = Object.keys(matches);
